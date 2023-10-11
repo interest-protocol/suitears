@@ -91,7 +91,7 @@ module suimate::upgrade {
         cap.policy = policy;
         cap.digest = digest;
 
-        let lock = timelock::create(Policy {}, unlock_epoch, true, ctx);
+        let lock = timelock::create(Policy {}, unlock_epoch, true, false, ctx);
         let p = package::upgrade_package(&cap.cap);
 
         add_package(&mut lock, p);

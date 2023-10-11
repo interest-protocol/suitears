@@ -104,7 +104,7 @@ module suimate::admin {
 
     let unlock_epoch = tx_context::epoch(ctx) + storage.epochs_delay;
     
-    let lock = timelock::create(Policy {}, tx_context::epoch(ctx) + storage.epochs_delay, true, ctx);
+    let lock = timelock::create(Policy {}, tx_context::epoch(ctx) + storage.epochs_delay, true, false, ctx);
 
     add_pending_admin(&mut lock, recipient);
 
