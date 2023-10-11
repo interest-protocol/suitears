@@ -1,0 +1,25 @@
+---
+compiled_package_info:
+  package_name: SuiMate
+  address_alias_instantiation:
+    std: "0000000000000000000000000000000000000000000000000000000000000001"
+    sui: "0000000000000000000000000000000000000000000000000000000000000002"
+    suimate: "0000000000000000000000000000000000000000000000000000000000000000"
+  source_digest: 9727C96980304B5553581433CE383FA7EEA27760882B0785A01E923401CE6669
+  build_flags:
+    dev_mode: false
+    test_mode: false
+    generate_docs: false
+    generate_abis: false
+    install_dir: ~
+    force_recompilation: false
+    lock_file: "./Move.lock"
+    additional_named_addresses: {}
+    fetch_deps_only: false
+    skip_fetch_latest_git_deps: false
+    default_flavor: sui
+    default_edition: ~
+    deps_as_root: false
+dependencies:
+  - MoveStdlib
+  - Sui
