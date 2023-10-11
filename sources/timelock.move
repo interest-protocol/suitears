@@ -1,3 +1,4 @@
+// it abstracts the Timelock Logic
 module suimate::timelock {
 
   use sui::object::{Self, UID};

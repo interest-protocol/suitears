@@ -1,4 +1,4 @@
-// It adds a timelock to upgrade a package
+// It adds a timelock before the admin can upgrade a package
 module suimate::upgrade {
     use std::vector;
 
