@@ -1,20 +1,12 @@
-module suimate::math_u256 {
+module suimate::math256 {
   use std::vector;
 
   public fun mul_div(x: u256, y: u256, z: u256): u256 {
-      if (y == z) {
-          return x
-      };
-      if (x == z) {
-          return y
-      };
-      let a = x / z;
-      let b = x % z;
-      //x = a * z + b;
-      let c = y / z;
-      let d = y % z;
-      //y = c * z + d;
-      a * c * z + a * d + b * c + b * d / z
+    x * y / z
+  }
+
+  public fun mul_div_up(x: u256, y: u256, z: u256): u256 {
+    ceil_div(x * y, z)
   }
 
   /// @dev Returns the smallest of two numbers.

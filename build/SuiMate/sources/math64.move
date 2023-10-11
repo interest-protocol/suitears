@@ -1,4 +1,4 @@
-module suimate::math_u64 {
+module suimate::math64 {
   use std::vector;
 
   public fun mul_div(x: u64, y: u64, z: u64): u64 {

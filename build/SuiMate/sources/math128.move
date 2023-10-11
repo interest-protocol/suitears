@@ -1,4 +1,4 @@
-module suimate::math_u128 {
+module suimate::math128 {
   use std::vector;
 
   public fun mul_div(x: u128, y: u128, z: u128): u128 {
@@ -15,6 +15,22 @@ module suimate::math_u128 {
       let d = y % z;
       //y = c * z + d;
       a * c * z + a * d + b * c + b * d / z
+  }
+
+  public fun mul_div_up(x: u128, y: u128, z: u128): u128 {
+      if (y == z) {
+          return x
+      };
+      if (x == z) {
+          return y
+      };
+      let a = x / z;
+      let b = x % z;
+      //x = a * z + b;
+      let c = y / z;
+      let d = y % z;
+      //y = c * z + d;
+      ceil_div(a * c * z + a * d + b * c + b * d, z)
   }
 
   /// @dev Returns the smallest of two numbers.
