@@ -30,7 +30,7 @@ module suimate::math128 {
       let c = y / z;
       let d = y % z;
       //y = c * z + d;
-      ceil_div(a * c * z + a * d + b * c + b * d, z)
+      div_up(a * c * z + a * d + b * c + b * d, z)
   }
 
   /// @dev Returns the smallest of two numbers.
@@ -45,12 +45,13 @@ module suimate::math128 {
     (a & b) + (a ^ b) / 2
   }
   
-  /// https://github.com/pentagonxyz/movemate
-  /// @dev Returns the ceiling of the division of two numbers.
-  /// This differs from standard division with `/` in that it rounds up instead of rounding down.
-  public fun ceil_div(a: u128, b: u128): u128 {
+  public fun div_down(x: u128, y: u128): u128 {
+    x / y
+  }
+
+  public fun div_up(a: u128, b: u128): u128 {
     // (a + b - 1) / b can overflow on addition, so we distribute.
-    if (a == 0) 0 else (a - 1) / b + 1
+    if (a == 0) 0 else 1 + (a - 1) / b
   }
 
   /// https://github.com/pentagonxyz/movemate

@@ -3,7 +3,6 @@ module suimate::upgrade {
     use std::vector;
 
     use sui::event::emit;
-    use sui::dynamic_field as df;
     use sui::object::{Self, UID, ID};
     use sui::tx_context::{Self, TxContext};
     use sui::package::{Self, UpgradeCap, UpgradeTicket, UpgradeReceipt};  

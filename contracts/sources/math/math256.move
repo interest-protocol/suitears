@@ -6,7 +6,7 @@ module suimate::math256 {
   }
 
   public fun mul_div_up(x: u256, y: u256, z: u256): u256 {
-    ceil_div(x * y, z)
+    div_up(x * y, z)
   }
 
   /// @dev Returns the smallest of two numbers.
@@ -20,13 +20,19 @@ module suimate::math256 {
     // (a + b) / 2 can overflow.
     (a & b) + (a ^ b) / 2
   }
+
+  // API convenience
+  public fun mul(x: u256, y: u256): u256 {
+    x * y
+  }
   
-  /// https://github.com/pentagonxyz/movemate
-  /// @dev Returns the ceiling of the division of two numbers.
-  /// This differs from standard division with `/` in that it rounds up instead of rounding down.
-  public fun ceil_div(a: u256, b: u256): u256 {
+  public fun div_down(x: u256, y: u256): u256 {
+    x / y
+  }
+
+  public fun div_up(a: u256, b: u256): u256 {
     // (a + b - 1) / b can overflow on addition, so we distribute.
-    if (a == 0) 0 else (a - 1) / b + 1
+    if (a == 0) 0 else 1 + (a - 1) / b
   }
 
   /// https://github.com/pentagonxyz/movemate

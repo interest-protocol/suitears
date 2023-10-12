@@ -1,40 +1,35 @@
 module suimate::math64 {
   use std::vector;
 
+  use suimate::math128;
+
   public fun mul_div(x: u64, y: u64, z: u64): u64 {
-      if (y == z) {
-          return x
-      };
-      if (x == z) {
-          return y
-      };
-      let a = x / z;
-      let b = x % z;
-      //x = a * z + b;
-      let c = y / z;
-      let d = y % z;
-      //y = c * z + d;
-      a * c * z + a * d + b * c + b * d / z
+    (math128::mul_div((x as u128), (y as u128), (z as u128)) as u64)
   }
 
+  public fun mul_div_up(x: u64, y: u64, z: u64): u64 {
+    (math128::mul_div_up((x as u128), (y as u128), (z as u128)) as u64)
+  }  
+
   /// @dev Returns the smallest of two numbers.
-  public fun min(a: u64, b: u64): u64 {
-    if (a < b) a else b
+  public fun min(x: u64, y: u64): u64 {
+    if (x < y) x else y
   }
 
   /// SRC https://github.com/pentagonxyz/movemate/blob/main/sui/sources/math_u64.move
   /// @dev Returns the average of two numbers. The result is rounded towards zero.
-  public fun average(a: u64, b: u64): u64 {
+  public fun average(x: u64, y: u64): u64 {
     // (a + b) / 2 can overflow.
-    (a & b) + (a ^ b) / 2
+    (x & y) + (x ^ y) / 2
   }
-  
-  /// SRC https://github.com/pentagonxyz/movemate/blob/main/sui/sources/math_u64.move
-  /// @dev Returns the ceiling of the division of two numbers.
-  /// This differs from standard division with `/` in that it rounds up instead of rounding down.
-  public fun ceil_div(a: u64, b: u64): u64 {
+
+  public fun div_down(x: u64, y: u64): u64 {
+    x / y
+  }
+
+  public fun div_up(a: u64, b: u64): u64 {
     // (a + b - 1) / b can overflow on addition, so we distribute.
-    if (a == 0) 0 else (a - 1) / b + 1
+    if (a == 0) 0 else 1 + (a - 1) / b
   }
 
   /// SRC https://github.com/pentagonxyz/movemate/blob/main/sui/sources/math_u64.move
@@ -48,13 +43,13 @@ module suimate::math64 {
   }
 
   /// SRC https://github.com/pentagonxyz/movemate/blob/main/sui/sources/math_u64.move
-  public fun pow(a: u64, b: u64): u64 {
+  public fun pow(x: u64, n: u64): u64 {
     let c = 1;
 
-    while (b > 0) {
-      if (b & 1 > 0) c = c * a;
-        b = b >> 1;
-        a = a * a;
+    while (n > 0) {
+      if (n & 1 > 0) c = c * x;
+        n = n >> 1;
+        x = x * x;
       };
 
     c

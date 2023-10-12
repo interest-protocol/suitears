@@ -7,17 +7,16 @@ module suimate::timelock {
   use sui::dynamic_field as df;
   use sui::tx_context::{Self, TxContext};
 
-  const ENotAllowed: u64 = 0;
+  const EWrongPackage: u64 = 0;
   const ETooEarly: u64 = 1;
   const EInvalidEpoch: u64 = 2;
   const EInvalidOperation: u64 = 3;
-  const EWrongPackage: u64 = 4;
 
   struct TimeLockCap has key, store {
     id: UID,
     unlock_epoch: u64,
     can_update_unlock_epoch: bool,
-    name: TypeName
+    name: TypeName,
   }
 
   public fun create<T: drop>(_: T, unlock_epoch: u64, can_update_unlock_epoch: bool, ctx: &mut TxContext): TimeLockCap {
@@ -44,7 +43,7 @@ module suimate::timelock {
     object::delete(id);
   } 
 
-  public fun update_unlock_epoch<T>(timelock: &mut TimeLockCap, unlock_epoch: u64) {
+  public fun update_unlock_epoch(timelock: &mut TimeLockCap, unlock_epoch: u64) {
     assert!(timelock.can_update_unlock_epoch, EInvalidOperation);
     timelock.unlock_epoch = unlock_epoch;
   }

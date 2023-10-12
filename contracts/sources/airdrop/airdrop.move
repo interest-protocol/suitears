@@ -29,7 +29,6 @@ module suimate::airdrop {
     accounts: Table<address, bool>
   }
 
-
   public fun create<T>(airdrop_coin: Coin<T>, root: vector<u8>, start: u64, ctx: &mut TxContext) {
     assert!(!vector::is_empty(&root), EInvalidRoot);
     transfer::share_object(AirdropStorage {
