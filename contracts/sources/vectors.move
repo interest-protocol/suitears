@@ -9,7 +9,7 @@ module suimate::vectors {
 
     /// @dev When you supply vectors of different lengths to a function requiring equal-length vectors.
     /// TODO: Support variable length vectors?
-    const EVECTOR_LENGTH_MISMATCH: u64 = 0;
+    const EVectorLengthMismatch: u64 = 0;
 
     /// @dev Searches a sorted `vec` and returns the first index that contains
     /// a value greater or equal to `element`. If no such index exists (i.e. all
@@ -48,7 +48,7 @@ module suimate::vectors {
     public fun lt(a: &vector<u8>, b: &vector<u8>): bool {
         let i = 0;
         let len = vector::length(a);
-        assert!(len == vector::length(b), EVECTOR_LENGTH_MISMATCH);
+        assert!(len == vector::length(b), EVectorLengthMismatch);
 
         while (i < len) {
             let aa = *vector::borrow(a, i);
@@ -64,7 +64,7 @@ module suimate::vectors {
     public fun gt(a: &vector<u8>, b: &vector<u8>): bool {
         let i = 0;
         let len = vector::length(a);
-        assert!(len == vector::length(b), EVECTOR_LENGTH_MISMATCH);
+        assert!(len == vector::length(b), EVectorLengthMismatch);
 
         while (i < len) {
             let aa = *vector::borrow(a, i);
@@ -80,7 +80,7 @@ module suimate::vectors {
     public fun lte(a: &vector<u8>, b: &vector<u8>): bool {
         let i = 0;
         let len = vector::length(a);
-        assert!(len == vector::length(b), EVECTOR_LENGTH_MISMATCH);
+        assert!(len == vector::length(b), EVectorLengthMismatch);
 
         while (i < len) {
             let aa = *vector::borrow(a, i);
@@ -96,7 +96,7 @@ module suimate::vectors {
     public fun gte(a: &vector<u8>, b: &vector<u8>): bool {
         let i = 0;
         let len = vector::length(a);
-        assert!(len == vector::length(b), EVECTOR_LENGTH_MISMATCH);
+        assert!(len == vector::length(b), EVectorLengthMismatch);
 
         while (i < len) {
             let aa = *vector::borrow(a, i);

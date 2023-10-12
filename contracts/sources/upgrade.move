@@ -8,13 +8,13 @@ module suimate::upgrade {
     use sui::tx_context::{Self, TxContext};
     use sui::package::{Self, UpgradeCap, UpgradeTicket, UpgradeReceipt};  
 
-    use suimate::timelock::{Self, TimeLock};
+    use suimate::timelock::{Self, TimeLockCap};
 
     // Errors
     const EInvalidTimelock: u64 = 0;
 
     // Do not expose this
-    struct Policy has drop {}
+    struct TimeLockName has drop {}
     
     struct Package has copy, drop, store {}
 
@@ -86,12 +86,12 @@ module suimate::upgrade {
         policy: u8,
         digest: vector<u8>,
         ctx: &mut TxContext        
-    ): TimeLock<Policy> {
+    ): TimeLockCap {
         let unlock_epoch = tx_context::epoch(ctx) + cap.epochs_delay;
         cap.policy = policy;
         cap.digest = digest;
 
-        let lock = timelock::create(Policy {}, unlock_epoch, true, false, ctx);
+        let lock = timelock::create(TimeLockName {}, unlock_epoch,  false, ctx);
         let p = package::upgrade_package(&cap.cap);
 
         add_package(&mut lock, p);
@@ -101,23 +101,25 @@ module suimate::upgrade {
         lock
     }
 
-    public fun cancel_upgrade(cap: &mut UpgradeWrapper, lock: TimeLock<Policy>) {
-        timelock::destroy(lock);
+    public fun cancel_upgrade(cap: &mut UpgradeWrapper, lock: TimeLockCap) {
         cap.policy = 0;
         cap.digest = vector::empty();
+        timelock::destroy(lock);
         emit(CancelUpgrade { id:  package::upgrade_package(&cap.cap) });
     }
 
     public fun authorize_upgrade(
         cap: &mut UpgradeWrapper,
-        lock: TimeLock<Policy>,
+        lock: TimeLockCap,
         ctx: &mut TxContext  
     ): UpgradeTicket {
-        assert!(get_package(&mut lock) == package::upgrade_package(&cap.cap), EInvalidTimelock);
+        assert!(get_package(&lock) == package::upgrade_package(&cap.cap), EInvalidTimelock);
+        timelock::assert_unlock_epoch_and_destroy(TimeLockName {}, lock, ctx);
 
-        timelock::unlock(lock, ctx);
         let epoch = tx_context::epoch(ctx);
+
         emit(AuthorizeUpgrade { id: package::upgrade_package(&cap.cap), epoch, policy: cap.policy, digest: cap.digest });
+        
         package::authorize_upgrade(&mut cap.cap, cap.policy, cap.digest)
     }
 
@@ -136,11 +138,11 @@ module suimate::upgrade {
 
   // Private Fns
 
-  fun add_package(lock: &mut TimeLock<Policy>, p: ID) {
-    df::add(timelock::uid_mut(lock), Package {}, p);
+  fun add_package(lock: &mut TimeLockCap, p: ID) {
+    timelock::add_extra_data(lock, Package {}, p);
   }
 
-  fun get_package(lock: &mut TimeLock<Policy>): ID {
-    df::remove(timelock::uid_mut(lock), Package {})
+  fun get_package(lock: &TimeLockCap): ID {
+    *timelock::borrow_extra_data(lock, Package {})
   }
 }

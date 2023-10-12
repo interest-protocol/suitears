@@ -8,10 +8,9 @@ module suimate::admin {
   use sui::event::emit;
   use sui::object::{Self, UID, ID};
   use sui::types::is_one_time_witness;
-  use sui::dynamic_field as df;
   use sui::tx_context::{Self, TxContext};
 
-  use suimate::timelock::{Self, TimeLock};
+  use suimate::timelock::{Self, TimeLockCap};
 
   // Errors
   const EZeroAddress: u64 = 0;
@@ -21,7 +20,7 @@ module suimate::admin {
   const EInvalidTimeLock: u64 = 6;
 
   // Do not expose this
-  struct Policy has drop {}
+  struct TimeLockName has drop {}
 
   struct PendingAdmin has copy, drop, store {}
 
@@ -97,25 +96,25 @@ module suimate::admin {
   * @param admin_cap The AdminCap that will be transferred
   * @recipient the new admin address
   */
-  public fun start_transfer<T>(_: &AdminCap<T>, storage: &mut AdminStorage<T>, recipient: address, ctx: &mut TxContext): TimeLock<Policy> {
+  public fun start_transfer<T>(_: &AdminCap<T>, storage: &mut AdminStorage<T>, recipient: address, ctx: &mut TxContext): TimeLockCap {
     assert!(recipient != @0x0, EZeroAddress);
     storage.pending_admin = recipient;
     storage.accepted = false;
 
     let unlock_epoch = tx_context::epoch(ctx) + storage.epochs_delay;
     
-    let lock = timelock::create(Policy {}, tx_context::epoch(ctx) + storage.epochs_delay, true, false, ctx);
+    let cap = timelock::create(TimeLockName {}, tx_context::epoch(ctx) + storage.epochs_delay,  false, ctx);
 
-    add_pending_admin(&mut lock, recipient);
+    add_pending_admin(&mut cap, recipient);
 
     emit(StartTransfer<T> {
       current_admin: storage.current_admin,
       pending_admin: recipient,
-      timelock_id: object::id(&lock),
+      timelock_id: object::id(&cap),
       unlock_epoch 
     });
 
-    lock
+    cap
   } 
 
   /**
@@ -123,10 +122,9 @@ module suimate::admin {
   * @param admin_cap The AdminCap that will be transferred
   * @recipient the new admin address
   */
-  public fun cancel_transfer<T>(_: &AdminCap<T>, lock: TimeLock<Policy>, storage: &mut AdminStorage<T>) {
+  public fun cancel_transfer<T>(_: &AdminCap<T>, storage: &mut AdminStorage<T>, lock: TimeLockCap) {
     storage.pending_admin = @0x0;
     storage.accepted = false;
-    
     timelock::destroy(lock);
 
     emit(CancelTransfer<T> {
@@ -155,13 +153,13 @@ module suimate::admin {
   * @param admin_cap The AdminCap that will be transferred
   * @recipient the new admin address
   */
-  public fun transfer<T>(cap: AdminCap<T>, lock: TimeLock<Policy>, storage: &mut AdminStorage<T>, ctx: &mut TxContext) {
+  public fun transfer<T>(cap: AdminCap<T>, lock: TimeLockCap, storage: &mut AdminStorage<T>, ctx: &mut TxContext) {
     // New admin must accept the capability
     assert!(storage.accepted, EAdminDidNotAccept);
-    assert!(get_admin(&mut lock) == storage.pending_admin, EInvalidTimeLock);
+    assert!(get_admin(&lock) == storage.pending_admin, EInvalidTimeLock);
 
     // Will throw if the epoch is not valid
-    timelock::unlock(lock, ctx);
+    timelock::assert_unlock_epoch_and_destroy(TimeLockName {}, lock, ctx);
 
     storage.accepted = false;
     let new_admin = storage.pending_admin;
@@ -176,11 +174,11 @@ module suimate::admin {
 
   // Private Fns
 
-  fun add_pending_admin(lock: &mut TimeLock<Policy>, admin: address) {
-    df::add(timelock::uid_mut(lock), PendingAdmin {}, admin);
+  fun add_pending_admin(lock: &mut TimeLockCap, admin: address) {
+    timelock::add_extra_data(lock, PendingAdmin {}, admin);
   }
 
-  fun get_admin(lock: &mut TimeLock<Policy>): address {
-    df::remove(timelock::uid_mut(lock), PendingAdmin {})
+  fun get_admin(lock: &TimeLockCap): address {
+    *timelock::borrow_extra_data(lock, PendingAdmin {})
   }
 }
