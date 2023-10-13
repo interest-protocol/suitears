@@ -5,7 +5,7 @@
 module suimate::vectors {
     use std::vector;
 
-    use suimate::math64;
+    use suimate::math64::average;
 
     /// @dev When you supply vectors of different lengths to a function requiring equal-length vectors.
     /// TODO: Support variable length vectors?
@@ -26,7 +26,7 @@ module suimate::vectors {
         let high = vector::length(vec);
 
         while (low < high) {
-            let mid = math64::average(low, high);
+            let mid = average(low, high);
 
             // Note that mid will always be strictly less than high (i.e. it will be a valid vector index)
             // because Math::average rounds down (it does integer division with truncation).
