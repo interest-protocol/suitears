@@ -1,7 +1,7 @@
 // A module to easily calculate the amount of shares of an underlying pool of assets
-module suimate::fund {
+module suitears::fund {
 
-  use suimate::math128::mul_div;
+  use suitears::math128::mul_div;
 
   struct Fund has store, copy {
     shares: u128,

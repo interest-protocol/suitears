@@ -1,5 +1,5 @@
 [package]
-name = "SuiMate"
+name = "SuiTears"
 version = "0.0.1"
 
 [dependencies]
@@ -7,4 +7,6 @@ MoveStdlib = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/s
 Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "testnet-v1.11.1" }
 
 [addresses]
-suimate = "0x0"
+suitears = "0x0"
+std = "0x1"
+sui = "0x2"

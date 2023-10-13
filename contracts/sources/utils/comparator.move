@@ -1,5 +1,5 @@
 /// From https://github.com/aptos-labs/aptos-core/blob/main/aptos-move/framework/aptos-stdlib/sources/comparator.move
-module suimate::comparator {
+module suitears::comparator {
     use std::bcs;
     use std::vector;
 

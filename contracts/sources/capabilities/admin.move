@@ -2,7 +2,7 @@
 * This module allows anyone to create an AdminCap with a shared AdminStorage to manage access to their dApps
 * It has safe mechanisms against several attack vectors by requiring a two-step transfer and an epoch delay before transferring
 */
-module suimate::admin {
+module suitears::admin {
   
   use sui::transfer;
   use sui::event::emit;
@@ -10,7 +10,7 @@ module suimate::admin {
   use sui::types::is_one_time_witness;
   use sui::tx_context::{Self, TxContext};
 
-  use suimate::timelock::{Self, TimeLockCap};
+  use suitears::timelock::{Self, TimeLockCap};
 
   // Errors
   const EZeroAddress: u64 = 0;

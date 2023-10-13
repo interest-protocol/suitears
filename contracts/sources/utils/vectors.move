@@ -2,10 +2,10 @@
 /// @notice Vector utilities.
 /// @dev TODO: Fuzz testing?
 /// Taken from https://github.com/pentagonxyz/movemate
-module suimate::vectors {
+module suitears::vectors {
     use std::vector;
 
-    use suimate::math64::average;
+    use suitears::math64::average;
 
     /// @dev When you supply vectors of different lengths to a function requiring equal-length vectors.
     /// TODO: Support variable length vectors?

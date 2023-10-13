@@ -1,5 +1,5 @@
 // it abstracts the Timelock Logic
-module suimate::timelock {
+module suitears::timelock {
     
   use std::type_name::{Self, TypeName};
 

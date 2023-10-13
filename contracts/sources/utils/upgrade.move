@@ -1,5 +1,5 @@
 // It adds a timelock before the admin can upgrade a package
-module suimate::upgrade {
+module suitears::upgrade {
     use std::vector;
 
     use sui::event::emit;
@@ -8,10 +8,7 @@ module suimate::upgrade {
     use sui::tx_context::{Self, TxContext};
     use sui::package::{Self, UpgradeCap, UpgradeTicket, UpgradeReceipt};  
 
-    use suimate::timelock::{Self, TimeLockCap};
-
-    // Errors
-    const EInvalidTimelock: u64 = 0;
+    use suitears::timelock;
 
     // Do not expose this
     struct TimeLockName has drop {}

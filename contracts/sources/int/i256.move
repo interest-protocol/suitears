@@ -2,7 +2,7 @@
 /// @notice Signed 256-bit integers in Move.
 /// Uses 2's complement for negative numbers to follow solidity
 /// Uses arithmatic shr and shl for negative numbers
-module suimate::i256 {
+module suitears::i256 {
 
     const MAX_I256_AS_U256: u256 = 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
     const MAX_U256: u256 = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;

@@ -4,7 +4,7 @@
 *
 * Each Token is fungible within the same slot and non-fungible accross slots
 */
-module suimate::semi_fungible_token {
+module suitears::semi_fungible_token {
   use std::ascii;
   use std::vector;
   use std::option::{Self, Option};
@@ -15,7 +15,7 @@ module suimate::semi_fungible_token {
   use sui::tx_context::TxContext;
   use sui::types::is_one_time_witness;
 
-  use suimate::semi_fungible_balance::{Self as balance, SFTBalance, SFTSupply};
+  use suitears::semi_fungible_balance::{Self as balance, SFTBalance, SFTSupply};
 
   // Errors
   const EZeroDivision: u64 = 0;

@@ -1,8 +1,8 @@
 // Fixed Point Math without a Type guard/wrapper  
 // Ray has a higher accurate and assumes values have 18 decimals
-module suimate::fixed_point_ray {
+module suitears::fixed_point_ray {
 
-  use suimate::math256;
+  use suitears::math256;
 
   const RAY: u256 = 1_000_000_000_000_000_000; // 1e18
   

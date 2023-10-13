@@ -1,8 +1,8 @@
 // Fixed Point Math without a Type guard/wrapper  
 // Wad has the decimal factor as Sui - 9 decimals
-module suimate::fixed_point_wad {
+module suitears::fixed_point_wad {
 
-  use suimate::math128;
+  use suitears::math128;
 
   const WAD: u128 = 1_000_000_000; // 1e9
 

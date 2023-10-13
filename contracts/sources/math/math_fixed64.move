@@ -1,8 +1,8 @@
 // * ALL CREDITS TO APTOS - https://github.com/aptos-labs/aptos-core/blob/main/aptos-move/framework/aptos-stdlib/sources/math_fixed64.move
 /// Standard math utilities missing in the Move Language.
 
-module suimate::math_fixed64 {
-    use suimate::fixed_point64::{Self, FixedPoint64};
+module suitears::math_fixed64 {
+    use suitears::fixed_point64::{Self, FixedPoint64};
 
     /// Integer power of a fixed point number
     public fun pow(x: FixedPoint64, n: u64): FixedPoint64 {

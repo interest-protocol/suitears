@@ -2,7 +2,7 @@
 /// @notice Signed 128-bit integers in Move.
 /// Uses 2's complement for negative numbers to follow solidity
 /// Uses arithmatic shr and shl for negative numbers
-module suimate::i128 {
+module suitears::i128 {
 
     const MAX_I128_AS_u128: u128 = 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
     const MAX_U128: u128 = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;

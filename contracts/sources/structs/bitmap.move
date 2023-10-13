@@ -1,4 +1,4 @@
-module suimate::bitmap {
+module suitears::bitmap {
 
   use sui::bcs;
   use sui::object::{Self, UID};

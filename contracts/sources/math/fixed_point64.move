@@ -1,6 +1,6 @@
 // * ALL CREDITS TO APTOS - https://github.com/aptos-labs/aptos-core/blob/main/aptos-move/framework/aptos-stdlib/sources/fixed_point64.move
 
-module suimate::fixed_point64 {
+module suitears::fixed_point64 {
     const MAX_U128: u256 =  340282366920938463463374607431768211455;
 
     struct FixedPoint64 has copy, drop, store { value: u128 }

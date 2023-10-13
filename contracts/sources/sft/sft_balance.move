@@ -3,7 +3,7 @@
 *
 * Balance representation of a Semi Fungible Token
 */
-module suimate::semi_fungible_balance {
+module suitears::semi_fungible_balance {
   use sui::table::{Self, Table};
   use sui::tx_context::TxContext;
 

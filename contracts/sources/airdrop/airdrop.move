@@ -1,4 +1,4 @@
-module suimate::airdrop {
+module suitears::airdrop {
   use std::vector;
   use std::hash;
   
@@ -14,7 +14,7 @@ module suimate::airdrop {
   #[test_only]
   use sui::balance;
 
-  use suimate::merkle_proof;
+  use suitears::merkle_proof;
 
   const EInvalidProof: u64 = 0;
   const EAlreadyClaimed: u64 = 1;

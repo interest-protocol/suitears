@@ -1,4 +1,4 @@
-module suimate::math256 {
+module suitears::math256 {
   use std::vector;
 
   public fun mul_div(x: u256, y: u256, z: u256): u256 {
