@@ -17,16 +17,16 @@ module suitears::semi_fungible_balance {
     data: Table<u256, u64>
   }
 
-  struct SFTBalance<phantom T> has store {
+  struct SftBalance<phantom T> has store {
     slot: u256, // Provides fungibility between the NFTs
     value: u64,
   }
 
-  public fun slot<T>(self: &SFTBalance<T>): u256 {
+  public fun slot<T>(self: &SftBalance<T>): u256 {
     self.slot
   }
 
-  public fun value<T>(self: &SFTBalance<T>): u64 {
+  public fun value<T>(self: &SftBalance<T>): u64 {
     self.value
   }
 
@@ -39,7 +39,7 @@ module suitears::semi_fungible_balance {
     SftSupply { data: table::new(ctx) }
   }
 
-  public fun increase_supply<T>(self: &mut SftSupply<T>, slot: u256, value: u64): SFTBalance<T> {
+  public fun increase_supply<T>(self: &mut SftSupply<T>, slot: u256, value: u64): SftBalance<T> {
     new_slot(self, slot);
     
     let current_supply = table::borrow_mut(&mut self.data, slot);
@@ -47,21 +47,21 @@ module suitears::semi_fungible_balance {
     
     *current_supply = *current_supply + value;
 
-    SFTBalance {
+    SftBalance {
       slot,
       value
     }   
   }
 
-  public fun decrease_supply<T>(self: &mut SftSupply<T>, balance: SFTBalance<T>): u64 {
-    let SFTBalance  { value, slot } = balance;
+  public fun decrease_supply<T>(self: &mut SftSupply<T>, balance: SftBalance<T>): u64 {
+    let SftBalance  { value, slot } = balance;
     let current_supply = table::borrow_mut(&mut self.data, slot);
     *current_supply = *current_supply - value;
     value
   }
 
-  public fun zero<T>(slot: u256): SFTBalance<T> {
-    SFTBalance { slot, value: 0 }
+  public fun zero<T>(slot: u256): SftBalance<T> {
+    SftBalance { slot, value: 0 }
   }
 
   spec zero {
@@ -69,8 +69,8 @@ module suitears::semi_fungible_balance {
     ensures result.value == 0;
   }
 
-  public fun join<T>(self: &mut SFTBalance<T>, balance: SFTBalance<T>): u64 {
-    let SFTBalance {slot, value } = balance;
+  public fun join<T>(self: &mut SftBalance<T>, balance: SftBalance<T>): u64 {
+    let SftBalance {slot, value } = balance;
     assert!(self.slot == slot, EMismatchedSlot);
     self.value = self.value + value;
     self.value
@@ -84,10 +84,10 @@ module suitears::semi_fungible_balance {
     ensures self.slot == balance.slot;
   }
 
-  public fun split<T>(self: &mut SFTBalance<T>, value: u64): SFTBalance<T> {
+  public fun split<T>(self: &mut SftBalance<T>, value: u64): SftBalance<T> {
     assert!(self.value >= value, EInvalidSplitAmount);
     self.value = self.value - value;
-    SFTBalance {slot: self.slot, value }
+    SftBalance {slot: self.slot, value }
   }
 
   spec split {
@@ -97,7 +97,7 @@ module suitears::semi_fungible_balance {
     ensures self.slot == result.slot;
   }
 
-  public fun withdraw_all<T>(self: &mut SFTBalance<T>): SFTBalance<T> {
+  public fun withdraw_all<T>(self: &mut SftBalance<T>): SftBalance<T> {
     let value = self.value;
     split(self, value)
   }
@@ -107,9 +107,9 @@ module suitears::semi_fungible_balance {
     ensures result.value == old(self.value);
   }
 
-  public fun destroy_zero<T>(self: SFTBalance<T>) {
+  public fun destroy_zero<T>(self: SftBalance<T>) {
     assert!(self.value == 0, EHasValue);
-    let SFTBalance {value: _, slot: _ } = self;
+    let SftBalance {value: _, slot: _ } = self;
    }
 
   spec destroy_zero {
@@ -123,13 +123,13 @@ module suitears::semi_fungible_balance {
   } 
 
   #[test_only]
-  public fun create_for_testing<T>(slot: u256, value: u64): SFTBalance<T> {
-    SFTBalance { slot, value }
+  public fun create_for_testing<T>(slot: u256, value: u64): SftBalance<T> {
+    SftBalance { slot, value }
   }
 
   #[test_only]
-  public fun destroy_for_testing<T>(self: SFTBalance<T>): u64 {
-    let SFTBalance { slot: _, value } = self;
+  public fun destroy_for_testing<T>(self: SftBalance<T>): u64 {
+    let SftBalance { slot: _, value } = self;
     value
   }
 }

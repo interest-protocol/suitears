@@ -15,7 +15,7 @@ module suitears::semi_fungible_token {
   use sui::tx_context::TxContext;
   use sui::types::is_one_time_witness;
 
-  use suitears::semi_fungible_balance::{Self as balance, SFTBalance, SftSupply};
+  use suitears::semi_fungible_balance::{Self as balance, SftBalance, SftSupply};
 
   // Errors
   const EZeroDivision: u64 = 0;
@@ -24,7 +24,7 @@ module suitears::semi_fungible_token {
 
   struct SemiFungibleToken<phantom T> has key, store {
     id: UID, 
-    balance: SFTBalance<T>
+    balance: SftBalance<T>
   }
 
   struct SftMetadata<phantom T> has key, store {
@@ -62,19 +62,19 @@ module suitears::semi_fungible_token {
      balance::slot(&self.balance)
   }
 
-  public fun balance<T>(self: &SemiFungibleToken<T>): &SFTBalance<T> {
+  public fun balance<T>(self: &SemiFungibleToken<T>): &SftBalance<T> {
     &self.balance
   }
 
-  public fun balance_mut<T>(self: &mut SemiFungibleToken<T>): &mut SFTBalance<T> {
+  public fun balance_mut<T>(self: &mut SemiFungibleToken<T>): &mut SftBalance<T> {
     &mut self.balance
   }
 
-  public fun from_balance<T>(balance: SFTBalance<T>, ctx: &mut TxContext): SemiFungibleToken<T> {
+  public fun from_balance<T>(balance: SftBalance<T>, ctx: &mut TxContext): SemiFungibleToken<T> {
     SemiFungibleToken { id: object::new(ctx), balance }
   }
 
-  public fun into_balance<T>(self: SemiFungibleToken<T>): SFTBalance<T> {
+  public fun into_balance<T>(self: SemiFungibleToken<T>): SftBalance<T> {
     let SemiFungibleToken { id, balance } = self;
     object::delete(id);
     balance
@@ -86,7 +86,7 @@ module suitears::semi_fungible_token {
     total_supply
   }
 
-  public fun take<T>(balance: &mut SFTBalance<T>, value: u64, ctx: &mut TxContext): SemiFungibleToken<T> {
+  public fun take<T>(balance: &mut SftBalance<T>, value: u64, ctx: &mut TxContext): SemiFungibleToken<T> {
     SemiFungibleToken {
       id: object::new(ctx),
       balance: balance::split(balance, value)
@@ -106,7 +106,7 @@ module suitears::semi_fungible_token {
     aborts_if ctx.ids_created + 1 > MAX_U64;
   }
 
-  public fun put<T>(balance: &mut SFTBalance<T>, sft: SemiFungibleToken<T>) {
+  public fun put<T>(balance: &mut SftBalance<T>, sft: SemiFungibleToken<T>) {
     balance::join(balance, into_balance(sft));
   }
 
@@ -226,7 +226,7 @@ module suitears::semi_fungible_token {
     }
   }
 
-  public fun mint_balance<T>(cap: &mut SftTreasuryCap<T>, slot: u256, value: u64): SFTBalance<T> {
+  public fun mint_balance<T>(cap: &mut SftTreasuryCap<T>, slot: u256, value: u64): SftBalance<T> {
     balance::increase_supply(&mut cap.total_supply, slot, value)
   }
 
