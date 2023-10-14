@@ -4,17 +4,18 @@ module suitears::airdrop {
   
   use sui::bcs;
   use sui::transfer;
+  use sui::address::to_u256;
   use sui::coin::{Self, Coin};
   use sui::object::{Self, UID}; 
   use sui::clock::{Self, Clock};
-  use sui::table::{Self, Table};
   use sui::balance::Balance;
   use sui::tx_context::{Self, TxContext};
 
+  use suitears::merkle_proof;
+  use suitears::bitmap::{Self, Bitmap};
+
   #[test_only]
   use sui::balance;
-
-  use suitears::merkle_proof;
 
   const EInvalidProof: u64 = 0;
   const EAlreadyClaimed: u64 = 1;
@@ -26,7 +27,7 @@ module suitears::airdrop {
     balance: Balance<T>,
     root: vector<u8>,
     start: u64,
-    accounts: Table<address, bool>
+    map: Bitmap
   }
 
   public fun create<T>(airdrop_coin: Coin<T>, root: vector<u8>, start: u64, ctx: &mut TxContext) {
@@ -36,7 +37,7 @@ module suitears::airdrop {
         balance: coin::into_balance(airdrop_coin),
         root,
         start,
-        accounts: table::new(ctx)
+        map: bitmap::new(ctx)
     });
   }
 
@@ -60,11 +61,13 @@ module suitears::airdrop {
 
     assert!(!has_account_claimed(storage, sender), EAlreadyClaimed);
 
+    bitmap::set(&mut storage.map, to_u256(sender));
+
     coin::take(&mut storage.balance, amount, ctx)
   }
 
   public fun has_account_claimed<T>(storage: &AirdropStorage<T>, user: address): bool {
-    table::contains(&storage.accounts, user)
+    bitmap::get(&storage.map, to_u256(user))
   }
 
   #[test_only]
