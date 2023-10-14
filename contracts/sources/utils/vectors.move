@@ -109,6 +109,78 @@ module suitears::vectors {
         true
     }
 
+  // Our pools will not have more than 4 tokens
+  // Bubble sort is enough
+  public fun ascending_insertion_sort(x: &vector<u256>): vector<u256> {
+    let x = *x;
+    let len = vector::length(&x) - 1;
+    let i = 0;
+
+    while (i < len) {
+      let j = i;
+      while (j > 0 && *vector::borrow(&x, j - 1) >  *vector::borrow(&x, j)) {
+        vector::swap(&mut x, j, j - 1);
+        j = j - 1;
+      };
+
+      i = i + 1;
+    }; 
+
+    x
+  }  
+
+  // Our pools will not have more than 4 tokens
+  // Bubble sort is enough
+  public fun descending_insertion_sort(x: &vector<u256>): vector<u256> {
+    let x = *x;
+    let len = vector::length(&x) - 1;
+    let i = 0;
+
+    while (i < len) {
+      let j = i;
+      while (j > 0 && *vector::borrow(&x, j - 1) <  *vector::borrow(&x, j)) {
+        vector::swap(&mut x, j, j - 1);
+        j = j - 1;
+      };
+
+      i = i + 1;
+    }; 
+
+    x
+  }
+
+// @dev From https://github.com/suidouble/suidouble-liquid/blob/main/move/sources/suidouble_liquid_staker.move
+public fun quick_sort(values: &mut vector<u128>, left: u64, right: u64) {
+    if (left < right) {
+        let partition_index = partion(values, left, right);
+
+        if (partition_index > 1) {
+            quick_sort( values, left, partition_index -1);
+        };
+            quick_sort( values, partition_index + 1, right);
+    }
+}
+
+// @dev Quick Sort Partition
+// From SuiDouble
+fun partion(values: &mut vector<u128>, left: u64, right: u64): u64 {
+    let pivot: u64 = left;
+    let index: u64 = pivot + 1;
+    let i: u64 = index;
+        
+    while (i <= right) {
+        if ((*vector::borrow(values, i)) < (*vector::borrow(values, pivot))) {
+            vector::swap(values, i, index);
+            index = index + 1;
+        };
+            i = i + 1;
+    };
+
+    vector::swap(values, pivot, index -1);
+
+    index - 1
+}
+
     #[test]
     fun test_find_upper_bound() {
         let vec = vector::empty<u64>();
