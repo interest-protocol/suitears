@@ -15,7 +15,7 @@ module suitears::fixed_point_ray {
   }
 
   public fun ray_mul_up(x: u256, y: u256): u256 {
-    math256::div_up(x * y, RAY) 
+    math256::mul_div_up(x, y, RAY) 
   }
 
   public fun ray_div_down(x: u256, y: u256): u256 {
