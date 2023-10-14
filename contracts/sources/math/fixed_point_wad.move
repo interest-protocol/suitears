@@ -3,6 +3,7 @@
 module suitears::fixed_point_wad {
 
   use suitears::math128;
+  use suitears::math256;
 
   const WAD: u128 = 1_000_000_000; // 1e9
 
@@ -26,11 +27,7 @@ module suitears::fixed_point_wad {
     math128::div_up(x * WAD, y)
   }
 
-  public fun wad_to_ray(x: u128): u256 {
-    (x as u256) * (WAD as u256)
-  }
-  
-  public fun ray_to_wad(x: u256): u128 {
-    ((x / (WAD as u256)) as u128)
+  public fun to_wad(x: u256, decimal_factor: u64): u64 {
+    (math256::mul_div(x, (WAD as u256), (decimal_factor as u256)) as u64)
   }
 }

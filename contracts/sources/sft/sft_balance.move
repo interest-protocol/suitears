@@ -13,7 +13,7 @@ module suitears::semi_fungible_balance {
   const EInvalidSplitAmount: u64 = 2;
   const EHasValue: u64 = 3;
 
-  struct SFTSupply<phantom T> has store {
+  struct SftSupply<phantom T> has store {
     data: Table<u256, u64>
   }
 
@@ -30,16 +30,16 @@ module suitears::semi_fungible_balance {
     self.value
   }
 
-  public fun supply_value<T>(s: &SFTSupply<T>, slot: u256): u64 {
+  public fun supply_value<T>(s: &SftSupply<T>, slot: u256): u64 {
     if (!table::contains(&s.data, slot)) return 0;
     *table::borrow(&s.data, slot)
   }
 
-  public fun create_supply<T: drop>(ctx: &mut TxContext): SFTSupply<T> {
-    SFTSupply { data: table::new(ctx) }
+  public fun create_supply<T: drop>(ctx: &mut TxContext): SftSupply<T> {
+    SftSupply { data: table::new(ctx) }
   }
 
-  public fun increase_supply<T>(self: &mut SFTSupply<T>, slot: u256, value: u64): SFTBalance<T> {
+  public fun increase_supply<T>(self: &mut SftSupply<T>, slot: u256, value: u64): SFTBalance<T> {
     new_slot(self, slot);
     
     let current_supply = table::borrow_mut(&mut self.data, slot);
@@ -53,7 +53,7 @@ module suitears::semi_fungible_balance {
     }   
   }
 
-  public fun decrease_supply<T>(self: &mut SFTSupply<T>, balance: SFTBalance<T>): u64 {
+  public fun decrease_supply<T>(self: &mut SftSupply<T>, balance: SFTBalance<T>): u64 {
     let SFTBalance  { value, slot } = balance;
     let current_supply = table::borrow_mut(&mut self.data, slot);
     *current_supply = *current_supply - value;
@@ -116,7 +116,7 @@ module suitears::semi_fungible_balance {
     aborts_if self.value != 0 with EHasValue;
   }
 
-  fun new_slot<T>(self: &mut SFTSupply<T>, slot: u256) {
+  fun new_slot<T>(self: &mut SftSupply<T>, slot: u256) {
     if (table::contains(&self.data, slot)) return;
 
     table::add(&mut self.data, slot, 0);

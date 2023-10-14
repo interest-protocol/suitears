@@ -15,7 +15,7 @@ module suitears::semi_fungible_token {
   use sui::tx_context::TxContext;
   use sui::types::is_one_time_witness;
 
-  use suitears::semi_fungible_balance::{Self as balance, SFTBalance, SFTSupply};
+  use suitears::semi_fungible_balance::{Self as balance, SFTBalance, SftSupply};
 
   // Errors
   const EZeroDivision: u64 = 0;
@@ -27,7 +27,7 @@ module suitears::semi_fungible_token {
     balance: SFTBalance<T>
   }
 
-  struct SFTMetadata<phantom T> has key, store {
+  struct SftMetadata<phantom T> has key, store {
     id: UID,
     decimals: u8,
     name: String,
@@ -37,12 +37,12 @@ module suitears::semi_fungible_token {
     slot_description: String,
   }
 
-  struct SFTTreasuryCap<phantom T> has key, store {
+  struct SftTreasuryCap<phantom T> has key, store {
     id: UID,
-    total_supply: SFTSupply<T>
+    total_supply: SftSupply<T>
   }
 
-  public fun total_supply<T>(cap: &SFTTreasuryCap<T>, slot: u256): u64 {
+  public fun total_supply<T>(cap: &SftTreasuryCap<T>, slot: u256): u64 {
     balance::supply_value(&cap.total_supply, slot)
   }
 
@@ -50,11 +50,11 @@ module suitears::semi_fungible_token {
     balance::value(&self.balance)
   }
 
-  public fun supply<T>(cap: &SFTTreasuryCap<T>): &SFTSupply<T> {
+  public fun supply<T>(cap: &SftTreasuryCap<T>): &SftSupply<T> {
     &cap.total_supply
   }
 
-  public fun supply_mut<T>(cap: &mut SFTTreasuryCap<T>): &mut SFTSupply<T> {
+  public fun supply_mut<T>(cap: &mut SftTreasuryCap<T>): &mut SftSupply<T> {
     &mut cap.total_supply
   }
 
@@ -80,8 +80,8 @@ module suitears::semi_fungible_token {
     balance
   }
 
-  public fun treasury_into_supply<T>(treasury: SFTTreasuryCap<T>): SFTSupply<T> {
-    let SFTTreasuryCap { id, total_supply } = treasury;
+  public fun treasury_into_supply<T>(treasury: SftTreasuryCap<T>): SftSupply<T> {
+    let SftTreasuryCap { id, total_supply } = treasury;
     object::delete(id);
     total_supply
   }
@@ -198,15 +198,15 @@ module suitears::semi_fungible_token {
     slot_description: vector<u8>,
     icon_url: Option<Url>,
     ctx: &mut TxContext 
-  ): (SFTTreasuryCap<T>, SFTMetadata<T>) {
+  ): (SftTreasuryCap<T>, SftMetadata<T>) {
     assert!(is_one_time_witness(&witness), EInvalidWitness);
     
     (
-      SFTTreasuryCap {
+      SftTreasuryCap {
         id: object::new(ctx),
         total_supply: balance::create_supply(ctx)
       },  
-      SFTMetadata
+      SftMetadata
         {
           id: object::new(ctx),
           decimals,
@@ -219,19 +219,19 @@ module suitears::semi_fungible_token {
     )    
   }
 
-  public fun mint<T>(cap: &mut SFTTreasuryCap<T>, slot: u256, value: u64, ctx: &mut TxContext): SemiFungibleToken<T> {
+  public fun mint<T>(cap: &mut SftTreasuryCap<T>, slot: u256, value: u64, ctx: &mut TxContext): SemiFungibleToken<T> {
     SemiFungibleToken {
       id: object::new(ctx),
       balance: mint_balance(cap, slot, value)
     }
   }
 
-  public fun mint_balance<T>(cap: &mut SFTTreasuryCap<T>, slot: u256, value: u64): SFTBalance<T> {
+  public fun mint_balance<T>(cap: &mut SftTreasuryCap<T>, slot: u256, value: u64): SFTBalance<T> {
     balance::increase_supply(&mut cap.total_supply, slot, value)
   }
 
 
-  public fun burn<T>(cap: &mut SFTTreasuryCap<T>, token: SemiFungibleToken<T>): u64 {
+  public fun burn<T>(cap: &mut SftTreasuryCap<T>, token: SemiFungibleToken<T>): u64 {
     let SemiFungibleToken {id, balance } = token;
     object::delete(id);
     balance::decrease_supply(&mut cap.total_supply, balance)
@@ -247,34 +247,34 @@ module suitears::semi_fungible_token {
     balance::destroy_zero(balance);
   }
 
-  // === Update Token SFTMetadata ===
+  // === Update Token SftMetadata ===
 
     public entry fun update_name<T>(
-        _: &SFTTreasuryCap<T>, metadata: &mut SFTMetadata<T>, name: String
+        _: &SftTreasuryCap<T>, metadata: &mut SftMetadata<T>, name: String
     ) {
         metadata.name = name;
     }
 
     public entry fun update_symbol<T>(
-        _: &SFTTreasuryCap<T>, metadata: &mut SFTMetadata<T>, symbol: ascii::String
+        _: &SftTreasuryCap<T>, metadata: &mut SftMetadata<T>, symbol: ascii::String
     ) {
         metadata.symbol = symbol;
     }
 
     public entry fun update_description<T>(
-        _: &SFTTreasuryCap<T>, metadata: &mut SFTMetadata<T>, description: String
+        _: &SftTreasuryCap<T>, metadata: &mut SftMetadata<T>, description: String
     ) {
         metadata.description = description;
     }
 
     public entry fun update_slot_description<T>(
-        _: &SFTTreasuryCap<T>, metadata: &mut SFTMetadata<T>, slot_description: String
+        _: &SftTreasuryCap<T>, metadata: &mut SftMetadata<T>, slot_description: String
     ) {
         metadata.slot_description = slot_description;
     }
 
     public entry fun update_icon_url<T>(
-        _: &SFTTreasuryCap<T>, metadata: &mut SFTMetadata<T>, url: ascii::String
+        _: &SftTreasuryCap<T>, metadata: &mut SftMetadata<T>, url: ascii::String
     ) {
         metadata.icon_url = option::some(url::new_unsafe(url));
     }
@@ -282,37 +282,37 @@ module suitears::semi_fungible_token {
     // === Get Token metadata fields for on-chain consumption ===
 
     public fun get_decimals<T>(
-        metadata: &SFTMetadata<T>
+        metadata: &SftMetadata<T>
     ): u8 {
         metadata.decimals
     }
 
     public fun get_name<T>(
-        metadata: &SFTMetadata<T>
+        metadata: &SftMetadata<T>
     ): String {
         metadata.name
     }
 
     public fun get_symbol<T>(
-        metadata: &SFTMetadata<T>
+        metadata: &SftMetadata<T>
     ): ascii::String {
         metadata.symbol
     }
 
     public fun get_description<T>(
-        metadata: &SFTMetadata<T>
+        metadata: &SftMetadata<T>
     ): String {
         metadata.description
     }
 
     public fun get_slot_description<T>(
-        metadata: &SFTMetadata<T>
+        metadata: &SftMetadata<T>
     ): String {
         metadata.slot_description
     }
 
     public fun get_icon_url<T>(
-        metadata: &SFTMetadata<T>
+        metadata: &SftMetadata<T>
     ): Option<Url> {
         metadata.icon_url
     }
