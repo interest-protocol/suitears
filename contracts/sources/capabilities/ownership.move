@@ -37,4 +37,9 @@ module suitears::ownership {
     if (vector::contains(&self.of, &x)) return;
     vector::push_back(&mut self.of, x);
   }
+
+  public fun destroy<T: drop>(self: OwnershipCap<T>) {
+    let  OwnershipCap {id, of: _} = self; 
+    object::delete(id);
+  }
 }

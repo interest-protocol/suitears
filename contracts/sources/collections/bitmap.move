@@ -41,6 +41,11 @@ module suitears::bitmap {
     *x = *x & (mask ^ MAX_U256)
   }
 
+  public fun destroy(self: Bitmap) {
+    let Bitmap { id } = self;
+    object::delete(id);
+  }
+
   fun key_mask(index: u256): (vector<u8>, u256) {
     (bcs::to_bytes(&(index >> 8)), 1 << ((index & 0xff) as u8)) 
   }

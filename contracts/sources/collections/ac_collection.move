@@ -54,4 +54,16 @@ module suitears::ac_collection {
     ownership::assert_ownership(&cap.cap, object::id(self));
     &mut self.id
   }
+
+  public fun destroy_cap(cap: AcCollectionCap) {
+    let AcCollectionCap { id, cap } = cap;
+    ownership::destroy(cap);
+    object::delete(id);
+  }
+
+  public fun destroy_collection<C: key + store>(self: AcCollection<C>): C {
+    let AcCollection { id, collection } = self;
+    object::delete(id);
+    collection
+  }
 }
