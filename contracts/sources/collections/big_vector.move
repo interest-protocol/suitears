@@ -1,6 +1,6 @@
-// * IMPORTANT Use Smart Vector to create
+// * IMPORTANT Use List
 // A vector that can scale forever
-// Notive vector should not be used after 1000 entries
+// Notice vector should not be used after 1000 entries
 // Based from : https://github.com/aptos-labs/aptos-core/blob/main/aptos-move/framework/aptos-stdlib/sources/data_structures/big_vector.move
 module suitears::big_vector {
     use std::vector;
@@ -13,7 +13,7 @@ module suitears::big_vector {
     #[test_only]
     use sui::test_scenario::{Self as test, ctx};
     
-    // friend aptos_std::smart_vector;
+    friend suitears::list;
 
     /// Vector index is out of bounds
     const EIndexOutOfBounds: u64 = 1;
@@ -23,7 +23,7 @@ module suitears::big_vector {
     /// bucket_size cannot be 0
     const EZeroBucketSize: u64 = 4;
 
-    /// A scalable vector implementation based on tables where elements are grouped into id.
+    /// A scalable vector implementation based on dynamic field where elements are grouped into id.
     /// Each bucket has a capacity of `bucket_size` elements.
     struct BigVector<phantom T: store> has key, store {
         id: UID,
