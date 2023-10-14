@@ -3,6 +3,8 @@ module suitears::math64 {
 
   use suitears::math128;
 
+  const QUADRATIC_SCALAR: u64 = 1 << 16;
+
   public fun mul_div(x: u64, y: u64, z: u64): u64 {
     (math128::mul_div((x as u128), (y as u128), (z as u128)) as u64)
   }
@@ -78,6 +80,15 @@ module suitears::math64 {
 
   public fun max(x: u64, y: u64): u64 {
     if (x >= y) x else y
+  }
+
+  public fun quadratic_scale(): u64 {
+    QUADRATIC_SCALAR
+  }
+
+  /// @notice Calculates ax^2 + bx + c assuming all variables are scaled by 2**16.
+  public fun quadratic(x: u64, a: u64, b: u64, c: u64): u64 {
+    (pow(x, 2) / QUADRATIC_SCALAR * a / QUADRATIC_SCALAR) + (b * x / QUADRATIC_SCALAR) + c
   }
   
   /// Source: https://github.com/pentagonxyz/movemate/blob/main/sui/sources/math_u64.move
