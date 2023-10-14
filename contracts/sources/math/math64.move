@@ -82,7 +82,7 @@ module suitears::math64 {
     if (x >= y) x else y
   }
 
-  public fun quadratic_scale(): u64 {
+  public fun quadratic_scalar(): u64 {
     QUADRATIC_SCALAR
   }
 
