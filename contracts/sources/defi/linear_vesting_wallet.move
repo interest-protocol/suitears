@@ -146,14 +146,14 @@ module suitears::linear_vesting_wallet {
     /// From Movemate
     /// Calculates the amount that has already vested. Default implementation is a linear vesting curve.
   fun vested_amount(start: u64, duration: u64, balance: u64, already_released: u64, timestamp: u64): u64 {
-        vesting_schedule(start, duration, balance + already_released, timestamp)
+    vesting_schedule(start, duration, balance + already_released, timestamp)
   }
 
     /// From Movemate
     /// @dev Virtual implementation of the vesting formula. This returns the amount vested, as a function of time, for an asset given its total historical allocation.
   fun vesting_schedule(start: u64, duration: u64, total_allocation: u64, timestamp: u64): u64 {
-        if (timestamp < start) return 0;
-        if (timestamp > start + duration) return total_allocation;
-        (total_allocation * (timestamp - start)) / duration
+    if (timestamp < start) return 0;
+    if (timestamp > start + duration) return total_allocation;
+    (total_allocation * (timestamp - start)) / duration
   }
 }
