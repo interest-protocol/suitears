@@ -6,6 +6,7 @@ module suitears::admin {
   
   use sui::transfer;
   use sui::event::emit;
+  use sui::clock::{Self, Clock};
   use sui::object::{Self, UID, ID};
   use sui::types::is_one_time_witness;
   use sui::tx_context::{Self, TxContext};
@@ -34,7 +35,7 @@ module suitears::admin {
     pending_admin: address,
     current_admin: address,
     accepted: bool,
-    epochs_delay: u64
+    time_delay: u64
   }
 
   // * Events
@@ -43,13 +44,13 @@ module suitears::admin {
     storage_id: ID,
     cap_id: ID,
     sender: address,
-    epochs_delay: u64
+    time_delay: u64
   }
 
   struct StartTransfer<phantom T> has copy, drop {
     current_admin: address,
     pending_admin: address,
-    unlock_epoch: u64,
+    unlock_timestamp: u64,
     timelock_id: ID,
   }
 
@@ -66,7 +67,7 @@ module suitears::admin {
     admin: address
   }
 
-  public fun create<T: drop>(witness: T, epochs_delay: u64, ctx: &mut TxContext): AdminCap<T> {
+  public fun create<T: drop>(witness: T, time_delay: u64, ctx: &mut TxContext): AdminCap<T> {
     assert!(is_one_time_witness(&witness), EInvalidWitness);
     let sender = tx_context::sender(ctx);
 
@@ -76,14 +77,14 @@ module suitears::admin {
         pending_admin: @0x0,
         current_admin: sender,
         accepted: false,
-        epochs_delay
+        time_delay
     };
 
     emit(Create<T> { 
       sender, 
       storage_id: object::id(&admin_storage), 
       cap_id: object::id(&admin_cap),
-      epochs_delay
+      time_delay
     });
 
     transfer::share_object(admin_storage);
@@ -96,14 +97,14 @@ module suitears::admin {
   * @param admin_cap The AdminCap that will be transferred
   * @recipient the new admin address
   */
-  public fun start_transfer<T>(_: &AdminCap<T>, storage: &mut AdminStorage<T>, recipient: address, ctx: &mut TxContext): TimeLockCap {
+  public fun start_transfer<T>(_: &AdminCap<T>, storage: &mut AdminStorage<T>, c: &Clock, recipient: address, ctx: &mut TxContext): TimeLockCap {
     assert!(recipient != @0x0, EZeroAddress);
     storage.pending_admin = recipient;
     storage.accepted = false;
 
-    let unlock_epoch = tx_context::epoch(ctx) + storage.epochs_delay;
+    let unlock_timestamp = clock::timestamp_ms(c) + storage.time_delay;
     
-    let cap = timelock::create(TimeLockName {}, tx_context::epoch(ctx) + storage.epochs_delay,  false, ctx);
+    let cap = timelock::create(TimeLockName {}, c, unlock_timestamp,  false, ctx);
 
     add_pending_admin(&mut cap, recipient);
 
@@ -111,7 +112,7 @@ module suitears::admin {
       current_admin: storage.current_admin,
       pending_admin: recipient,
       timelock_id: object::id(&cap),
-      unlock_epoch 
+      unlock_timestamp 
     });
 
     cap
@@ -153,13 +154,13 @@ module suitears::admin {
   * @param admin_cap The AdminCap that will be transferred
   * @recipient the new admin address
   */
-  public fun transfer<T>(cap: AdminCap<T>, lock: TimeLockCap, storage: &mut AdminStorage<T>, ctx: &mut TxContext) {
+  public fun transfer<T>(cap: AdminCap<T>, c: &Clock, lock: TimeLockCap, storage: &mut AdminStorage<T>) {
     // New admin must accept the capability
     assert!(storage.accepted, EAdminDidNotAccept);
     assert!(get_admin(&lock) == storage.pending_admin, EInvalidTimeLock);
 
     // Will throw if the epoch is not valid
-    timelock::assert_unlock_epoch_and_destroy(TimeLockName {}, lock, ctx);
+    timelock::assert_unlock_epoch_and_destroy(TimeLockName {}, c, lock);
 
     storage.accepted = false;
     let new_admin = storage.pending_admin;

@@ -41,7 +41,8 @@ module suitears::farm {
     pool_limit_per_user: u64,
     account_token_per_share: u256,
     stake_coin_decimal_factor: u64,
-    reward_coin_decimal_factor: u64
+    reward_coin_decimal_factor: u64,
+    owned_by: ID
   }
 
   public fun create_cap(ctx: &mut TxContext): FarmCap {
@@ -52,17 +53,17 @@ module suitears::farm {
   }
 
   public fun create_farm<StakeCoin, RewardCoin>(
-    cap: &mut FarmCap,
-    stake_coin_metadata: &CoinMetadata<StakeCoin>,
-    reward_coin: Coin<RewardCoin>,
-    reward_coin_metadata: &CoinMetadata<RewardCoin>,
-    c: Clock,
-    reward_per_millisecond: u64,
-    start_timestamp: u64,
-    end_timestamp: u64,
-    pool_limit_per_user: u64,
-    milliseconds_for_user_limit: u64,
-    ctx: &mut TxContext
+    // cap: &mut FarmCap,
+    // stake_coin_metadata: &CoinMetadata<StakeCoin>,
+    // reward_coin: Coin<RewardCoin>,
+    // reward_coin_metadata: &CoinMetadata<RewardCoin>,
+    // c: Clock,
+    // reward_per_millisecond: u64,
+    // start_timestamp: u64,
+    // end_timestamp: u64,
+    // pool_limit_per_user: u64,
+    // milliseconds_for_user_limit: u64,
+    // ctx: &mut TxContext
   ) {
 
   }

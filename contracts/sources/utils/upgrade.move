@@ -4,6 +4,7 @@ module suitears::upgrade {
 
     use sui::event::emit;
     use sui::dynamic_field as df;
+    use sui::clock::{Self, Clock};
     use sui::object::{Self, UID, ID};
     use sui::tx_context::{Self, TxContext};
     use sui::package::{Self, UpgradeCap, UpgradeTicket, UpgradeReceipt};  
@@ -20,7 +21,7 @@ module suitears::upgrade {
         cap: UpgradeCap,
         policy: u8,
         digest: vector<u8>,
-        epochs_delay: u64
+        time_delay: u64
     }
     
     // * Events
@@ -28,7 +29,7 @@ module suitears::upgrade {
     struct NewUpgradeWrapper has copy, drop {
         upgrade_cap: ID,
         wrapper: ID,
-        epochs_delay: u64
+        time_delay: u64
     }
 
     struct ImmutablePackage has copy, drop {
@@ -39,14 +40,14 @@ module suitears::upgrade {
         id: ID,
         policy: u8,
         digest: vector<u8>,
-        unlock_epoch: u64
+        unlock_timestamp: u64
     }
 
     struct AuthorizeUpgrade has copy, drop {
         id: ID,
         policy: u8,
         digest: vector<u8>,
-        epoch: u64
+        timestamp: u64
     }
 
     struct CancelUpgrade has copy, drop {
@@ -60,7 +61,7 @@ module suitears::upgrade {
     // @dev Wrap the Upgrade Cap to add a Time Lock
     public fun wrap_it(
         cap: UpgradeCap,
-        epochs_delay: u64,
+        time_delay: u64,
         ctx: &mut TxContext
     ): UpgradeWrapper {
         let wrapper = UpgradeWrapper {
@@ -68,30 +69,31 @@ module suitears::upgrade {
             cap,
             policy: 0,
             digest: vector::empty(),
-            epochs_delay
+            time_delay
         };
         emit(NewUpgradeWrapper { 
           wrapper: object::id(&wrapper), 
           upgrade_cap: object::id(&wrapper.cap), 
-          epochs_delay
+          time_delay
         });
         wrapper
     }
 
     public fun init_upgrade(
+        c: &Clock,
         cap: &mut UpgradeWrapper,
         policy: u8,
         digest: vector<u8>,
         ctx: &mut TxContext        
     ) {
-        let unlock_epoch = tx_context::epoch(ctx) + cap.epochs_delay;
+        let unlock_timestamp = clock::timestamp_ms(c) + cap.time_delay;
         cap.policy = policy;
         cap.digest = digest;
         
         // Add Lock to Upgrade Wrapper
-        df::add(&mut cap.id, TimeLockKey {}, timelock::create(TimeLockName {}, unlock_epoch,  false, ctx));
+        df::add(&mut cap.id, TimeLockKey {}, timelock::create(TimeLockName {}, c, unlock_timestamp, false, ctx));
         
-        emit(InitUpgrade { id: object::id(cap), unlock_epoch, policy, digest });
+        emit(InitUpgrade { id: object::id(cap), unlock_timestamp, policy, digest });
     }
 
     public fun cancel_upgrade(cap: &mut UpgradeWrapper) {
@@ -102,15 +104,13 @@ module suitears::upgrade {
     }
 
     public fun authorize_upgrade(
+        c: &Clock,
         cap: &mut UpgradeWrapper,
-        ctx: &mut TxContext  
     ): UpgradeTicket {
         let lock = df::remove(&mut cap.id, TimeLockKey {});
-        timelock::assert_unlock_epoch_and_destroy(TimeLockName {}, lock, ctx);
+        timelock::assert_unlock_epoch_and_destroy(TimeLockName {}, c, lock);
 
-        let epoch = tx_context::epoch(ctx);
-
-        emit(AuthorizeUpgrade { id: package::upgrade_package(&cap.cap), epoch, policy: cap.policy, digest: cap.digest });
+        emit(AuthorizeUpgrade { id: package::upgrade_package(&cap.cap), timestamp: clock::timestamp_ms(c), policy: cap.policy, digest: cap.digest });
         
         package::authorize_upgrade(&mut cap.cap, cap.policy, cap.digest)
     }

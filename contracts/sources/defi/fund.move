@@ -8,7 +8,7 @@ module suitears::fund {
     underlying: u128
   }
 
-  public fun new(): Fund {
+  public fun empty(): Fund {
     Fund {
       shares: 0,
       underlying: 0

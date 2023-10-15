@@ -4,11 +4,11 @@ module suitears::quadratic_vesting_airdrop {
   
   use sui::bcs;
   use sui::transfer;
+  use sui::clock::Clock;
+  use sui::balance::Balance;
   use sui::address::to_u256;
   use sui::coin::{Self, Coin};
   use sui::object::{Self, UID}; 
-  use sui::clock::Clock;
-  use sui::balance::Balance;
   use sui::tx_context::{Self, TxContext};
 
   use suitears::merkle_proof;
