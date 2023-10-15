@@ -2,9 +2,9 @@
 module suitears::ownership {
   use std::vector;
 
-  use sui::object::{Self, UID, ID};
   use sui::tx_context::TxContext;
-
+  use sui::object::{Self, UID, ID};
+  
   const ENotAllowed: u64 = 0;
 
   struct OwnershipCap<phantom T> has key, store {

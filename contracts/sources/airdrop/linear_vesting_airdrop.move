@@ -66,9 +66,9 @@ module suitears::linear_vesting_airdrop {
     wallet::create(
       coin::take(&mut storage.balance, amount, ctx),
       clock_object,
-        storage.start,
-        storage.duration,
-        ctx
+      storage.start,
+      storage.duration,
+      ctx
     )
   }
 

@@ -90,7 +90,7 @@ module suitears::quadratic_vesting_airdrop {
       storage.start,
       storage.cliff,
       storage.duration,
-        ctx
+      ctx
     )
   }
 

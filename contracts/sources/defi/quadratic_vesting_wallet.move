@@ -2,8 +2,8 @@ module suitears::quadratic_vesting_wallet {
   
   use sui::transfer;
   use sui::coin::{Self, Coin};
-  use sui::clock::{Self, Clock};
   use sui::object::{Self, UID};
+  use sui::clock::{Self, Clock};
   use sui::tx_context::TxContext;
 
   
