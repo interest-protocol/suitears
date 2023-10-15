@@ -19,8 +19,8 @@ module suitears::i128 {
 
     // ERRORS
 
-    const ERROR_CONVERSION_FROM_U128_OVERFLOW: u64 = 0;
-    const ERR0R_CONVERSION_TO_U128_UNDERFLOW: u64 = 1;
+    const EConversionFromU128Overflow: u64 = 0;
+    const EConversionToU128Underflow: u64 = 1;
 
     struct I128 has copy, drop, store {
         bits: u128
@@ -31,7 +31,7 @@ module suitears::i128 {
     }
 
     public fun from(x: u128): I128 {
-        assert!(x <= MAX_I128_AS_u128, ERROR_CONVERSION_FROM_U128_OVERFLOW);
+        assert!(x <= MAX_I128_AS_u128, EConversionFromU128Overflow);
         I128 { bits: x }
     }
 
@@ -46,12 +46,12 @@ module suitears::i128 {
     }
 
     public fun as_u128(x: &I128): u128 {
-        assert!(is_positive(x), ERR0R_CONVERSION_TO_U128_UNDERFLOW);
+        assert!(is_positive(x), EConversionToU128Underflow);
         x.bits
     }
 
     public fun as_u64(x: &I128): u64 {
-        assert!(is_positive(x), ERR0R_CONVERSION_TO_U128_UNDERFLOW);
+        assert!(is_positive(x), EConversionToU128Underflow);
         (x.bits as u64)
     }
 

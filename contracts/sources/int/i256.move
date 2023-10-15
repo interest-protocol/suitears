@@ -19,8 +19,8 @@ module suitears::i256 {
 
     // ERRORS
 
-    const ERROR_CONVERSION_FROM_U256_OVERFLOW: u64 = 0;
-    const ERR0R_CONVERSION_TO_U256_UNDERFLOW: u64 = 1;
+    const EConversionFromU256Overflow: u64 = 0;
+    const EConversionToU256Underflow: u64 = 1;
 
     struct I256 has copy, drop, store {
         bits: u256
@@ -31,7 +31,7 @@ module suitears::i256 {
     }
 
     public fun from(x: u256): I256 {
-        assert!(x <= MAX_I256_AS_U256, ERROR_CONVERSION_FROM_U256_OVERFLOW);
+        assert!(x <= MAX_I256_AS_U256, EConversionFromU256Overflow);
         I256 { bits: x }
     }
 
@@ -46,12 +46,12 @@ module suitears::i256 {
     }
 
     public fun as_u256(x: &I256): u256 {
-        assert!(is_positive(x), ERR0R_CONVERSION_TO_U256_UNDERFLOW);
+        assert!(is_positive(x), EConversionToU256Underflow);
         x.bits
     }
 
     public fun as_u64(x: &I256): u64 {
-        assert!(is_positive(x), ERR0R_CONVERSION_TO_U256_UNDERFLOW);
+        assert!(is_positive(x), EConversionToU256Underflow);
         (x.bits as u64)
     }
 

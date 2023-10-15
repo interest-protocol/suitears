@@ -19,8 +19,8 @@ module suitears::i64 {
 
     // ERRORS
 
-    const ERROR_CONVERSION_FROM_U128_OVERFLOW: u64 = 0;
-    const ERR0R_CONVERSION_TO_U128_UNDERFLOW: u64 = 1;
+    const EConversionFromU64Overflow: u64 = 0;
+    const EConversionToU64Underflow: u64 = 1;
 
     struct I64 has copy, drop, store {
         bits: u64
@@ -31,7 +31,7 @@ module suitears::i64 {
     }
 
     public fun from(x: u64): I64 {
-        assert!(x <= MAX_I64_AS_u128, ERROR_CONVERSION_FROM_U128_OVERFLOW);
+        assert!(x <= MAX_I64_AS_u128, EConversionFromU64Overflow);
         I64 { bits: x }
     }
 
@@ -46,12 +46,12 @@ module suitears::i64 {
     }
 
     public fun as_u128(x: &I64): u64 {
-        assert!(is_positive(x), ERR0R_CONVERSION_TO_U128_UNDERFLOW);
+        assert!(is_positive(x), EConversionToU64Underflow);
         x.bits
     }
 
     public fun as_u64(x: &I64): u64 {
-        assert!(is_positive(x), ERR0R_CONVERSION_TO_U128_UNDERFLOW);
+        assert!(is_positive(x), EConversionToU64Underflow);
         (x.bits as u64)
     }
 
