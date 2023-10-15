@@ -41,6 +41,10 @@ module suitears::airdrop {
     });
   }
 
+  public fun deposit<T>(storage: &mut AirdropStorage<T>, airdrop_coin: Coin<T>): u64 {
+    balance::join(&mut storage.balance, coin::into_balance(airdrop_coin))
+  }
+
   public fun get_airdrop<T>(
     storage: &mut AirdropStorage<T>, 
     clock_object: &Clock,
