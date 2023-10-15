@@ -23,6 +23,10 @@ module suitears::ownership {
     vector::contains(&self.of, &x)
   }
 
+  public fun view<T: drop>(self: &OwnershipCap<T>): &vector<ID> {
+    &self.of
+  }
+
   public fun assert_ownership<T: drop>(self: &OwnershipCap<T>, x: ID) {
     assert!(owns(self, x), ENotAllowed);
   }
@@ -39,7 +43,13 @@ module suitears::ownership {
   }
 
   public fun destroy<T: drop>(self: OwnershipCap<T>) {
-    let  OwnershipCap {id, of: _} = self; 
+    let  OwnershipCap { id, of: _ } = self; 
     object::delete(id);
+  }
+
+  public fun destroy_empty<T: drop>(self: OwnershipCap<T>) {
+    let  OwnershipCap { id, of} = self; 
+    object::delete(id);
+    vector::destroy_empty(of);
   }
 }
