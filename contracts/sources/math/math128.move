@@ -1,36 +1,14 @@
 module suitears::math128 {
   use std::vector;
 
+  use suitears::math256;
+
   public fun mul_div(x: u128, y: u128, z: u128): u128 {
-      if (y == z) {
-          return x
-      };
-      if (x == z) {
-          return y
-      };
-      let a = x / z;
-      let b = x % z;
-      //x = a * z + b;
-      let c = y / z;
-      let d = y % z;
-      //y = c * z + d;
-      a * c * z + a * d + b * c + b * d / z
+    (math256::mul_div((x as u256), (y as u256), (z as u256)) as u128)
   }
 
   public fun mul_div_up(x: u128, y: u128, z: u128): u128 {
-      if (y == z) {
-          return x
-      };
-      if (x == z) {
-          return y
-      };
-      let a = x / z;
-      let b = x % z;
-      //x = a * z + b;
-      let c = y / z;
-      let d = y % z;
-      //y = c * z + d;
-      div_up(a * c * z + a * d + b * c + b * d, z)
+    (math256::mul_div_up((x as u256), (y as u256), (z as u256)) as u128)
   }
 
   /// @dev Returns the smallest of two numbers.
