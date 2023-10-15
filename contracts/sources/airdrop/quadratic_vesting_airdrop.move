@@ -101,6 +101,12 @@ module suitears::quadratic_vesting_airdrop {
     bitmap::get(&storage.map, to_u256(user))
   }
 
+  public fun destroy_zero<T>(storage: AirdropStorage<T>) {
+    let AirdropStorage {id, balance, start: _, root: _, duration: _, map: _, cliff: _, vesting_curve_a: _, vesting_curve_b: _, vesting_curve_c: _} = storage;
+    object::delete(id);
+    balance::destroy_zero(balance);
+  }
+
   #[test_only]
   public fun read_storage<T>(storage: &AirdropStorage<T>): (u64, vector<u8>, u64) {
     (balance::value(&storage.balance), storage.root, storage.start)
