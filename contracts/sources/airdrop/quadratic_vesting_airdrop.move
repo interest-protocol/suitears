@@ -3,7 +3,6 @@ module suitears::quadratic_vesting_airdrop {
   use std::hash;
   
   use sui::bcs;
-  use sui::transfer;
   use sui::clock::Clock;
   use sui::balance::Balance;
   use sui::address::to_u256;
@@ -45,9 +44,9 @@ module suitears::quadratic_vesting_airdrop {
     cliff: u64,
     duration: u64,
     ctx: &mut TxContext
-  ) {
+  ): AirdropStorage<T> {
     assert!(!vector::is_empty(&root), EInvalidRoot);
-    transfer::share_object(AirdropStorage {
+    AirdropStorage {
         id: object::new(ctx),
         balance: coin::into_balance(airdrop_coin),
         root,
@@ -58,7 +57,7 @@ module suitears::quadratic_vesting_airdrop {
         vesting_curve_b,
         vesting_curve_c,
         map: bitmap::new(ctx)
-    });
+    }
   }
 
   public fun deposit<T>(storage: &mut AirdropStorage<T>, airdrop_coin: Coin<T>): u64 {

@@ -3,7 +3,6 @@ module suitears::linear_vesting_airdrop {
   use std::hash;
   
   use sui::bcs;
-  use sui::transfer;
   use sui::clock::Clock;
   use sui::balance::Balance;
   use sui::address::to_u256;
@@ -22,7 +21,7 @@ module suitears::linear_vesting_airdrop {
   const EAlreadyClaimed: u64 = 1;
   const EInvalidRoot: u64 = 2;
 
-  struct AirdropStorage<phantom T> has key { 
+  struct AirdropStorage<phantom T> has key, store { 
     id: UID,
     balance: Balance<T>,
     root: vector<u8>,
@@ -31,16 +30,16 @@ module suitears::linear_vesting_airdrop {
     map: Bitmap
   }
 
-  public fun create<T>(airdrop_coin: Coin<T>, root: vector<u8>, start: u64, duration: u64, ctx: &mut TxContext) {
+  public fun create<T>(airdrop_coin: Coin<T>, root: vector<u8>, start: u64, duration: u64, ctx: &mut TxContext): AirdropStorage<T> {
     assert!(!vector::is_empty(&root), EInvalidRoot);
-    transfer::share_object(AirdropStorage {
+    AirdropStorage {
         id: object::new(ctx),
         balance: coin::into_balance(airdrop_coin),
         root,
         start,
         duration,
         map: bitmap::new(ctx)
-    });
+    }
   }
 
   public fun deposit<T>(storage: &mut AirdropStorage<T>, airdrop_coin: Coin<T>): u64 {
