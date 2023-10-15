@@ -20,6 +20,7 @@ module suitears::farm {
   const EFarmLimitZero: u64 = 3;
   const EFarmEnded: u64 = 4;
   const EStakeAboveLimit: u64 = 5;
+  const EInsufficientStakeAmount: u64 = 6;
 
   struct FarmWitness has drop {}
 
@@ -66,6 +67,13 @@ module suitears::farm {
   struct Stake<phantom Label, phantom StakeCoin, phantom RewardCoin> has copy, drop {
     farm: ID,
     stake_amount: u64,
+    reward_amount: u64,
+    sender: address
+  }
+
+  struct Unstake<phantom Label, phantom StakeCoin, phantom RewardCoin> has copy, drop {
+    farm: ID,
+    unstake_amount: u64,
     reward_amount: u64,
     sender: address
   }
@@ -170,6 +178,41 @@ module suitears::farm {
     emit(Stake<Label, StakeCoin, RewardCoin> { farm: object::id(farm), stake_amount, reward_amount: coin::value(&reward_coin), sender });
 
     reward_coin
+  }
+
+  public fun unstake<Label, StakeCoin, RewardCoin>(
+    c: &Clock,
+    farm: &mut Farm<Label, StakeCoin, RewardCoin>, 
+    amount: u64,
+    ctx: &mut TxContext
+  ): (Coin<StakeCoin>, Coin<RewardCoin>) {
+    let now = clock::timestamp_ms(c);
+    update(farm, now);
+
+    let sender = tx_context::sender(ctx);
+    let account = table::borrow_mut(&mut farm.accounts, sender);
+
+    assert!(account.amount >= amount, EInsufficientStakeAmount);
+
+    let pending_reward = calculate_pending_rewards(account, farm.stake_coin_decimal_factor, farm.account_token_per_share);
+
+    let stake_coin = coin::zero<StakeCoin>(ctx);
+    let reward_coin = coin::zero<RewardCoin>(ctx);
+
+    if (amount != 0) {
+      account.amount = account.amount - amount;
+      coin::join(&mut stake_coin, coin::take(&mut farm.balance_stake_coin, amount, ctx));
+    };
+
+    if (pending_reward != 0) {
+      coin::join(&mut reward_coin, coin::take(&mut farm.balance_reward_coin, amount, ctx));      
+    };
+
+    account.reward_debt = reward_debt(account.amount, farm.stake_coin_decimal_factor, farm.account_token_per_share);
+
+    emit(Unstake<Label, StakeCoin, RewardCoin> { farm: object::id(farm), unstake_amount: amount, reward_amount: pending_reward, sender });
+
+    (stake_coin, reward_coin)
   }
 
 
