@@ -172,6 +172,12 @@ module suitears::admin {
     emit(NewAdmin<T> { admin: new_admin });
   } 
 
+  // Careful, this cannot be reverted
+  public fun destroy<T>(cap: AdminCap<T>) {
+    let AdminCap { id } = cap;
+    object::delete(id);
+  }
+
 
   // Private Fns
 

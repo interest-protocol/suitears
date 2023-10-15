@@ -27,4 +27,10 @@ module suitears::wit_collection {
   public fun borrow_mut_uid<W: drop, C: key + store>(_: W, self: &mut WitCollection<W, C>): &mut UID {
     &mut self.id
   }
+
+  public fun destroy_collection<W: drop, C: key + store>(self: WitCollection<W, C>): C {
+    let WitCollection { id, collection } = self;
+    object::delete(id);
+    collection
+  }
 }
