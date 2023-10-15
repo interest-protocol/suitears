@@ -102,9 +102,10 @@ module suitears::quadratic_vesting_airdrop {
   }
 
   public fun destroy_zero<T>(storage: AirdropStorage<T>) {
-    let AirdropStorage {id, balance, start: _, root: _, duration: _, map: _, cliff: _, vesting_curve_a: _, vesting_curve_b: _, vesting_curve_c: _} = storage;
+    let AirdropStorage {id, balance, start: _, root: _, duration: _, map, cliff: _, vesting_curve_a: _, vesting_curve_b: _, vesting_curve_c: _} = storage;
     object::delete(id);
     balance::destroy_zero(balance);
+    bitmap::destroy(map);
   }
 
   #[test_only]

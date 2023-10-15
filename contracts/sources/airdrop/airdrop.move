@@ -74,9 +74,10 @@ module suitears::airdrop {
   }
 
   public fun destroy_zero<T>(storage: AirdropStorage<T>) {
-    let AirdropStorage {id, balance, start: _, root: _, map: _} = storage;
+    let AirdropStorage {id, balance, start: _, root: _, map} = storage;
     object::delete(id);
     balance::destroy_zero(balance);
+    bitmap::destroy(map);
   }
 
   #[test_only]

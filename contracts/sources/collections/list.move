@@ -2,7 +2,8 @@
 module suitears::list {
     use std::vector;
     use std::option::{Self, Option};
-
+    
+    use sui::object::{Self, UID};
     use sui::tx_context::TxContext;
 
     use suitears::big_vector::{Self, BigVector};
@@ -21,6 +22,7 @@ module suitears::list {
     /// The option wrapping BigVector saves space in the metadata associated with BigVector when list is
     /// so small that inline_vec vector can hold all the data.
     struct List<T: store> has store {
+        id: UID,
         inline_vec: vector<T>,
         big_vec: Option<BigVector<T>>,
         inline_capacity: Option<u64>,
@@ -31,9 +33,10 @@ module suitears::list {
 
     /// Create an empty vector with customized config.
     /// When inline_capacity = 0, List degrades to a wrapper of BigVector.
-    public fun new<T: store>(inline_capacity: u64, bucket_size: u64): List<T> {
+    public fun new<T: store>(inline_capacity: u64, bucket_size: u64, ctx: &mut TxContext): List<T> {
         assert!(bucket_size > 0, EZeroBucketSize);
         List {
+            id: object::new(ctx),
             inline_vec: vector[],
             big_vec: option::none(),
             inline_capacity: option::some(inline_capacity),
@@ -43,7 +46,7 @@ module suitears::list {
 
     /// Create a vector of length 1 containing the passed in T.
     public fun singleton<T: store>(inline_capacity: u64, bucket_size: u64, element: T, ctx: &mut TxContext): List<T> {
-        let v = new(inline_capacity, bucket_size);
+        let v = new(inline_capacity, bucket_size, ctx);
         push_back(&mut v, element, ctx);
         v
     }
@@ -52,9 +55,10 @@ module suitears::list {
     /// Aborts if `v` is not empty.
     public fun destroy_empty<T: store>(v: List<T>) {
         assert!(is_empty(&v), EVectorNotEmpty);
-        let List { inline_vec, big_vec, inline_capacity: _, bucket_size: _ } = v;
+        let List { id, inline_vec, big_vec, inline_capacity: _, bucket_size: _ } = v;
         vector::destroy_empty(inline_vec);
         option::destroy_none(big_vec);
+        object::delete(id);
     }
 
     /// Destroy a vector completely when T has `drop`.
@@ -326,7 +330,7 @@ module suitears::list {
         let scenario = test::begin(@0x1);
         let test = &mut scenario;
         
-        let v = new(7, 11);
+        let v = new(7, 11, ctx(test));
         let i = 0;
         while (i < 100) {
             push_back(&mut v, i, ctx(test));
@@ -368,10 +372,10 @@ module suitears::list {
         let scenario = test::begin(@0x1);
         let test = &mut scenario;
         
-        let v1 = new(7, 11);
+        let v1 = new(7, 11, ctx(test));
         let v2 = singleton(7, 11, 1, ctx(test));
-        let v3 = new(7, 11);
-        let v4 = new(7, 11);
+        let v3 = new(7, 11, ctx(test));
+        let v4 = new(7, 11, ctx(test));
         append(&mut v3, v4, ctx(test));
         assert!(length(&v3) == 0, 0);
         append(&mut v2, v3, ctx(test));
@@ -387,8 +391,8 @@ module suitears::list {
         let scenario = test::begin(@0x1);
         let test = &mut scenario;
 
-        let v1 = new(7, 11);
-        let v2 = new(7, 11);
+        let v1 = new(7, 11, ctx(test));
+        let v2 = new(7, 11, ctx(test));
         let i = 0;
         while (i < 7) {
             push_back(&mut v1, i, ctx(test));
@@ -414,7 +418,7 @@ module suitears::list {
         let scenario = test::begin(@0x1);
         let test = &mut scenario;
 
-        let v = new(12,9);
+        let v = new(12,9, ctx(test));
         let i = 0u64;
         while (i < 101) {
             push_back(&mut v, i, ctx(test));
@@ -455,7 +459,7 @@ module suitears::list {
         let scenario = test::begin(@0x1);
         let test = &mut scenario;
 
-        let v = new(12, 9);
+        let v = new(12, 9, ctx(test));
         let i = 0u64;
         while (i < 10) {
             push_back(&mut v, i, ctx(test));
@@ -496,7 +500,7 @@ module suitears::list {
         let scenario = test::begin(@0x1);
         let test = &mut scenario;
 
-        let v = new(1, 2);
+        let v = new(1, 2, ctx(test));
         add_all(&mut v, vector[1, 2, 3, 4, 5, 6], ctx(test));
         assert!(length(&v) == 6, 0);
         let i = 0;
@@ -513,7 +517,7 @@ module suitears::list {
         let scenario = test::begin(@0x1);
         let test = &mut scenario;
 
-        let v1 = new(7, 11);
+        let v1 = new(7, 1, ctx(test));
         let i = 0;
         while (i < 100) {
             push_back(&mut v1, i, ctx(test));
@@ -534,7 +538,7 @@ module suitears::list {
         let scenario = test::begin(@0x1);
         let test = &mut scenario;
 
-        let v = new(7, 11);
+        let v = new(7, 11, ctx(test));
         let i = 0;
         while (i < 101) {
             push_back(&mut v, i, ctx(test));
@@ -559,7 +563,7 @@ module suitears::list {
         let scenario = test::begin(@0x1);
         let test = &mut scenario;
 
-        let v = new(7, 11);
+        let v = new(7, 11, ctx(test));
         let i = 0;
         while (i < 100) {
             push_back(&mut v, i, ctx(test));

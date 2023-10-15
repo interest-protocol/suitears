@@ -47,7 +47,7 @@ module suitears::ownership {
     object::delete(id);
   }
 
-  public fun destroy_empty<T: drop>(self: OwnershipCap<T>) {
+  public fun destroy_empty<T>(self: OwnershipCap<T>) {
     let  OwnershipCap { id, of} = self; 
     object::delete(id);
     vector::destroy_empty(of);
