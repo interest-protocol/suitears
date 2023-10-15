@@ -158,7 +158,8 @@ module suitears::quadratic_vesting_wallet {
     ownership::destroy(cap);
   }
 
-  public fun destroy_wallet<T>(self: Wallet<T>) {
+  public fun destroy_wallet<T>(cap: &WalletClawbackCap,self: Wallet<T>) {
+    ownership::assert_ownership(&cap.cap, object::id(&self));
     let Wallet { id, start: _, duration: _, token, released: _, has_clawback: _, recipient: _, vesting_curve_a: _, vesting_curve_b: _, vesting_curve_c: _, cliff: _} = self;
     object::delete(id);
     coin::destroy_zero(token);

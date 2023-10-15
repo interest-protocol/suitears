@@ -115,7 +115,8 @@ module suitears::linear_vesting_wallet {
     ownership::destroy(cap);
   }
 
-  public fun destroy_wallet<T>(self: Wallet<T>) {
+  public fun destroy_wallet<T>(cap: &WalletClawbackCap, self: Wallet<T>) {
+    ownership::assert_ownership(&cap.cap, object::id(&self));
     let Wallet { id, start: _, duration: _, token, released: _, has_clawback: _, recipient: _} = self;
     object::delete(id);
     coin::destroy_zero(token);
