@@ -3,11 +3,11 @@ module suitears::airdrop {
   use std::hash;
   
   use sui::bcs;
-  use sui::balance::Balance;
   use sui::address::to_u256;
   use sui::coin::{Self, Coin};
   use sui::object::{Self, UID}; 
   use sui::clock::{Self, Clock};
+  use sui::balance::{Self, Balance};
   use sui::tx_context::{Self, TxContext};
 
   use suitears::merkle_proof;

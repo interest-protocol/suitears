@@ -1,4 +1,4 @@
-// Src & Credit: https://github.com/aptos-labs/aptos-core/blob/main/aptos-move/framework/aptos-stdlib/sources/data_structures/list.move
+// Src & Credit: https://github.com/aptos-labs/aptos-core/blob/main/aptos-move/framework/aptos-stdlib/sources/data_structures/smart_vector.move
 module suitears::list {
     use std::vector;
     use std::option::{Self, Option};

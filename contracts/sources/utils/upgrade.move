@@ -5,8 +5,8 @@ module suitears::upgrade {
     use sui::event::emit;
     use sui::dynamic_field as df;
     use sui::clock::{Self, Clock};
-    use sui::object::{Self, UID, ID};
-    use sui::tx_context::{Self, TxContext};
+    use sui::tx_context::TxContext;
+    use sui::object::{Self, UID, ID};    
     use sui::package::{Self, UpgradeCap, UpgradeTicket, UpgradeReceipt};  
 
     use suitears::timelock;
