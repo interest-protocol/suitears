@@ -24,7 +24,6 @@ module suitears::farm {
   const ENoLimitSet: u64 = 7;
   const ELimitPerUserMustBeHigher: u64 = 8;
   const EFarmAlreadyStarted: u64 = 9;
-  const EFarmStillLive: u64 = 10;
 
   struct FarmWitness has drop {}
 
