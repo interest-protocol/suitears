@@ -18,7 +18,7 @@ module suitears::ac_collection {
     cap: OwnershipCap<AcCollectionWitness>
   }
 
-  public fun create<C: key + store>(collection: C, ctx: &mut TxContext): (AcCollectionCap, AcCollection<C>) {
+  public fun create<C: store>(collection: C, ctx: &mut TxContext): (AcCollectionCap, AcCollection<C>) {
     let cap_collection = AcCollection<C> {
       id: object::new(ctx),
       collection
@@ -30,7 +30,7 @@ module suitears::ac_collection {
     )
   }
 
-  public fun create_with_cap<C: key + store>(cap: &mut AcCollectionCap, collection: C, ctx: &mut TxContext): AcCollection<C> {
+  public fun create_with_cap<C: store>(cap: &mut AcCollectionCap, collection: C, ctx: &mut TxContext): AcCollection<C> {
     let cap_collection = AcCollection<C> {
       id: object::new(ctx),
       collection
@@ -41,16 +41,16 @@ module suitears::ac_collection {
     cap_collection
   }
 
-  public fun borrow<C: key + store>(self: &AcCollection<C>): &C {
+  public fun borrow<C: store>(self: &AcCollection<C>): &C {
     &self.collection
   }
 
-  public fun borrow_mut<C: key + store>(cap: &AcCollectionCap, self: &mut AcCollection<C>): &mut C {
+  public fun borrow_mut<C: store>(cap: &AcCollectionCap, self: &mut AcCollection<C>): &mut C {
     ownership::assert_ownership(&cap.cap, object::id(self));
     &mut self.collection
   }
 
-  public fun borrow_mut_uid<C: key + store>(cap: &AcCollectionCap, self: &mut AcCollection<C>): &mut UID {
+  public fun borrow_mut_uid<C: store>(cap: &AcCollectionCap, self: &mut AcCollection<C>): &mut UID {
     ownership::assert_ownership(&cap.cap, object::id(self));
     &mut self.id
   }
@@ -61,7 +61,7 @@ module suitears::ac_collection {
     object::delete(id);
   }
 
-  public fun destroy_collection<C: key + store>(self: AcCollection<C>): C {
+  public fun destroy_collection<C: store>(self: AcCollection<C>): C {
     let AcCollection { id, collection } = self;
     object::delete(id);
     collection
