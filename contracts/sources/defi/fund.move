@@ -1,7 +1,7 @@
 // A module to easily calculate the amount of shares of an underlying pool of assets
 module suitears::fund {
 
-  use suitears::math128::mul_div_down;
+  use suitears::math128::{mul_div_down,  mul_div_up};
 
   struct Fund has store, copy {
     shares: u128,
@@ -24,19 +24,23 @@ module suitears::fund {
   }
 
   public fun to_shares(rebase: &Fund, underlying: u64, round_up: bool): u64 {
-    if (rebase.underlying == 0) { underlying } else {
-      let shares = mul_div_down((underlying as u128), rebase.shares, rebase.underlying); 
-      if (round_up && (mul_div_down(shares, rebase.underlying, rebase.shares) < (underlying as u128))) shares = shares + 1;
-      (shares as u64)
-    }
+    if (rebase.underlying == 0) return underlying;
+      
+    if (round_up) {
+      (mul_div_up((underlying as u128), rebase.shares, rebase.underlying) as u64)
+    } else {
+      (mul_div_down((underlying as u128), rebase.shares, rebase.underlying) as u64)
+    } 
   }
 
   public fun to_underlying(rebase: &Fund, shares: u64, round_up: bool): u64 {
-    if (rebase.shares == 0) { shares } else {
-        let underlying = mul_div_down((shares as u128), rebase.underlying, rebase.shares); 
-        if (round_up && (mul_div_down(underlying, rebase.shares, rebase.underlying) < (shares as u128))) underlying = underlying + 1;
-        (underlying as u64)
-    }
+    if (rebase.shares == 0) return shares;
+    
+    if (round_up) {
+      (mul_div_up((shares as u128), rebase.underlying, rebase.shares) as u64)
+    } else {
+      (mul_div_down((shares as u128), rebase.underlying, rebase.shares) as u64)
+    } 
   }
 
   public fun sub_shares(rebase: &mut Fund, shares: u64, round_up: bool): u64 {
