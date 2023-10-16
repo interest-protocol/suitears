@@ -5,8 +5,8 @@ module suitears::math64 {
 
   const QUADRATIC_SCALAR: u64 = 1 << 16;
 
-  public fun mul_div(x: u64, y: u64, z: u64): u64 {
-    (math256::mul_div((x as u256), (y as u256), (z as u256)) as u64)
+  public fun mul_div_down(x: u64, y: u64, z: u64): u64 {
+    (math256::mul_div_down((x as u256), (y as u256), (z as u256)) as u64)
   }
 
   public fun mul_div_up(x: u64, y: u64, z: u64): u64 {

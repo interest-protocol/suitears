@@ -12,7 +12,7 @@ module suitears::fixed_point_wad {
   }
 
   public fun wad_mul_down(x: u128, y: u128): u128 {
-    math128::mul_div(x, y, WAD)
+    math128::mul_div_down(x, y, WAD)
   }
 
   public fun wad_mul_up(x: u128, y: u128): u128 {
@@ -20,7 +20,7 @@ module suitears::fixed_point_wad {
   }
 
   public fun wad_div_down(x: u128, y: u128): u128 {
-    math128::mul_div(x, WAD, y)
+    math128::mul_div_down(x, WAD, y)
   }
 
   public fun wad_div_up(x: u128, y: u128): u128 {
@@ -28,6 +28,6 @@ module suitears::fixed_point_wad {
   }
 
   public fun to_wad(x: u256, decimal_factor: u64): u64 {
-    (math256::mul_div(x, (WAD as u256), (decimal_factor as u256)) as u64)
+    (math256::mul_div_down(x, (WAD as u256), (decimal_factor as u256)) as u64)
   }
 }

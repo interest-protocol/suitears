@@ -11,7 +11,7 @@ module suitears::fixed_point_ray {
   }
 
   public fun ray_mul_down(x: u256, y: u256): u256 {
-    math256::mul_div(x, y, RAY)
+    math256::mul_div_down(x, y, RAY)
   }
 
   public fun ray_mul_up(x: u256, y: u256): u256 {
@@ -19,7 +19,7 @@ module suitears::fixed_point_ray {
   }
 
   public fun ray_div_down(x: u256, y: u256): u256 {
-    math256::mul_div(x, RAY, y)
+    math256::mul_div_down(x, RAY, y)
   }
 
   public fun ray_div_up(x: u256, y: u256): u256 {
@@ -27,6 +27,6 @@ module suitears::fixed_point_ray {
   }
 
   public fun to_ray(x: u256, decimal_factor: u64): u256 {
-    math256::mul_div(x, RAY, (decimal_factor as u256))
+    math256::mul_div_down(x, RAY, (decimal_factor as u256))
   }
 }

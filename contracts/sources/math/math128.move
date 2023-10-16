@@ -3,8 +3,8 @@ module suitears::math128 {
 
   use suitears::math256;
 
-  public fun mul_div(x: u128, y: u128, z: u128): u128 {
-    (math256::mul_div((x as u256), (y as u256), (z as u256)) as u128)
+  public fun mul_div_down(x: u128, y: u128, z: u128): u128 {
+    (math256::mul_div_down((x as u256), (y as u256), (z as u256)) as u128)
   }
 
   public fun mul_div_up(x: u128, y: u128, z: u128): u128 {

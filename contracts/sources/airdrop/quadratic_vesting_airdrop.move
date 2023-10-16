@@ -14,9 +14,6 @@ module suitears::quadratic_vesting_airdrop {
   use suitears::bitmap::{Self, Bitmap};
   use suitears::quadratic_vesting_wallet::{Self as wallet, Wallet}; 
 
-  #[test_only]
-  use sui::balance;
-
   const EInvalidProof: u64 = 0;
   const EAlreadyClaimed: u64 = 1;
   const EInvalidRoot: u64 = 2;

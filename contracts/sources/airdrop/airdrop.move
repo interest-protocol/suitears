@@ -13,9 +13,6 @@ module suitears::airdrop {
   use suitears::merkle_proof;
   use suitears::bitmap::{Self, Bitmap};
 
-  #[test_only]
-  use sui::balance;
-
   const EInvalidProof: u64 = 0;
   const EAlreadyClaimed: u64 = 1;
   const ETooEarly: u64 = 2;

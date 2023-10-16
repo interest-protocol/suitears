@@ -1,7 +1,7 @@
 module suitears::math256 {
   use std::vector;
 
-  public fun mul_div(x: u256, y: u256, z: u256): u256 {
+  public fun mul_div_down(x: u256, y: u256, z: u256): u256 {
     x * y / z
   }
 
