@@ -16,6 +16,7 @@ module suitears::airdrop {
   const EAlreadyClaimed: u64 = 1;
   const ETooEarly: u64 = 2;
   const EInvalidRoot: u64 = 3;
+  const EInvalidStartTime: u64 = 4;
 
   struct AirdropStorage<phantom T> has key, store { 
     id: UID,
@@ -25,8 +26,9 @@ module suitears::airdrop {
     map: Bitmap
   }
 
-  public fun create<T>(airdrop_coin: Coin<T>, root: vector<u8>, start: u64, ctx: &mut TxContext): AirdropStorage<T> {
+  public fun create<T>(c: &Clock, airdrop_coin: Coin<T>, root: vector<u8>, start: u64, ctx: &mut TxContext): AirdropStorage<T> {
     assert!(!vector::is_empty(&root), EInvalidRoot);
+    assert!(start > clock::timestamp_ms(c), EInvalidStartTime);
     AirdropStorage {
         id: object::new(ctx),
         balance: coin::into_balance(airdrop_coin),
