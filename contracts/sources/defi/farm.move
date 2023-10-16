@@ -380,7 +380,7 @@ module suitears::farm {
     } = farm;
 
     object::delete(id);
-    table::destroy_empty(accounts);
+    table::drop(accounts);
     balance::destroy_zero(balance_reward_coin);
     balance::destroy_zero(balance_stake_coin)
   }
