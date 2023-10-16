@@ -259,7 +259,7 @@ module suitears::dao {
     emit(ChangeVote<DAOWitness, ModuleWitness,  CoinType, T>{ proposal_id, value, voter: tx_context::sender(ctx), end_time: proposal.end_time, agree: vote.agree, vote_id: object::id(vote) });
   }
 
-  public fun revote_vote<DAOWitness: drop, ModuleWitness: drop, CoinType, T: store>(
+  public fun revoke_vote<DAOWitness: drop, ModuleWitness: drop, CoinType, T: store>(
     proposal: &mut Proposal<DAOWitness, ModuleWitness,  CoinType, T>,
     vote: Vote<DAOWitness, ModuleWitness,  CoinType, T>,
     c: &Clock,
@@ -277,7 +277,7 @@ module suitears::dao {
     destroy_vote(vote, ctx)
   }
 
-  public fun unstake_votes<DAOWitness: drop, ModuleWitness: drop, CoinType, T: store>(
+  public fun unstake_vote<DAOWitness: drop, ModuleWitness: drop, CoinType, T: store>(
     proposal: &Proposal<DAOWitness, ModuleWitness,  CoinType, T>,
     vote: Vote<DAOWitness, ModuleWitness,  CoinType, T>,
     c: &Clock,
@@ -393,7 +393,7 @@ module suitears::dao {
       EXECUTABLE
     } else {
       EXTRACTED
-      }
+    }
     }
 
   
