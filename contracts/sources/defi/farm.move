@@ -1,4 +1,5 @@
 // Credits: https://github.com/pancakeswap/pancake-contracts-move/blob/main/pancake-smart-chef/sources/smart_chef.move
+// ** IMPORTANT ALL TIMESTAMPS IN SECOND
 module suitears::farm {
   use std::type_name;
 
@@ -11,7 +12,7 @@ module suitears::farm {
   use sui::tx_context::{Self, TxContext};
   use sui::coin::{Self, Coin, CoinMetadata};
 
-  use suitears::ownership::{Self, OwnershipCap};
+  use suitears::owner::{Self, OwnerCap};
 
   // Errors
   const EInvalidStartTime: u64 = 0;
@@ -29,10 +30,10 @@ module suitears::farm {
 
   struct FarmCap has key, store {
     id: UID,
-    cap: OwnershipCap<FarmWitness>,
+    cap: OwnerCap<FarmWitness>,
   }
 
-  struct Account has store {
+  struct Account has store, drop {
     amount: u64,
     reward_debt: u256
   }
@@ -42,11 +43,11 @@ module suitears::farm {
     balance_stake_coin: Balance<StakeCoin>,
     balance_reward_coin: Balance<RewardCoin>,
     accounts: Table<address, Account>,
-    reward_per_millisecond: u64,
+    reward_per_second: u64,
     start_timestamp: u64,
     end_timestamp: u64,
     last_reward_timestamp: u64,
-    milliseconds_for_user_limit: u64,
+    seconds_for_user_limit: u64,
     farm_limit_per_user: u64,
     account_token_per_share: u256,
     stake_coin_decimal_factor: u64,
@@ -109,7 +110,7 @@ module suitears::farm {
   public fun create_cap(ctx: &mut TxContext): FarmCap {
     FarmCap {
       id: object::new(ctx),
-      cap: ownership::create(FarmWitness {}, vector[], ctx)
+      cap: owner::create(FarmWitness {}, vector[], ctx)
     }
   }
 
@@ -117,18 +118,18 @@ module suitears::farm {
     cap: &mut FarmCap,
     stake_coin_metadata: &CoinMetadata<StakeCoin>,
     c: &Clock,
-    reward_per_millisecond: u64,
+    reward_per_second: u64,
     start_timestamp: u64,
     end_timestamp: u64,
     farm_limit_per_user: u64,
-    milliseconds_for_user_limit: u64,
+    seconds_for_user_limit: u64,
     ctx: &mut TxContext
   ): Farm<Label, StakeCoin, RewardCoin> {
-    assert!(clock::timestamp_ms(c) > start_timestamp, EInvalidStartTime);
+    assert!(clock_timestamp_s(c) > start_timestamp, EInvalidStartTime);
     assert!(end_timestamp > start_timestamp, EInvalidEndTime);
     assert!(type_name::get<StakeCoin>() != type_name::get<RewardCoin>(), ESameCoin);
 
-    if (milliseconds_for_user_limit != 0) {
+    if (seconds_for_user_limit != 0) {
       assert!(farm_limit_per_user != 0, EFarmLimitZero);
     };
 
@@ -139,11 +140,11 @@ module suitears::farm {
       balance_stake_coin: balance::zero(),
       balance_reward_coin: balance::zero(),
       accounts: table::new(ctx),
-      reward_per_millisecond,
+      reward_per_second,
       start_timestamp,
       end_timestamp,
       last_reward_timestamp: start_timestamp,
-      milliseconds_for_user_limit,
+      seconds_for_user_limit,
       farm_limit_per_user,
       account_token_per_share: 0,
       stake_coin_decimal_factor: math::pow(10, coin::get_decimals(stake_coin_metadata)),
@@ -152,7 +153,7 @@ module suitears::farm {
 
     let farm_id = object::id(&farm);
 
-    ownership::add(FarmWitness {}, &mut cap.cap, farm_id);
+    owner::add(FarmWitness {}, &mut cap.cap, farm_id);
     
     emit(CreateFarm<Label, StakeCoin, RewardCoin>{ farm: farm_id, cap: cap_id, sender: tx_context::sender(ctx) });
     
@@ -161,7 +162,7 @@ module suitears::farm {
 
   public fun add_reward<Label, StakeCoin, RewardCoin>(cap: &FarmCap, farm: &mut Farm<Label, StakeCoin, RewardCoin>, reward: Coin<RewardCoin>) {
     let farm_id = object::id(farm);
-    ownership::assert_ownership(&cap.cap, farm_id);
+    owner::assert_ownership(&cap.cap, farm_id);
     emit(AddReward<Label, StakeCoin, RewardCoin> { farm: farm_id, cap: object::id(cap), value: coin::value(&reward) });
     balance::join(&mut farm.balance_reward_coin, coin::into_balance(reward));
   }
@@ -172,7 +173,7 @@ module suitears::farm {
     stake_coin: Coin<StakeCoin>, 
     ctx: &mut TxContext
   ): Coin<RewardCoin> {
-    let now = clock::timestamp_ms(c);
+    let now = clock_timestamp_s(c);
     assert!(farm.end_timestamp > now, EFarmEnded);
 
     let sender = tx_context::sender(ctx);
@@ -185,7 +186,7 @@ module suitears::farm {
     let account = table::borrow_mut(&mut farm.accounts, sender);
     let stake_amount = coin::value(&stake_coin);
     
-    assert!(farm.farm_limit_per_user >= account.amount + stake_amount || now >= (farm.start_timestamp + farm.milliseconds_for_user_limit), EStakeAboveLimit);
+    assert!(farm.farm_limit_per_user >= account.amount + stake_amount || now >= (farm.start_timestamp + farm.seconds_for_user_limit), EStakeAboveLimit);
 
     let reward_coin = coin::zero<RewardCoin>(ctx);
 
@@ -214,7 +215,7 @@ module suitears::farm {
     amount: u64,
     ctx: &mut TxContext
   ): (Coin<StakeCoin>, Coin<RewardCoin>) {
-    let now = clock::timestamp_ms(c);
+    let now = clock_timestamp_s(c);
     update(farm, now);
 
     let sender = tx_context::sender(ctx);
@@ -244,9 +245,9 @@ module suitears::farm {
   }
 
   public fun stop_reward<Label, StakeCoin, RewardCoin>(cap: &FarmCap, farm: &mut Farm<Label, StakeCoin, RewardCoin>, c:&Clock, ctx: &mut TxContext) {
-    ownership::assert_ownership(&cap.cap, object::id(farm));
+    owner::assert_ownership(&cap.cap, object::id(farm));
     
-    let now = clock::timestamp_ms(c);
+    let now = clock_timestamp_s(c);
     farm.end_timestamp = now;
     emit(StopReward<Label, StakeCoin, RewardCoin>{ farm: object::id(farm), timestamp: now, sender: tx_context::sender(ctx) });
   }
@@ -258,12 +259,12 @@ module suitears::farm {
     new_farm_limit_per_user: u64,
     ctx: &mut TxContext
   ) {
-    ownership::assert_ownership(&cap.cap, object::id(farm));
+    owner::assert_ownership(&cap.cap, object::id(farm));
     
-    assert!(farm.milliseconds_for_user_limit > 0 && (farm.start_timestamp + farm.milliseconds_for_user_limit) > clock::timestamp_ms(c), ENoLimitSet);
+    assert!(farm.seconds_for_user_limit > 0 && (farm.start_timestamp + farm.seconds_for_user_limit) > clock_timestamp_s(c), ENoLimitSet);
 
     if (new_farm_limit_per_user == 0) {
-      farm.milliseconds_for_user_limit = 0; 
+      farm.seconds_for_user_limit = 0; 
       farm.farm_limit_per_user = 0;
     } else {
       assert!(new_farm_limit_per_user > farm.farm_limit_per_user, ELimitPerUserMustBeHigher);
@@ -273,19 +274,19 @@ module suitears::farm {
     emit(UpdateLimitPerUser<Label, StakeCoin, RewardCoin> { farm: object::id(farm), new_limit: new_farm_limit_per_user, sender: tx_context::sender(ctx) });
   }
 
-  public fun update_reward_per_millisecond<Label, StakeCoin, RewardCoin>(
+  public fun update_reward_per_second<Label, StakeCoin, RewardCoin>(
     cap: &FarmCap, 
     farm: &mut Farm<Label, StakeCoin, RewardCoin>, 
     c: &Clock, 
-    new_reward_per_millisecond: u64,
+    new_reward_per_second: u64,
     ctx: &mut TxContext
   ) {
-    ownership::assert_ownership(&cap.cap, object::id(farm));
-    assert!(farm.start_timestamp > clock::timestamp_ms(c), EFarmAlreadyStarted);
+    owner::assert_ownership(&cap.cap, object::id(farm));
+    assert!(farm.start_timestamp > clock_timestamp_s(c), EFarmAlreadyStarted);
 
-    farm.reward_per_millisecond = new_reward_per_millisecond;
+    farm.reward_per_second = new_reward_per_second;
 
-    emit(NewRewardRate<Label, StakeCoin, RewardCoin> { farm: object::id(farm), rate: new_reward_per_millisecond, sender: tx_context::sender(ctx)});
+    emit(NewRewardRate<Label, StakeCoin, RewardCoin> { farm: object::id(farm), rate: new_reward_per_second, sender: tx_context::sender(ctx)});
   }
 
   public fun update_start_and_end_timestamp<Label, StakeCoin, RewardCoin>(
@@ -296,9 +297,9 @@ module suitears::farm {
     end_timestamp: u64,
     ctx: &mut TxContext
   ) {
-    ownership::assert_ownership(&cap.cap, object::id(farm));
+    owner::assert_ownership(&cap.cap, object::id(farm));
 
-    let now = clock::timestamp_ms(c);
+    let now = clock_timestamp_s(c);
     assert!(farm.start_timestamp > now, EFarmAlreadyStarted);
     assert!(end_timestamp > start_timestamp, EInvalidEndTime);
     assert!(start_timestamp > now, EInvalidStartTime);
@@ -314,10 +315,10 @@ module suitears::farm {
     (
       balance::value(&farm.balance_stake_coin),
       balance::value(&farm.balance_reward_coin),
-      farm.reward_per_millisecond,
+      farm.reward_per_second,
       farm.start_timestamp,
       farm.end_timestamp,
-      farm.milliseconds_for_user_limit,
+      farm.seconds_for_user_limit,
       farm.farm_limit_per_user
     )
   }
@@ -335,7 +336,7 @@ module suitears::farm {
     if (!table::contains(&farm.accounts, sender)) return 0;
     
     let total_staked_value = balance::value(&farm.balance_stake_coin);
-    let now = clock::timestamp_ms(c);
+    let now = clock_timestamp_s(c);
 
     let account_token_per_share = if (total_staked_value == 0 || farm.last_reward_timestamp >= now) {
       farm.account_token_per_share
@@ -345,7 +346,7 @@ module suitears::farm {
         farm.account_token_per_share,
         total_staked_value,
         farm.end_timestamp,
-        farm.reward_per_millisecond,
+        farm.reward_per_second,
         farm.stake_coin_decimal_factor,
         farm.last_reward_timestamp
       )
@@ -357,13 +358,41 @@ module suitears::farm {
   public fun destroy_cap(cap: FarmCap) {
     let FarmCap { id, cap } = cap;
     object::delete(id);
-    ownership::destroy(cap);
+    owner::destroy(cap);
+  }
+
+  public fun destroy_farm<Label, StakeCoin, RewardCoin>(cap: &FarmCap, farm: Farm<Label, StakeCoin, RewardCoin>) {
+    owner::assert_ownership(&cap.cap, object::id(&farm));
+    let Farm {
+      id, 
+      balance_reward_coin, 
+      balance_stake_coin, 
+      owned_by: _, 
+      reward_per_second: _,
+      start_timestamp: _,
+      end_timestamp: _,
+      last_reward_timestamp: _,
+      seconds_for_user_limit: _,
+      farm_limit_per_user: _,
+      account_token_per_share: _,
+      stake_coin_decimal_factor: _,
+      accounts
+    } = farm;
+
+    object::delete(id);
+    table::destroy_empty(accounts);
+    balance::destroy_zero(balance_reward_coin);
+    balance::destroy_zero(balance_stake_coin)
   }
 
   // @dev Can attach the Account to the farm and other data
   public fun borrow_mut_uid<Label, StakeCoin, RewardCoin>(cap: &FarmCap, self: &mut Farm<Label, StakeCoin, RewardCoin>): &mut UID {
-    ownership::assert_ownership(&cap.cap, object::id(self));
+    owner::assert_ownership(&cap.cap, object::id(self));
     &mut self.id    
+  }
+
+  fun clock_timestamp_s(c: &Clock): u64 {
+    clock::timestamp_ms(c) / 1000
   }
 
   fun update<Label, StakeCoin, RewardCoin>(farm: &mut Farm<Label, StakeCoin, RewardCoin>, now: u64) {
@@ -381,7 +410,7 @@ module suitears::farm {
       farm.account_token_per_share,
       total_staked_value,
       farm.end_timestamp,
-      farm.reward_per_millisecond,
+      farm.reward_per_second,
       farm.stake_coin_decimal_factor,
       farm.last_reward_timestamp
     );
@@ -397,20 +426,20 @@ module suitears::farm {
     last_account_token_per_share: u256,
     total_staked_token: u64,
     end_timestamp: u64,
-    reward_per_millisecond: u64,
+    reward_per_second: u64,
     stake_factor: u64,
     last_reward_timestamp: u64
   ): u256 { 
     let multiplier = get_multiplier(last_reward_timestamp, now, end_timestamp);
-    let (total_staked_token, reward_per_millisecond, stake_factor, multiplier) =
+    let (total_staked_token, reward_per_second, stake_factor, multiplier) =
      (
       (total_staked_token as u256),
-      (reward_per_millisecond as u256),
+      (reward_per_second as u256),
       (stake_factor as u256),
       (multiplier as u256)
      );
     
-    let reward = reward_per_millisecond * multiplier;
+    let reward = reward_per_second * multiplier;
     if (multiplier == 0) return last_account_token_per_share;
 
     last_account_token_per_share + ((reward * stake_factor) / total_staked_token)

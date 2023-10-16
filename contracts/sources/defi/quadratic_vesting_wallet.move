@@ -7,7 +7,7 @@ module suitears::quadratic_vesting_wallet {
   use sui::tx_context::TxContext;
 
   
-  use suitears::ownership::{Self, OwnershipCap};
+  use suitears::owner::{Self, OwnerCap};
   use suitears::math64::{quadratic, quadratic_scalar};
 
   const EInvalidStart: u64 = 0;
@@ -30,7 +30,7 @@ module suitears::quadratic_vesting_wallet {
 
   struct WalletClawbackCap has key, store {
     id: UID,
-    cap: OwnershipCap<WalletWitness>
+    cap: OwnerCap<WalletWitness>
   }
 
   public fun create<T>(
@@ -63,7 +63,7 @@ module suitears::quadratic_vesting_wallet {
   public fun create_clawback_cap(ctx: &mut TxContext): WalletClawbackCap {
     WalletClawbackCap {
       id: object::new(ctx),
-      cap: ownership::create(WalletWitness {}, vector[], ctx)
+      cap: owner::create(WalletWitness {}, vector[], ctx)
     }
   }
 
@@ -95,7 +95,7 @@ module suitears::quadratic_vesting_wallet {
       recipient
     };
 
-    ownership::add(WalletWitness {},&mut cap.cap, object::id(&wallet));
+    owner::add(WalletWitness {},&mut cap.cap, object::id(&wallet));
 
     transfer::share_object(wallet);
   }
@@ -125,7 +125,7 @@ module suitears::quadratic_vesting_wallet {
   }
 
   public fun clawback<T>(cap: &WalletClawbackCap, c: &Clock, wallet: &mut Wallet<T>, ctx: &mut TxContext): Coin<T> {
-    ownership::assert_ownership(&cap.cap, object::id(wallet));
+    owner::assert_ownership(&cap.cap, object::id(wallet));
 
     transfer::public_transfer(release(c, wallet, ctx), wallet.recipient);
 
@@ -155,11 +155,11 @@ module suitears::quadratic_vesting_wallet {
   public fun destroy_cap(cap: WalletClawbackCap) {
     let WalletClawbackCap { id, cap } = cap;
     object::delete(id);
-    ownership::destroy(cap);
+    owner::destroy(cap);
   }
 
   public fun destroy_wallet<T>(cap: &WalletClawbackCap,self: Wallet<T>) {
-    ownership::assert_ownership(&cap.cap, object::id(&self));
+    owner::assert_ownership(&cap.cap, object::id(&self));
     let Wallet { id, start: _, duration: _, token, released: _, has_clawback: _, recipient: _, vesting_curve_a: _, vesting_curve_b: _, vesting_curve_c: _, cliff: _} = self;
     object::delete(id);
     coin::destroy_zero(token);
