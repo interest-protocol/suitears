@@ -1,4 +1,4 @@
-// * IMPORTANT Use List
+// * IMPORTANT Use Smart Vector to create
 // A vector that can scale forever
 // Notice vector should not be used after 1000 entries
 // Based from : https://github.com/aptos-labs/aptos-core/blob/main/aptos-move/framework/aptos-stdlib/sources/data_structures/big_vector.move
@@ -23,7 +23,7 @@ module suitears::big_vector {
     /// bucket_size cannot be 0
     const EZeroBucketSize: u64 = 4;
 
-    /// A scalable vector implementation based on dynamic field where elements are grouped into id.
+    /// A scalable vector implementation based on dynamic field.
     /// Each bucket has a capacity of `bucket_size` elements.
     struct BigVector<phantom T: store> has key, store {
         id: UID,
