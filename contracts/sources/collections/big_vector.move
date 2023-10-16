@@ -1,4 +1,4 @@
-// * IMPORTANT Use Smart Vector to create
+// * IMPORTANT Use List to create
 // A vector that can scale forever
 // Notice vector should not be used after 1000 entries
 // Based from : https://github.com/aptos-labs/aptos-core/blob/main/aptos-move/framework/aptos-stdlib/sources/data_structures/big_vector.move
