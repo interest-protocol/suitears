@@ -21,7 +21,7 @@ module suitears::list {
     /// A Scalable vector implementation based on tables, Ts are grouped into buckets with `bucket_size`.
     /// The option wrapping BigVector saves space in the metadata associated with BigVector when list is
     /// so small that inline_vec vector can hold all the data.
-    struct List<T: store> has store {
+    struct List<T: store> has key, store {
         id: UID,
         inline_vec: vector<T>,
         big_vec: Option<BigVector<T>>,
