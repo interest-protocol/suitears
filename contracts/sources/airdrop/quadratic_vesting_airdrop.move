@@ -4,14 +4,13 @@ module suitears::quadratic_vesting_airdrop {
   
   use sui::bcs;
   use sui::clock::Clock;
-  use sui::address::to_u256;
   use sui::coin::{Self, Coin};
   use sui::object::{Self, UID}; 
   use sui::balance::{Self, Balance};
   use sui::tx_context::{Self, TxContext};
 
-  use suitears::merkle_proof;
   use suitears::bitmap::{Self, Bitmap};
+  use suitears::ens_merkle_proof as merkle_proof;
   use suitears::quadratic_vesting_wallet::{Self as wallet, Wallet}; 
 
   const EInvalidProof: u64 = 0;
@@ -74,12 +73,14 @@ module suitears::quadratic_vesting_airdrop {
     vector::append(&mut payload, bcs::to_bytes(&amount));
 
     let leaf = hash::sha3_256(payload);
+
+    let (pred, index) = merkle_proof::verify(&proof, storage.root, leaf);
     
-    assert!(merkle_proof::verify(&proof, storage.root, leaf), EInvalidProof);
+    assert!(pred, EInvalidProof);
 
-    assert!(!has_account_claimed(storage, sender), EAlreadyClaimed);
+    assert!(!has_account_claimed(storage, index), EAlreadyClaimed);
 
-    bitmap::set(&mut storage.map, to_u256(sender));
+    bitmap::set(&mut storage.map, index);
 
     wallet::create(
       coin::take(&mut storage.balance, amount, ctx),
@@ -94,8 +95,8 @@ module suitears::quadratic_vesting_airdrop {
     )
   }
 
-  public fun has_account_claimed<T>(storage: &AirdropStorage<T>, user: address): bool {
-    bitmap::get(&storage.map, to_u256(user))
+  public fun has_account_claimed<T>(storage: &AirdropStorage<T>, index: u256): bool {
+    bitmap::get(&storage.map, index)
   }
 
   public fun destroy_zero<T>(storage: AirdropStorage<T>) {
