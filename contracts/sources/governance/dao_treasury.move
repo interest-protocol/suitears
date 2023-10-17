@@ -19,7 +19,7 @@ module suitears::dao_treasury {
   const EMismatchCoinType: u64 = 0;
   const EInvalidPublisher: u64 = 1;
 
-  struct TransferWitness has drop {}
+  struct TreasuryActionWitness has drop {}
 
   struct TransferPayload has key, store {
     id: UID,
@@ -120,10 +120,10 @@ module suitears::dao_treasury {
   public fun transfer<DaoWitness: drop, CoinType>(
     treasury: &mut DaoTreasury<DaoWitness>,
     pub: &Publisher,
-    action: Action<DaoWitness, TransferWitness, CoinType, TransferPayload>, 
+    action: Action<DaoWitness, TreasuryActionWitness, CoinType, TransferPayload>, 
     ctx: &mut TxContext
   ): Coin<CoinType> {
-    let payload = finish_action(TransferWitness {}, action);
+    let payload = finish_action(TreasuryActionWitness {}, action);
     assert!(get<CoinType>() == payload.type, EMismatchCoinType);
     assert!(object::id(pub) == payload.publisher_id, EInvalidPublisher);
     
@@ -144,10 +144,10 @@ module suitears::dao_treasury {
     treasury: &mut DaoTreasury<DaoWitness>,
     c: &Clock,
     pub: &Publisher,
-    action: Action<DaoWitness, TransferWitness, CoinType, TransferVestingWalletPayload>, 
+    action: Action<DaoWitness, TreasuryActionWitness, CoinType, TransferVestingWalletPayload>, 
     ctx: &mut TxContext    
   ): LinearWallet<CoinType> {
-    let payload = finish_action(TransferWitness {}, action);
+    let payload = finish_action(TreasuryActionWitness {}, action);
     assert!(get<CoinType>() == payload.type, EMismatchCoinType);
     assert!(object::id(pub) == payload.publisher_id, EInvalidPublisher);
     
@@ -174,10 +174,10 @@ module suitears::dao_treasury {
     treasury: &mut DaoTreasury<DaoWitness>,
     c: &Clock,
     pub: &Publisher,
-    action: Action<DaoWitness, TransferWitness, CoinType, TransferQuadraticWalletPayload>, 
+    action: Action<DaoWitness, TreasuryActionWitness, CoinType, TransferQuadraticWalletPayload>, 
     ctx: &mut TxContext    
   ): QuadraticWallet<CoinType> {
-    let payload = finish_action(TransferWitness {}, action);
+    let payload = finish_action(TreasuryActionWitness {}, action);
     assert!(get<CoinType>() == payload.type, EMismatchCoinType);
     assert!(object::id(pub) == payload.publisher_id, EInvalidPublisher);
     
