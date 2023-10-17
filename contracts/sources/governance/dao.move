@@ -1,4 +1,5 @@
 // Based from https://github.com/starcoinorg/starcoin-framework/blob/main/sources/Dao.move
+// Before creating a DAO make sure your tokens are properly distributed
 module suitears::dao {
   use std::option::{Self, Option};
 
@@ -185,6 +186,8 @@ module suitears::dao {
     dao
   }
 
+  // ** Important Make sure the voting_period and min_quorum_votes is adequate because a large holder can vote to withdraw all coins from the treasury.
+  // ** Also major stakeholders should monitor all proposals to ensure they vote against malicious proposals.
   public fun create_with_treasury<OTW: drop, CoinType>(
     otw: OTW, 
     voting_delay: u64, 
