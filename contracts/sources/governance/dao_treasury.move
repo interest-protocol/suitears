@@ -10,14 +10,19 @@ module suitears::dao_treasury {
   use sui::balance::{Self, Balance};
   use sui::tx_context::{Self, TxContext};
 
+  use suitears::fixed_point_wad::wad_mul_up;
   use suitears::dao_action::{Action, finish_action};
   use suitears::linear_vesting_wallet::{Self, Wallet as LinearWallet};
   use suitears::quadratic_vesting_wallet::{Self, Wallet as QuadraticWallet};
 
   friend suitears::dao;
 
+  const FLASH_LOAN_FEE: u128 = 5000000; // 0.5%
+
   const EMismatchCoinType: u64 = 0;
   const EInvalidPublisher: u64 = 1;
+  const EFlashloanNotAllowed: u64 = 2;
+  const ERepayAmountTooLow: u64 = 3;
 
   struct TreasuryActionWitness has drop {}
 
@@ -53,7 +58,14 @@ module suitears::dao_treasury {
   struct DaoTreasury<phantom DaoWitness: drop> has key, store {
     id: UID,
     coins: Bag,
-    dao: ID
+    dao: ID,
+    allow_flashloan: bool
+  }
+
+  // * IMPORTANT do not add abilities
+  struct FlashLoan<phantom DaoWitness, phantom CoinType> {
+    initial_balance: u64,
+    type: TypeName
   }
 
   // Events
@@ -96,11 +108,19 @@ module suitears::dao_treasury {
     vesting_curve_c: u64,
   }
 
-  public(friend) fun create<DaoWitness: drop>(dao: ID, ctx: &mut TxContext): DaoTreasury<DaoWitness> {
+  struct FlashLoanRequest<phantom DaoWitness, phantom CoinType> has copy, drop {
+    borrower: address,
+    treasury_id: ID,
+    value: u64,
+    type: TypeName
+  } 
+
+  public(friend) fun create<DaoWitness: drop>(dao: ID, allow_flashloan: bool, ctx: &mut TxContext): DaoTreasury<DaoWitness> {
     let treasury = DaoTreasury {
       id: object::new(ctx),
       coins: bag::new(ctx),
-      dao
+      dao,
+      allow_flashloan
     };
 
     emit(CreateDaoTreasury<DaoWitness> { treasury_id: object::id(&treasury), dao_id: dao });
@@ -312,5 +332,32 @@ module suitears::dao_treasury {
       vesting_curve_c: _ 
     } = payload;
     object::delete(id);
+  }
+
+  // Flash loan logic
+
+  public fun flash_loan<DaoWitness: drop, CoinType>(treasury: &mut DaoTreasury<DaoWitness>, value: u64, ctx: &mut TxContext):(Coin<CoinType>, FlashLoan<DaoWitness, CoinType>) {
+    assert!(treasury.allow_flashloan, EFlashloanNotAllowed);
+    let type = get<CoinType>();
+    let initial_balance = balance::value(bag::borrow<TypeName, Balance<CoinType>>(&treasury.coins, type));
+
+    emit(FlashLoanRequest<DaoWitness, CoinType> { type, borrower: tx_context::sender(ctx), value, treasury_id: object::id(treasury) });
+
+    (
+      coin::take<CoinType>(bag::borrow_mut(&mut treasury.coins, type), value, ctx),
+      FlashLoan { initial_balance , type }
+    )
+  }
+
+  public fun repay_flash_loan<DaoWitness: drop, CoinType>(
+    treasury: &mut DaoTreasury<DaoWitness>, 
+    flash_loan: FlashLoan<DaoWitness, CoinType>,
+    token: Coin<CoinType>
+  ) {
+    let FlashLoan { initial_balance, type } = flash_loan;
+    balance::join(bag::borrow_mut(&mut treasury.coins, type), coin::into_balance(token));
+
+    let final_balance = initial_balance + (wad_mul_up((initial_balance as u128), FLASH_LOAN_FEE) as u64);
+    assert!(final_balance >= balance::value(bag::borrow<TypeName, Balance<CoinType>>(&treasury.coins, type)), ERepayAmountTooLow);
   }
 }

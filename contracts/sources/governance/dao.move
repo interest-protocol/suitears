@@ -192,11 +192,12 @@ module suitears::dao {
     voting_quorum_rate: u128, 
     min_action_delay: u64, 
     min_quorum_votes: u64,
+    allow_flashloan: bool,
     ctx: &mut TxContext
   ): (Dao<OTW, CoinType>, DaoTreasury<OTW>) {
     let dao = create<OTW, CoinType>(otw, voting_delay, voting_period, voting_quorum_rate, min_action_delay, min_quorum_votes, ctx);
 
-    let treasury = dao_treasury::create<OTW>(object::id(&dao), ctx);
+    let treasury = dao_treasury::create<OTW>(object::id(&dao), allow_flashloan, ctx);
 
     option::fill(&mut dao.treasury, object::id(&treasury));
     
