@@ -1,5 +1,3 @@
-# Sui Tears 💧
-
 <p>  <img  width="246.5px"height="76.5px"  src="./assets/logo.png" /></p> Is a protocol to swap and lend crypto, commoditie
 
 Production ready modules for Sui Move developers
