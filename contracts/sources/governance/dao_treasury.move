@@ -96,7 +96,7 @@ module suitears::dao_treasury {
     vesting_curve_c: u64,
   }
 
-  public fun create<DaoWitness: drop>(dao: ID, ctx: &mut TxContext): DaoTreasury<DaoWitness> {
+  public(friend) fun create<DaoWitness: drop>(dao: ID, ctx: &mut TxContext): DaoTreasury<DaoWitness> {
     let treasury = DaoTreasury {
       id: object::new(ctx),
       coins: bag::new(ctx),
