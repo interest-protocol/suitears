@@ -64,7 +64,8 @@ module suitears::dao {
     voting_quorum_rate: u128,
     /// how long the proposal should wait before it can be executed (in milliseconds).
     min_action_delay: u64,
-    min_quorum_votes: u64
+    min_quorum_votes: u64,
+    treasury: Option<ID>
   }
 
   struct Proposal<phantom DaoWitness: drop, phantom ModuleWitness: drop, phantom CoinType, T: store> has key, store {
@@ -163,7 +164,8 @@ module suitears::dao {
       voting_period,
       voting_quorum_rate,
       min_action_delay,
-      min_quorum_votes
+      min_quorum_votes,
+      treasury: option::none()
     };
 
     assert_dao_config(&dao);
@@ -192,17 +194,15 @@ module suitears::dao {
     min_quorum_votes: u64,
     ctx: &mut TxContext
   ): (Dao<OTW, CoinType>, DaoTreasury<OTW>) {
+    let dao = create<OTW, CoinType>(otw, voting_delay, voting_period, voting_quorum_rate, min_action_delay, min_quorum_votes, ctx);
+
+    let treasury = dao_treasury::create<OTW>(object::id(&dao), ctx);
+
+    option::fill(&mut dao.treasury, object::id(&treasury));
+    
     (
-      create(
-        otw,
-        voting_delay,
-        voting_period,
-        voting_quorum_rate,
-        min_action_delay,
-        min_quorum_votes,
-        ctx    
-      ),
-      dao_treasury::create(ctx)
+      dao,
+      treasury
     )
   }
 

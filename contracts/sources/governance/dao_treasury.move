@@ -52,13 +52,15 @@ module suitears::dao_treasury {
 
   struct DaoTreasury<phantom DaoWitness> has key, store {
     id: UID,
-    coins: Bag
+    coins: Bag,
+    dao: ID
   }
 
   // Events
 
   struct CreateDaoTreasury<phantom DaoWitness> has copy, drop {
     treasury_id: ID,
+    dao_id: ID
   }
 
   struct Donate<phantom DaoWitness, phantom CoinType> has copy, drop {
@@ -66,13 +68,14 @@ module suitears::dao_treasury {
     donator: address  
   }
 
-  public fun create<DaoWitness: drop>(ctx: &mut TxContext): DaoTreasury<DaoWitness> {
+  public fun create<DaoWitness: drop>(dao: ID, ctx: &mut TxContext): DaoTreasury<DaoWitness> {
     let treasury = DaoTreasury {
       id: object::new(ctx),
-      coins: bag::new(ctx)
+      coins: bag::new(ctx),
+      dao
     };
 
-    emit(CreateDaoTreasury<DaoWitness> { treasury_id: object::id(&treasury) });
+    emit(CreateDaoTreasury<DaoWitness> { treasury_id: object::id(&treasury), dao_id: dao });
 
     treasury
   }
