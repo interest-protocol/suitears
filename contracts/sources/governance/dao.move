@@ -157,13 +157,8 @@ module suitears::dao {
     ctx: &mut TxContext
   ): DAO<OTW, CoinType> {
     assert!(is_one_time_witness(&otw), EInvalidOTW);
-    assert!(100 * wad() >= voting_quorum_rate && voting_quorum_rate != 0, EInvalidQuorumRate);
-    assert!(voting_delay != 0, EInvalidVotingDelay);
-    assert!(voting_period != 0, EInvalidVotingPeriod);
-    assert!(min_action_delay != 0, EInvalidMinActionDelay);
-    assert!(min_quorum_votes != 0, EInvalidMinQuorumVotes);
 
-    let dao = DAO {
+    let dao = DAO<OTW, CoinType> {
       id: object::new(ctx),
       voting_delay,
       voting_period,
@@ -171,6 +166,8 @@ module suitears::dao {
       min_action_delay,
       min_quorum_votes
     };
+
+    assert_dao_config(&dao);
 
     emit(
       CreateDAO<OTW, CoinType> {
@@ -394,7 +391,15 @@ module suitears::dao {
     } else {
       EXTRACTED
     }
-    }
+  }
+
+  fun assert_dao_config<DAOWitness: drop, CoinType>(dao: &DAO<DAOWitness, CoinType>) {
+    assert!(100 * wad() >= dao.voting_quorum_rate && dao.voting_quorum_rate != 0, EInvalidQuorumRate);
+    assert!(dao.voting_delay != 0, EInvalidVotingDelay);
+    assert!(dao.voting_period != 0, EInvalidVotingPeriod);
+    assert!(dao.min_action_delay != 0, EInvalidMinActionDelay);
+    assert!(dao.min_quorum_votes != 0, EInvalidMinQuorumVotes);
+  }
 
   
    // Only Proposal can update DAO settings
@@ -440,17 +445,13 @@ module suitears::dao {
 
     object::delete(id);
 
-    if (option::is_some(&voting_delay)) dao.voting_delay = option::destroy_with_default(voting_delay, dao.voting_delay);
-    if (option::is_some(&voting_period)) dao.voting_period = option::destroy_with_default(voting_period, dao.voting_period);
-    if (option::is_some(&voting_quorum_rate)) dao.voting_quorum_rate = option::destroy_with_default(voting_quorum_rate, dao.voting_quorum_rate);
-    if (option::is_some(&min_action_delay)) dao.min_action_delay = option::destroy_with_default(min_action_delay, dao.min_action_delay);
-    if (option::is_some(&min_quorum_votes)) dao.min_quorum_votes = option::destroy_with_default(min_quorum_votes, dao.min_quorum_votes);
+    dao.voting_delay = option::destroy_with_default(voting_delay, dao.voting_delay);
+    dao.voting_period = option::destroy_with_default(voting_period, dao.voting_period);
+    dao.voting_quorum_rate = option::destroy_with_default(voting_quorum_rate, dao.voting_quorum_rate);
+    dao.min_action_delay = option::destroy_with_default(min_action_delay, dao.min_action_delay);
+    dao.min_quorum_votes = option::destroy_with_default(min_quorum_votes, dao.min_quorum_votes);
 
-    assert!(100 * wad() >= dao.voting_quorum_rate && dao.voting_quorum_rate != 0, EInvalidQuorumRate);
-    assert!(dao.voting_delay != 0, EInvalidVotingDelay);
-    assert!(dao.voting_period != 0, EInvalidVotingPeriod);
-    assert!(dao.min_action_delay != 0, EInvalidMinActionDelay);
-    assert!(dao.min_quorum_votes != 0, EInvalidMinQuorumVotes);
+    assert_dao_config(dao);
 
     emit(
       UpdateDAO<DAOWitness, CoinType> {
