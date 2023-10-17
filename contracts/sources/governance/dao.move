@@ -417,6 +417,18 @@ module suitears::dao {
     }
    } 
 
+   public fun destroy_config(config: DaoConfig) {
+    let  DaoConfig { id, voting_delay, voting_period, voting_quorum_rate, min_quorum_votes, min_action_delay } = config;
+
+    option::destroy_with_default(voting_delay, 0);
+    option::destroy_with_default(voting_period, 0);
+    option::destroy_with_default(voting_quorum_rate, 0);
+    option::destroy_with_default(min_quorum_votes, 0);
+    option::destroy_with_default(min_action_delay, 0);
+
+    object::delete(id);
+   }
+
    public fun update_dao_config<DAOWitness: drop, ModuleWitness: drop, CoinType>(
     dao: &mut DAO<DAOWitness, CoinType>,
     action: Action<DAOWitness, ModuleWitness, CoinType, DaoConfig>
