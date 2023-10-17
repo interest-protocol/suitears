@@ -61,7 +61,7 @@ module suitears::dao {
     voting_period: u64,
     /// the quorum rate to agree on the proposal.
     /// if 50% votes needed, then the voting_quorum_rate should be 50.
-    /// it should between (0, 100].
+    /// it should between (0, 100 wad].
     voting_quorum_rate: u128,
     /// how long the proposal should wait before it can be executed (in milliseconds).
     min_action_delay: u64,
