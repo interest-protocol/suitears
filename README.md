@@ -32,7 +32,7 @@ collections
 ├─ list — "A scalable vector implementation using dynamic fields"
 ├─ wit_collection - "Witness access wrapper for collections"
 defi
-├─ farm. move — "Farm module to reward coins over time"
+├─ farm — "Farm module to reward coins over time"
 ├─ fund — "Struct to track shares associated with underlying deposits/withdrawals"
 ├─ linear_vesting_wallet — "Wallet that allows linear withdrawals over time"
 ├─ quadratic_vesting_wallet — "Wallet that allows quadratic withdrawals over time"
