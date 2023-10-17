@@ -190,7 +190,7 @@ module suitears::dao_treasury {
     wallet
   }
 
-  public fun transfer_quadratic_vesting_wallett<DaoWitness: drop, CoinType>(
+  public fun transfer_quadratic_vesting_wallet<DaoWitness: drop, CoinType>(
     treasury: &mut DaoTreasury<DaoWitness>,
     c: &Clock,
     pub: &Publisher,
