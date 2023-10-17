@@ -50,7 +50,7 @@ module suitears::dao_treasury {
     publisher_id: ID
   }
 
-  struct DaoTreasury<phantom DaoWitness> has key, store {
+  struct DaoTreasury<phantom DaoWitness: drop> has key, store {
     id: UID,
     coins: Bag,
     dao: ID
