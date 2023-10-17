@@ -68,6 +68,34 @@ module suitears::dao_treasury {
     donator: address  
   }
 
+  struct Transfer<phantom DaoWitness, phantom CoinType> has copy, drop {
+    value: u64,
+    publisher_id: ID,
+    sender: address
+  }
+  
+  struct TransferLinearWallet<phantom DaoWitness, phantom CoinType> has copy, drop {
+    value: u64,
+    publisher_id: ID,
+    sender: address,
+    wallet_id: ID,
+    start: u64,
+    duration: u64
+  }
+
+  struct TransferQuadraticWallet<phantom DaoWitness, phantom CoinType> has copy, drop {
+    value: u64,
+    publisher_id: ID,
+    sender: address,
+    wallet_id: ID,
+    start: u64,
+    duration: u64,
+    cliff: u64,
+    vesting_curve_a: u64,
+    vesting_curve_b: u64,
+    vesting_curve_c: u64,
+  }
+
   public fun create<DaoWitness: drop>(dao: ID, ctx: &mut TxContext): DaoTreasury<DaoWitness> {
     let treasury = DaoTreasury {
       id: object::new(ctx),
@@ -101,6 +129,13 @@ module suitears::dao_treasury {
     
     let token = coin::take(bag::borrow_mut(&mut treasury.coins, payload.type), payload.value, ctx);
 
+    emit(Transfer<DaoWitness, CoinType> { 
+        value: payload.value, 
+        publisher_id: payload.publisher_id, 
+        sender: tx_context::sender(ctx) 
+      }
+    );
+
     destroy_transfer_payload(payload);
     token
   }
@@ -119,6 +154,16 @@ module suitears::dao_treasury {
     let token = coin::take<CoinType>(bag::borrow_mut(&mut treasury.coins, payload.type), payload.value, ctx);
 
     let wallet = linear_vesting_wallet::create(token, c, payload.start, payload.duration, ctx);
+
+    emit(TransferLinearWallet<DaoWitness, CoinType> { 
+        value: payload.value, 
+        publisher_id: payload.publisher_id, 
+        sender: tx_context::sender(ctx), 
+        duration: payload.duration, 
+        start: payload.start, 
+        wallet_id: object::id(&wallet) 
+      }
+    );
 
     destroy_transfer_linear_vesting_wallet_payload(payload);
     
@@ -148,6 +193,20 @@ module suitears::dao_treasury {
       payload.cliff,
       payload.duration, 
       ctx
+    );
+
+    emit(TransferQuadraticWallet<DaoWitness, CoinType> {
+        value: payload.value, 
+        publisher_id: payload.publisher_id, 
+        sender: tx_context::sender(ctx), 
+        duration: payload.duration, 
+        start: payload.start, 
+        wallet_id: object::id(&wallet), 
+        vesting_curve_a: payload.vesting_curve_a, 
+        vesting_curve_b: payload.vesting_curve_b, 
+        vesting_curve_c: payload.vesting_curve_c, 
+        cliff: payload.cliff 
+      }
     );
 
     destroy_transfer_quadratic_vesting_wallet_payload(payload);
