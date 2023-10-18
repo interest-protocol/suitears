@@ -20,7 +20,7 @@ module suitears::int {
     // ERRORS
 
     const EConversionFromU256Overflow: u64 = 0;
-    const EConversionToU256Underflow: u64 = 1;
+    const EConversionUnderflow: u64 = 1;
 
     struct Int has copy, drop, store {
         bits: u256
@@ -62,57 +62,57 @@ module suitears::int {
     }
 
     public fun as_u8(x: &Int): u8 {
-        assert!(is_positive(x), EConversionToU256Underflow);
+        assert!(is_positive(x), EConversionUnderflow;
         (x.bits as u8)
     }
 
     public fun as_u16(x: &Int): u16 {
-        assert!(is_positive(x), EConversionToU256Underflow);
+        assert!(is_positive(x), EConversionUnderflow;
         (x.bits as u16)
     }
 
     public fun as_u32(x: &Int): u32 {
-        assert!(is_positive(x), EConversionToU256Underflow);
+        assert!(is_positive(x), EConversionUnderflow;
         (x.bits as u32)
     }
 
     public fun as_u64(x: &Int): u64 {
-        assert!(is_positive(x), EConversionToU256Underflow);
+        assert!(is_positive(x), EConversionUnderflow;
         (x.bits as u64)
     }
 
     public fun as_u128(x: &Int): u128 {
-        assert!(is_positive(x), EConversionToU256Underflow);
+        assert!(is_positive(x), EConversionUnderflow;
         (x.bits as u128)
     }
 
     public fun as_u256(x: &Int): u256 {
-        assert!(is_positive(x), EConversionToU256Underflow);
+        assert!(is_positive(x), EConversionUnderflow;
         x.bits
     }
 
     public fun truncate_to_u8(x: &Int): u8 {
-        assert!(is_positive(x), EConversionToU256Underflow);
+        assert!(is_positive(x), EConversionUnderflow;
         ((x.bits & 0xFF) as u8)
     }
 
     public fun truncate_to_u16(x: &Int): u16 {
-        assert!(is_positive(x), EConversionToU256Underflow);
+        assert!(is_positive(x), EConversionUnderflow;
         ((x.bits & 0xFFFF) as u16)
     }
 
     public fun truncate_to_u32(x: &Int): u32 {
-        assert!(is_positive(x), EConversionToU256Underflow);
+        assert!(is_positive(x), EConversionUnderflow;
         ((x.bits & 0xFFFFFFFF) as u32)
     }
 
     public fun truncate_to_u64(x: &Int): u64 {
-        assert!(is_positive(x), EConversionToU256Underflow);
+        assert!(is_positive(x), EConversionUnderflow;
         ((x.bits & 0xFFFFFFFFFFFFFFFF) as u64)
     }
 
     public fun truncate_to_u128(x: &Int): u128 {
-        assert!(is_positive(x), EConversionToU256Underflow);
+        assert!(is_positive(x), EConversionUnderflow;
         ((x.bits & 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF) as u128)
     }
 
