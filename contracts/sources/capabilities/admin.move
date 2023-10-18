@@ -95,7 +95,7 @@ module suitears::admin {
   * @param admin_cap The AdminCap that will be transferred
   * @recipient the new admin address
   */
-  public fun start_transfer<T: drop>(_: &AdminCap<T>, storage: &mut AdminStorage<T>, c: &Clock, recipient: address, ctx: &mut TxContext): TimeLockCap {
+  public fun start_transfer<T: drop>(_: &AdminCap<T>, storage: &mut AdminStorage<T>, c: &Clock, recipient: address, ctx: &mut TxContext): TimeLockCap<TimeLockName> {
     assert!(recipient != @0x0, EZeroAddress);
     storage.pending_admin = recipient;
     storage.accepted = false;
@@ -121,7 +121,7 @@ module suitears::admin {
   * @param admin_cap The AdminCap that will be transferred
   * @recipient the new admin address
   */
-  public fun cancel_transfer<T: drop>(_: &AdminCap<T>, storage: &mut AdminStorage<T>, lock: TimeLockCap) {
+  public fun cancel_transfer<T: drop>(_: &AdminCap<T>, storage: &mut AdminStorage<T>, lock: TimeLockCap<TimeLockName>) {
     storage.pending_admin = @0x0;
     storage.accepted = false;
     timelock::destroy(lock);
@@ -152,7 +152,7 @@ module suitears::admin {
   * @param admin_cap The AdminCap that will be transferred
   * @recipient the new admin address
   */
-  public fun transfer<T: drop>(cap: AdminCap<T>, c: &Clock, lock: TimeLockCap, storage: &mut AdminStorage<T>) {
+  public fun transfer<T: drop>(cap: AdminCap<T>, c: &Clock, lock: TimeLockCap<TimeLockName>, storage: &mut AdminStorage<T>) {
     // New admin must accept the capability
     assert!(storage.accepted, EAdminDidNotAccept);
     assert!(get_admin(&lock) == storage.pending_admin, EInvalidTimeLock);
@@ -179,11 +179,11 @@ module suitears::admin {
 
   // Private Fns
 
-  fun add_pending_admin(lock: &mut TimeLockCap, admin: address) {
+  fun add_pending_admin(lock: &mut TimeLockCap<TimeLockName>, admin: address) {
     timelock::add_extra_data(lock, PendingAdmin {}, admin);
   }
 
-  fun get_admin(lock: &TimeLockCap): address {
+  fun get_admin(lock: &TimeLockCap<TimeLockName>): address {
     *timelock::borrow_extra_data(lock, PendingAdmin {})
   }
 }

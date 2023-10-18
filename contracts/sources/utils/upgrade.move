@@ -9,7 +9,7 @@ module suitears::upgrade {
     use sui::object::{Self, UID, ID};    
     use sui::package::{Self, UpgradeCap, UpgradeTicket, UpgradeReceipt};  
 
-    use suitears::timelock;
+    use suitears::timelock::{Self, TimeLockCap};
 
     // Do not expose this
     struct TimeLockName has drop {}
@@ -99,7 +99,7 @@ module suitears::upgrade {
     public fun cancel_upgrade(cap: &mut UpgradeWrapper) {
         cap.policy = 0;
         cap.digest = vector::empty();
-        timelock::destroy(df::remove(&mut cap.id, TimeLockKey {}));
+        timelock::destroy(df::remove<TimeLockKey, TimeLockCap<TimeLockName>>(&mut cap.id, TimeLockKey {}));
         emit(CancelUpgrade { id:  package::upgrade_package(&cap.cap) });
     }
 
