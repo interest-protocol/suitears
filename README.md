@@ -4,7 +4,7 @@
 
 ## Installation
 
-Add the following snippet in your `Move.tml`
+Add the following snippet in your `Move.toml`
 
 ```toml
 [dependencies.SuiTears]
@@ -20,8 +20,8 @@ The Sui Move contracts are located in the `contracts` directory.
 ```ml
 airdrop
 ├─ airdrop — "An airdrop that distributes the tokens after a specific date"
-├─ linear_vesting_airdrop — "An airdrop that distributes the tokens linearly"
-├─ quadratic_vesting_airdrop — "An airdrop that distributes the tokens quadratically"
+├─ linear_vesting_airdrop — "An airdrop that distributes the tokens according to a linear vesting"
+├─ quadratic_vesting_airdrop — "An airdrop that distributes the tokens according to a quadratic vesting"
 capabilities
 ├─ admin — "Admin authorization capability"
 ├─ owner — "Owner capability to give access to multiple objects"
@@ -32,10 +32,10 @@ collections
 ├─ list — "A scalable vector implementation using dynamic fields"
 ├─ wit_collection - "Witness access wrapper for collections"
 defi
-├─ farm — "Farm module to reward coins over time"
+├─ farm — "Farm module to reward coin holders over time"
 ├─ fund — "Struct to track shares associated with underlying deposits/withdrawals"
-├─ linear_vesting_wallet — "Wallet that allows linear withdrawals over time"
-├─ quadratic_vesting_wallet — "Wallet that allows quadratic withdrawals over time"
+├─ linear_vesting_wallet — "Wallet that allows withdrawals according to a linear vesting"
+├─ quadratic_vesting_wallet — "Wallet that allows withdrawals according to a quadratic vesting"
 governance
 ├─ dao — "Decentralized autonomous organization"
 ├─ dao_action — "Hot potato library to execute DAO proposals"
