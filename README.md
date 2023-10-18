@@ -40,10 +40,6 @@ governance
 ├─ dao — "Decentralized autonomous organization"
 ├─ dao_action — "Hot potato library to execute DAO proposals"
 ├─ dao_treasury — "A treasury plugin for the DAO module"
-int
-├─ i128 — "An object to handle i128 unsigned integers operations"
-├─ i256 — "An object to handle i256 unsigned integers operations"
-├─ i64 — "An object to handle i64 unsigned integers operations"
 math
 ├─ fixed_point64 — "Fixed point math module for x << 64 numbers"
 ├─ fixed_pointray — "Fixed point math module for numbers with 1e18 decimals"
@@ -52,6 +48,7 @@ math
 ├─ math256 — "Utility math functions for u256 numbers"
 ├─ math64 — "Utility math functions for u64 numbers"
 ├─ math_fixed64 — "Utility math functions for x << 64 numbers"
+├─ int — "Module to handle unsigned integer operations"
 sft
 ├─ sft — "Semi Fungible Tokens"
 ├─ sft_balance — "Balance for Semi Fungible Tokens"
