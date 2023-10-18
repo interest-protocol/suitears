@@ -80,12 +80,22 @@ Feel free to make a pull request.
 
 Do refer to the [contribution guidelines](https://github.com/interest-protocol/suitears/blob/main/CONTRIBUTING.md) for more details.
 
+## Credits
+
+Suitears💧 modules are inspired/based on many open-source projects. The list below is not extensive by any means.
+
+- Aptos
+- Movemate
+- PancakeSwap
+- Scallop
+- Starcoin
+
 ## Safety
 
 This is provided on an "as is" and "as available" basis.
 
 We **do not give any warranties** and **will not be liable for any loss** incurred through any use of this codebase.
 
-While Suitears💧 has been heavily tested, there may be parts that may exhibit unexpected emergent behavior when used with other code, or may break in future Solidity versions.
+While Suitears💧 has been heavily tested, there may be parts that may exhibit unexpected emergent behavior when used with other code, or may break in future Move versions.
 
 Please always include your own thorough tests when using Suitears💧 to make sure it works correctly with your code.
