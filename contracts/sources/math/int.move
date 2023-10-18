@@ -172,7 +172,7 @@ module suitears::int {
         }
     }
 
-    public fun equal(a: &Int, b: &Int): bool {
+    public fun eq(a: &Int, b: &Int): bool {
         compare(a, b) == EQUAL
     }
 
