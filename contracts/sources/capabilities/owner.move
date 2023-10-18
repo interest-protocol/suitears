@@ -31,13 +31,13 @@ module suitears::owner {
     assert!(owns(self, x), ENotAllowed);
   }
 
-  public fun remove<T: drop>(_: T, self: &mut OwnerCap<T>, x: ID) {
+  public fun remove<T: drop>(self: &mut OwnerCap<T>, x: ID) {
     let (present, i) = vector::index_of(&self.of, &x);
     if (!present) return;
     vector::remove(&mut self.of, i);
   }
 
-  public fun add<T: drop>(_: T, self: &mut OwnerCap<T>, x: ID) {
+  public fun add<T: drop>(self: &mut OwnerCap<T>, x: ID) {
     if (vector::contains(&self.of, &x)) return;
     vector::push_back(&mut self.of, x);
   }

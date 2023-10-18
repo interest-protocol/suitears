@@ -26,11 +26,11 @@ module suitears::admin {
   struct PendingAdmin has copy, drop, store {}
 
   // The owner of this object can add and remove minters + update the metadata
-  struct AdminCap<phantom T> has key {
+  struct AdminCap<phantom T: drop> has key {
     id: UID
   }
 
-  struct AdminStorage<phantom T> has key {
+  struct AdminStorage<phantom T: drop> has key {
     id: UID,
     pending_admin: address,
     current_admin: address,
@@ -67,7 +67,7 @@ module suitears::admin {
     admin: address
   }
 
-  public fun create<T: drop>(witness: T, time_delay: u64, ctx: &mut TxContext): AdminCap<T> {
+  public fun create<T: drop>(witness: T, time_delay: u64, ctx: &mut TxContext): (AdminStorage<T>, AdminCap<T>) {
     assert!(is_one_time_witness(&witness), EInvalidWitness);
     let sender = tx_context::sender(ctx);
 
@@ -87,9 +87,7 @@ module suitears::admin {
       time_delay
     });
 
-    transfer::share_object(admin_storage);
-
-    admin_cap
+    (admin_storage, admin_cap)
   }
 
   /**
@@ -97,7 +95,7 @@ module suitears::admin {
   * @param admin_cap The AdminCap that will be transferred
   * @recipient the new admin address
   */
-  public fun start_transfer<T>(_: &AdminCap<T>, storage: &mut AdminStorage<T>, c: &Clock, recipient: address, ctx: &mut TxContext): TimeLockCap {
+  public fun start_transfer<T: drop>(_: &AdminCap<T>, storage: &mut AdminStorage<T>, c: &Clock, recipient: address, ctx: &mut TxContext): TimeLockCap {
     assert!(recipient != @0x0, EZeroAddress);
     storage.pending_admin = recipient;
     storage.accepted = false;
@@ -123,7 +121,7 @@ module suitears::admin {
   * @param admin_cap The AdminCap that will be transferred
   * @recipient the new admin address
   */
-  public fun cancel_transfer<T>(_: &AdminCap<T>, storage: &mut AdminStorage<T>, lock: TimeLockCap) {
+  public fun cancel_transfer<T: drop>(_: &AdminCap<T>, storage: &mut AdminStorage<T>, lock: TimeLockCap) {
     storage.pending_admin = @0x0;
     storage.accepted = false;
     timelock::destroy(lock);
@@ -138,7 +136,7 @@ module suitears::admin {
   * @param admin_cap The AdminCap that will be transferred
   * @recipient the new admin address
   */
-  public fun accept_transfer<T>(storage: &mut AdminStorage<T>, ctx: &mut TxContext) {
+  public fun accept_transfer<T: drop>(storage: &mut AdminStorage<T>, ctx: &mut TxContext) {
     assert!(tx_context::sender(ctx) == storage.pending_admin, EInvalidAcceptSender);
 
     storage.accepted = true;
@@ -154,7 +152,7 @@ module suitears::admin {
   * @param admin_cap The AdminCap that will be transferred
   * @recipient the new admin address
   */
-  public fun transfer<T>(cap: AdminCap<T>, c: &Clock, lock: TimeLockCap, storage: &mut AdminStorage<T>) {
+  public fun transfer<T: drop>(cap: AdminCap<T>, c: &Clock, lock: TimeLockCap, storage: &mut AdminStorage<T>) {
     // New admin must accept the capability
     assert!(storage.accepted, EAdminDidNotAccept);
     assert!(get_admin(&lock) == storage.pending_admin, EInvalidTimeLock);
@@ -173,7 +171,7 @@ module suitears::admin {
   } 
 
   // Careful, this cannot be reverted
-  public fun destroy<T>(cap: AdminCap<T>) {
+  public fun destroy<T: drop>(cap: AdminCap<T>) {
     let AdminCap { id } = cap;
     object::delete(id);
   }

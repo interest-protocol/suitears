@@ -95,7 +95,7 @@ module suitears::quadratic_vesting_wallet {
       recipient
     };
 
-    owner::add(WalletWitness {},&mut cap.cap, object::id(&wallet));
+    owner::add(&mut cap.cap, object::id(&wallet));
 
     transfer::share_object(wallet);
   }
