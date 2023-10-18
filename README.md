@@ -80,6 +80,16 @@ Feel free to make a pull request.
 
 Do refer to the [contribution guidelines](https://github.com/interest-protocol/suitears/blob/main/CONTRIBUTING.md) for more details.
 
+## Credits
+
+Suitears💧 modules are inspired/based on many open-source projects. The list below is not extensive by any means.
+
+- Aptos
+- Movemate
+- PancakeSwap
+- Scallop
+- Starcoin
+
 ## Safety
 
 This is provided on an "as is" and "as available" basis.
