@@ -1,6 +1,6 @@
-<p>  <img  width="246.5px"height="76.5px"  src="./assets/logo.png" /></p>
+<div align="center">  <img  width="446.5px" height="146.5px"  src="./assets/logo.png" /></div>
 
-Production ready modules for Sui Move developers
+<h3 align="center"><em>Production ready modules for Sui Move developers</em></h3>
 
 ## Installation
 
