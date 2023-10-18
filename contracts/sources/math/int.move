@@ -172,6 +172,28 @@ module suitears::int {
         }
     }
 
+    public fun equal(a: &Int, b: &Int): bool {
+        compare(a, b) == EQUAL
+    }
+
+    public fun lt(a: &Int, b: &Int): bool {
+        compare(a, b) == LESS_THAN
+    }
+
+    public fun lte(a: &Int, b: &Int): bool {
+        let pred = compare(a, b);
+        pred == LESS_THAN || pred == EQUAL
+    }
+
+    public fun gt(a: &Int, b: &Int): bool {
+        compare(a, b) == GREATER_THAN
+    }
+
+    public fun gte(a: &Int, b: &Int): bool {
+        let pred = compare(a, b);
+        pred == GREATER_THAN || pred == EQUAL
+    }
+
     public fun add(a: &Int, b: &Int): Int {
         if (is_positive(a)) {
             // A is posiyive
