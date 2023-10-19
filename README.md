@@ -11,7 +11,7 @@ Add the following snippet in your `Move.toml`
 ```toml
 [dependencies.SuiTears]
 git = "https://github.com/interest-protocol/suitears.git"
-subdir = "contracts/"
+subdir = "contracts"
 rev = "testnet"
 ```
 
