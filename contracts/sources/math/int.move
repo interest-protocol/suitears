@@ -51,7 +51,37 @@ module suitears::int {
         Int { bits: x }
     }
 
-    public fun neg_from(x: u256): Int {
+    public fun neg_from_raw_u8(x: u8): Int {
+        let ret = from_raw_u8(x);
+        if (ret.bits > 0) *&mut ret.bits = MAX_U256 - ret.bits + 1;
+        ret
+    }
+
+    public fun neg_from_raw_u16(x: u16): Int {
+        let ret = from_raw_u16(x);
+        if (ret.bits > 0) *&mut ret.bits = MAX_U256 - ret.bits + 1;
+        ret
+    }
+
+    public fun neg_from_raw_u32(x: u32): Int {
+        let ret = from_raw_u32(x);
+        if (ret.bits > 0) *&mut ret.bits = MAX_U256 - ret.bits + 1;
+        ret
+    }
+
+    public fun neg_from_raw_u64(x: u64): Int {
+        let ret = from_raw_u64(x);
+        if (ret.bits > 0) *&mut ret.bits = MAX_U256 - ret.bits + 1;
+        ret
+    }
+
+    public fun neg_from_raw_u128(x: u128): Int {
+        let ret = from_raw_u128(x);
+        if (ret.bits > 0) *&mut ret.bits = MAX_U256 - ret.bits + 1;
+        ret
+    }
+
+    public fun neg_from_raw_u256(x: u256): Int {
         let ret = from_raw_u256(x);
         if (ret.bits > 0) *&mut ret.bits = MAX_U256 - ret.bits + 1;
         ret
@@ -141,7 +171,7 @@ module suitears::int {
     }
 
     public fun flip(x: &Int): Int {
-        if (is_neg(x)) { abs(x) } else { neg_from(x.bits) } 
+        if (is_neg(x)) { abs(x) } else { neg_from_raw_u256(x.bits) } 
     }
 
     public fun abs(x: &Int): Int {
@@ -204,7 +234,7 @@ module suitears::int {
                 // A is positive but B is negative
                 let b_abs = abs(b);
                 if (a.bits >= b_abs.bits) return from_raw_u256(a.bits - b_abs.bits);
-                return neg_from(b_abs.bits - a.bits)
+                return neg_from_raw_u256(b_abs.bits - a.bits)
             }
         } else {
             // A is negative
@@ -212,10 +242,10 @@ module suitears::int {
                 // A is negative and B is positive
                 let a_abs = abs(a);
                 if (b.bits >= a_abs.bits) return from_raw_u256(b.bits - a_abs.bits);
-                return neg_from(a_abs.bits - b.bits)
+                return neg_from_raw_u256(a_abs.bits - b.bits)
             } else {
                 // A and B are negative
-                neg_from(abs(a).bits + abs(b).bits)
+                neg_from_raw_u256(abs(a).bits + abs(b).bits)
             }
         }
     }
@@ -227,7 +257,7 @@ module suitears::int {
             if (is_positive(b)) {
                 // B is positive
                 if (a.bits >= b.bits) return from_raw_u256(a.bits - b.bits); // Return positive
-                return neg_from(b.bits - a.bits) // Return negative
+                return neg_from_raw_u256(b.bits - a.bits) // Return negative
             } else {
                 // B is negative
                 return from_raw_u256(a.bits + abs(b).bits) // Return positive
@@ -236,13 +266,13 @@ module suitears::int {
             // A is negative
             if (is_positive(b)) {
                 // B is positive
-                return neg_from(abs(a).bits + b.bits) // Return negative
+                return neg_from_raw_u256(abs(a).bits + b.bits) // Return negative
             } else {
                 // B is negative
                 let a_abs = abs(a);
                 let b_abs = abs(b);
                 if (b_abs.bits >= a_abs.bits) return from_raw_u256(b_abs.bits - a_abs.bits); // Return positive
-                return neg_from(a_abs.bits - b_abs.bits) // Return negative
+                return neg_from_raw_u256(a_abs.bits - b_abs.bits) // Return negative
             }
         }
     }
@@ -256,13 +286,13 @@ module suitears::int {
                 return from_raw_u256(a.bits * b.bits)// Return positive
             } else {
                 // B is negative
-                return neg_from(a.bits * abs(b).bits) // Return negative
+                return neg_from_raw_u256(a.bits * abs(b).bits) // Return negative
             }
         } else {
             // A is negative
             if (is_positive(b)) {
                 // B is positive
-                return neg_from(abs(a).bits * b.bits) // Return negative
+                return neg_from_raw_u256(abs(a).bits * b.bits) // Return negative
             } else {
                 // B is negative
                 return from_raw_u256(abs(a).bits * abs(b).bits ) // Return positive
@@ -279,13 +309,13 @@ module suitears::int {
                 return from_raw_u256(a.bits / b.bits) // Return positive
             } else {
                 // B is negative
-                return neg_from(a.bits / abs(b).bits ) // Return negative
+                return neg_from_raw_u256(a.bits / abs(b).bits ) // Return negative
             }
         } else {
             // A is negative
             if (is_positive(b)) {
                 // B is positive
-                return neg_from(abs(a).bits / b.bits) // Return negative
+                return neg_from_raw_u256(abs(a).bits / b.bits) // Return negative
             } else {
                 // B is negative
                 return from_raw_u256(abs(a).bits / abs(b).bits ) // Return positive
@@ -299,7 +329,7 @@ module suitears::int {
 
         let result = a_abs.bits % b_abs.bits;
 
-       if (is_neg(a) && result != 0)   neg_from(result) else from_raw_u256(result)
+       if (is_neg(a) && result != 0)   neg_from_raw_u256(result) else from_raw_u256(result)
     }
 
     public fun shr(a: &Int, rhs: u8): Int { 
