@@ -44,8 +44,7 @@ module suitears::dao {
 
   struct DaoActionWitness has drop {}
 
-  struct DaoConfig has key, store {
-    id: UID,
+  struct DaoConfig has store, copy, drop {
     voting_delay: Option<u64>,
     voting_period: Option<u64>,
     voting_quorum_rate: Option<u128>,
@@ -428,11 +427,9 @@ module suitears::dao {
     voting_period: u64,
     voting_quorum_rate: u128,
     min_action_delay: u64,
-    min_quorum_votes: u64,
-    ctx: &mut TxContext  
+    min_quorum_votes: u64
    ): DaoConfig {
     DaoConfig {
-      id: object::new(ctx),
       voting_delay: if (voting_delay == 0)  option::none() else option::some(voting_delay),
       voting_period: if (voting_period == 0) option::none() else option::some(voting_period),
       voting_quorum_rate:  if (voting_quorum_rate == 0) option::none() else option::some(voting_quorum_rate),
@@ -441,18 +438,6 @@ module suitears::dao {
     }
    } 
 
-   public fun destroy_config(config: DaoConfig) {
-    let  DaoConfig { id, voting_delay, voting_period, voting_quorum_rate, min_quorum_votes, min_action_delay } = config;
-
-    option::destroy_with_default(voting_delay, 0);
-    option::destroy_with_default(voting_period, 0);
-    option::destroy_with_default(voting_quorum_rate, 0);
-    option::destroy_with_default(min_quorum_votes, 0);
-    option::destroy_with_default(min_action_delay, 0);
-
-    object::delete(id);
-   }
-
    public fun update_dao_config<DaoWitness: drop, CoinType>(
     dao: &mut Dao<DaoWitness, CoinType>,
     action: Action<DaoWitness, DaoActionWitness, CoinType, DaoConfig>
@@ -460,9 +445,7 @@ module suitears::dao {
 
     let payload = dao_action::finish_action(DaoActionWitness {}, action);
 
-    let DaoConfig { id, voting_delay, voting_period, voting_quorum_rate, min_action_delay, min_quorum_votes  } = payload;
-
-    object::delete(id);
+    let DaoConfig { voting_delay, voting_period, voting_quorum_rate, min_action_delay, min_quorum_votes  } = payload;
 
     dao.voting_delay = option::destroy_with_default(voting_delay, dao.voting_delay);
     dao.voting_period = option::destroy_with_default(voting_period, dao.voting_period);
