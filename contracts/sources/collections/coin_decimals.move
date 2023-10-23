@@ -23,6 +23,7 @@ module suitears::coin_decimals {
   }
 
   public fun register_coin<CoinType>(metadata: &mut CoinDecimals, coin_metadata: &CoinMetadata<CoinType>) {
+    if (is_coin_registered<CoinType>(metadata)) return;
     let decimals = coin::get_decimals(coin_metadata);
     df::add(&mut metadata.id, get<CoinType>(), Decimals { decimals, decimals_scalar: pow(10, decimals) });
   }
