@@ -1,5 +1,5 @@
 // Global Repo for protocols to know a coin decimals
-module suitears::metadata {
+module suitears::coin_decimals {
   use std::type_name::{get, TypeName};
 
   use sui::math::pow;
