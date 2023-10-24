@@ -1,6 +1,6 @@
 module suitears::airdrop_utils {
-  use std::vector;
   use std::hash;
+  use std::vector;
   
   use sui::bcs;
   use sui::tx_context::{Self, TxContext};
