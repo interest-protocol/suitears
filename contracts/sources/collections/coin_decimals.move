@@ -19,7 +19,7 @@ module suitears::coin_decimals {
   }
 
   fun init(ctx: &mut TxContext) {
-    share_object(CoinDecimals { id: object::new(ctx) })
+    share_object(CoinDecimals { id: object::new(ctx) });
   }
 
   public fun register_coin<CoinType>(metadata: &mut CoinDecimals, coin_metadata: &CoinMetadata<CoinType>) {
