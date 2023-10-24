@@ -1,4 +1,4 @@
-> Please note that this repository is still under development and needs testing and auditing. It is not production ready yet! 
+> Please note that this repository is still under development and needs testing and auditing. It is not production ready yet!
 
 <div align="center">  <img  width="446.5px" height="146.5px"  src="./assets/logo.png" /></div>
 
@@ -31,6 +31,7 @@ capabilities
 collections
 ├─ ac_collection — "Capability access wrapper for collections"
 ├─ bitmap — "Bitmap implementation for sequential keys"
+├─ coin_decimals — "A collection that stores Coin decimals"
 ├─ list — "A scalable vector implementation using dynamic fields"
 ├─ wit_collection - "Witness access wrapper for collections"
 defi
