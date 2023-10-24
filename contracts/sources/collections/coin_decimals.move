@@ -6,20 +6,24 @@ module suitears::coin_decimals {
   use sui::dynamic_field as df;
   use sui::object::{Self, UID};
   use sui::tx_context::TxContext;
-  use sui::transfer::share_object;
   use sui::coin::{Self, CoinMetadata};
 
-  struct Decimals has store {
+  struct Decimals has store, copy, drop {
     decimals: u8,
     decimals_scalar: u64
   }
 
-  struct CoinDecimals has key {
+  struct CoinDecimals has key, store {
     id: UID
   }
 
-  fun init(ctx: &mut TxContext) {
-    share_object(CoinDecimals { id: object::new(ctx) });
+  public fun new(ctx: &mut TxContext): CoinDecimals {
+    CoinDecimals { id: object::new(ctx) }
+  }
+
+  public fun destroy(metada: CoinDecimals) {
+    let CoinDecimals { id } = metada;
+    object::delete(id);
   }
 
   public fun register_coin<CoinType>(metadata: &mut CoinDecimals, coin_metadata: &CoinMetadata<CoinType>) {
