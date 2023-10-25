@@ -22,23 +22,23 @@ module suitears::coin_decimals {
     share_object(CoinDecimals { id: object::new(ctx) });
   }
 
-  public fun register_coin<CoinType>(metadata: &mut CoinDecimals, coin_metadata: &CoinMetadata<CoinType>) {
-    if (is_coin_registered<CoinType>(metadata)) return;
+  public fun register_coin<CoinType>(self: &mut CoinDecimals, coin_metadata: &CoinMetadata<CoinType>) {
+    if (is_coin_registered<CoinType>(self)) return;
     let decimals = coin::get_decimals(coin_metadata);
-    df::add(&mut metadata.id, get<CoinType>(), Decimals { decimals, decimals_scalar: pow(10, decimals) });
+    df::add(&mut self.id, get<CoinType>(), Decimals { decimals, decimals_scalar: pow(10, decimals) });
   }
 
-  public fun get_decimals_scalar<CoinType>(metadata: &CoinDecimals): u64 {
-    let data = df::borrow<TypeName, Decimals>(&metadata.id, get<CoinType>());
+  public fun get_decimals_scalar<CoinType>(self: &CoinDecimals): u64 {
+    let data = df::borrow<TypeName, Decimals>(&self.id, get<CoinType>());
     data.decimals_scalar
   }
 
-  public fun get_decimals<CoinType>(metadata: &CoinDecimals): u8 {
-    let data = df::borrow<TypeName, Decimals>(&metadata.id, get<CoinType>());
+  public fun get_decimals<CoinType>(self: &CoinDecimals): u8 {
+    let data = df::borrow<TypeName, Decimals>(&self.id, get<CoinType>());
     data.decimals
   }
 
-  public fun is_coin_registered<CoinType>(metadata: &CoinDecimals): bool {
-    df::exists_(&metadata.id, get<CoinType>())
+  public fun is_coin_registered<CoinType>(self: &CoinDecimals): bool {
+    df::exists_(&self.id, get<CoinType>())
   }
 }
