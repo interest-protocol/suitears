@@ -21,6 +21,7 @@ The Sui Move contracts are located in the `contracts` directory.
 
 ```ml
 airdrop
+├─ airdrop_utils — "Verify function for the airdrop modules"
 ├─ airdrop — "An airdrop that distributes the tokens after a specific date"
 ├─ linear_vesting_airdrop — "An airdrop that distributes the tokens according to a linear vesting"
 ├─ quadratic_vesting_airdrop — "An airdrop that distributes the tokens according to a quadratic vesting"
@@ -57,7 +58,6 @@ sft
 ├─ sft_balance — "Balance for Semi Fungible Tokens"
 utils
 ├─ comparator — "Module to compare u8 vectors (bits)"
-├─ ens_merkle_proof — "Module to verify Merkle proofs"
 ├─ merkle_proof — "Module to verify Merkle proofs"
 ├─ upgrade — "Module to add a timelock to contract upgrades"
 ├─ vectors — "Utility functions for vectors"
