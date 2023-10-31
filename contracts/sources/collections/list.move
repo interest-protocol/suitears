@@ -25,8 +25,8 @@ module suitears::list {
         id: UID,
         inline_vec: vector<T>,
         big_vec: Option<BigVector<T>>,
-        inline_capacity: Option<u64>,
-        bucket_size: Option<u64>,
+        inline_capacity: u64,
+        bucket_size: u64,
     }
 
     /// Regular Vector API
@@ -39,8 +39,8 @@ module suitears::list {
             id: object::new(ctx),
             inline_vec: vector[],
             big_vec: option::none(),
-            inline_capacity: option::some(inline_capacity),
-            bucket_size: option::some(bucket_size),
+            inline_capacity,
+            bucket_size,
         }
     }
 
@@ -146,12 +146,11 @@ module suitears::list {
         let len = length(v);
         let inline_len = vector::length(&v.inline_vec);
         if (len == inline_len) {
-          if (len < *option::borrow(&v.inline_capacity)) {
+          if (len < v.inline_capacity) {
             vector::push_back(&mut v.inline_vec, val);
             return
           };
-          let bucket_size = *option::borrow(&v.bucket_size);
-          option::fill(&mut v.big_vec, big_vector::new(bucket_size, ctx));
+          option::fill(&mut v.big_vec, big_vector::new(v.bucket_size, ctx));
         };
         big_vector::push_back(option::borrow_mut(&mut v.big_vec), val);
     }
