@@ -21,6 +21,11 @@ module suitears::math256 {
     (a & b) + (a ^ b) / 2
   }
 
+  /// Return x clamped to the interval [lower, upper].
+  public fun clamp(x: u256, lower: u256, upper: u256): u256 {
+    min(upper, max(lower, x))
+  }
+
   // API convenience
   public fun mul(x: u256, y: u256): u256 {
     x * y

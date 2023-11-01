@@ -2,6 +2,9 @@ module suitears::math128 {
   use std::vector;
 
   use suitears::math256;
+  use suitears::fixed_point64::{Self, FixedPoint64};
+
+  const EInvalidArgFloorLog2: u64 = 0;
 
   public fun mul_div_down(x: u128, y: u128, z: u128): u128 {
     (math256::mul_div_down((x as u256), (y as u256), (z as u256)) as u128)
@@ -14,6 +17,11 @@ module suitears::math128 {
   /// @dev Returns the smallest of two numbers.
   public fun min(a: u128, b: u128): u128 {
     if (a < b) a else b
+  }
+
+  /// Return x clamped to the interval [lower, upper].
+  public fun clamp(x: u128, lower: u128, upper: u128): u128 {
+    min(upper, max(lower, x))
   }
 
   /// https://github.com/pentagonxyz/movemate
@@ -136,4 +144,44 @@ module suitears::math128 {
     result = (result + a / result) >> 1;
     min(result, a / result)
   }
+
+  /// Returns floor(log2(x))
+    public fun floor_log2(x: u128): u8 {
+        let res = 0;
+        assert!(x != 0, EInvalidArgFloorLog2);
+        // Effectively the position of the most significant set bit
+        let n = 64;
+        while (n > 0) {
+            if (x >= (1 << n)) {
+                x = x >> n;
+                res = res + n;
+            };
+            n = n >> 1;
+        };
+        res
+    }
+
+
+    // Return log2(x) as FixedPoint64
+    public fun log2(x: u128): FixedPoint64 {
+        let integer_part = floor_log2(x);
+        // Normalize x to [1, 2) in fixed point 63. To ensure x is smaller then 1<<64
+        if (x >= 1 << 63) {
+            x = x >> (integer_part - 63);
+        } else {
+            x = x << (63 - integer_part);
+        };
+        let frac = 0;
+        let delta = 1 << 63;
+        while (delta != 0) {
+            // log x = 1/2 log x^2
+            // x in [1, 2)
+            x = (x * x) >> 63;
+            // x is now in [1, 4)
+            // if x in [2, 4) then log x = 1 + log (x / 2)
+            if (x >= (2 << 63)) { frac = frac + delta; x = x >> 1; };
+            delta = delta >> 1;
+        };
+        fixed_point64::create_from_raw_value (((integer_part as u128) << 64) + frac)
+    }
 }
