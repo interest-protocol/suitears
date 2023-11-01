@@ -71,6 +71,11 @@ module suitears::math64 {
     sum
   }
 
+    /// Return x clamped to the interval [lower, upper].
+    public fun clamp(x: u64, lower: u64, upper: u64): u64 {
+        min(upper, max(lower, x))
+    }
+
   public fun avg(nums: &vector<u64>): u64{
     let len = vector::length(nums);
     let sum = sum(nums);
