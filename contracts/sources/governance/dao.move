@@ -14,7 +14,7 @@ module suitears::dao {
 
   use suitears::dao_action::{Self, Action};
   use suitears::dao_treasury::{Self, DaoTreasury};
-  use suitears::fixed_point_wad::{wad, wad_div_down};
+  use suitears::fixed_point_roll::{roll, roll_div_down};
 
   /// Proposal state
   const PENDING: u8 = 1;
@@ -403,7 +403,7 @@ module suitears::dao {
       // Active
       ACTIVE
     } else if (proposal.for_votes <= proposal.against_votes ||
-      proposal.for_votes < proposal.quorum_votes || proposal.voting_quorum_rate > wad_div_down((proposal.for_votes as u128), ((proposal.for_votes + proposal.against_votes) as u128)) ) {
+      proposal.for_votes < proposal.quorum_votes || proposal.voting_quorum_rate > roll_div_down((proposal.for_votes as u128), ((proposal.for_votes + proposal.against_votes) as u128)) ) {
       // Defeated
       DEFEATED
     } else if (proposal.eta == 0) {
@@ -420,7 +420,7 @@ module suitears::dao {
   }
 
   fun assert_dao_config<DaoWitness: drop, CoinType>(dao: &Dao<DaoWitness, CoinType>) {
-    assert!(100 * wad() >= dao.voting_quorum_rate && dao.voting_quorum_rate != 0, EInvalidQuorumRate);
+    assert!(100 * roll() >= dao.voting_quorum_rate && dao.voting_quorum_rate != 0, EInvalidQuorumRate);
     assert!(dao.voting_delay != 0, EInvalidVotingDelay);
     assert!(dao.voting_period != 0, EInvalidVotingPeriod);
     assert!(dao.min_action_delay != 0, EInvalidMinActionDelay);
