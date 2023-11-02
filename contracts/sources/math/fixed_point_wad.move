@@ -1,13 +1,14 @@
 // Fixed Point Math without a Type guard/wrapper  
-// Ray has a higher accurate and assumes values have 18 decimals
+// Wad has a higher accurate and assumes values have 18 decimals
 module suitears::fixed_point_wad {
 
   use suitears::int::{Self, Int};
-  use suitears::math256::{Self, pow};
+  use suitears::math256::{Self, pow, log2};
 
   const WAD: u256 = 1_000_000_000_000_000_000; // 1e18
 
   const EOverflow: u64 = 0;
+  const EUndefined: u64 = 1;
   
   public fun wad(): u256 {
     WAD
@@ -62,4 +63,38 @@ module suitears::fixed_point_wad {
 
     int::from_u256((int::as_u256(r) * 3822833074963236453042738258902158003155416615667) >> (195 - int::as_u8(k)))
   }
+
+  public fun ln_wad(x: Int): Int {
+    assert!(int::is_positive(x), EUndefined);
+
+    let k = int::sub(int::from_u256(log2(int::as_u256(x))), int::from_u256(96));
+
+    x = int::shl(x, (156 - int::as_u8(k)));
+    x = int::neg_from_u256(int::as_u256(x) >> 159);
+
+    let p = int::add(x, int::from_u256(3273285459638523848632254066296));
+    p = int::add(int::shr(int::mul(p, x), 96), int::from_u256(24828157081833163892658089445524));
+    p = int::add(int::shr(int::mul(p, x), 96), int::from_u256(43456485725739037958740375743393));
+    p = int::sub(int::shr(int::mul(p, x), 96), int::from_u256(11111509109440967052023855526967));
+    p = int::sub(int::shr(int::mul(p, x), 96), int::from_u256(45023709667254063763336534515857));
+    p = int::sub(int::shr(int::mul(p, x), 96), int::from_u256(14706773417378608786704636184526));
+    p = int::sub(int::mul(p, x), int::from_u256(795164235651350426258249787498 << 96));
+
+    let q = int::add(x,int::from_u256(5573035233440673466300451813936));
+    q = int::add(int::shr(int::mul(q, x), 96), int::from_u256(71694874799317883764090561454958));
+    q = int::add(int::shr(int::mul(q, x), 96), int::from_u256(283447036172924575727196451306956));
+    q = int::add(int::shr(int::mul(q, x), 96), int::from_u256(401686690394027663651624208769553));
+    q = int::add(int::shr(int::mul(q, x), 96), int::from_u256(204048457590392012362485061816622));
+    q = int::add(int::shr(int::mul(q, x), 96), int::from_u256(31853899698501571402653359427138));
+    q = int::add(int::shr(int::mul(q, x), 96), int::from_u256(909429971244387300277376558375));
+
+    let r = int::div(p, q);
+
+    r = int::mul(r,int::from_u256(1677202110996718588342820967067443963516166));
+    r = int::add(r, int::mul(int::from_u256(16597577552685614221487285958193947469193820559219878177908093499208371) , k));
+    r = int::add(r, int::from_u256(600920179829731861736702779321621459595472258049074101567377883020018308));
+
+    int::shr(r, 174)
+  }
+
 }

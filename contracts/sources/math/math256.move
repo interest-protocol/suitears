@@ -105,4 +105,52 @@ module suitears::math256 {
     };
     z
   }
+
+      /**
+     * @dev Return the log in base 2 of a positive value rounded towards zero.
+     * Returns 0 if given 0.
+     */
+    public fun log2(value: u256): u256 {
+        let result = 0;
+        if (value >> 128 > 0) {
+          value = value >> 128;
+          result = result + 128;
+        };
+        
+        if (value >> 64 > 0) {
+            value = value >> 64;
+            result = result + 64;
+        };
+        
+        if (value >> 32 > 0) {
+          value = value >> 32;
+          result = result + 32;
+        };
+        
+        if (value >> 16 > 0) {
+            value = value >> 16;
+            result = result + 16;
+        };
+        
+        if (value >> 8 > 0) {
+            value = value >> 8;
+            result = result + 8;
+        };
+        
+        if (value >> 4 > 0) {
+            value = value >> 4;
+            result = result + 4;
+        };
+        
+        if (value >> 2 > 0) {
+            value = value >> 2;
+            result = result + 2;
+        };
+        
+        if (value >> 1 > 0) 
+          result = result + 1;
+
+       result
+    }
+
 }
