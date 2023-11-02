@@ -91,26 +91,25 @@ module suitears::math256 {
   /// @dev Returns the square root of a number. If the number is not a perfect square, the value is rounded down.
   /// Inspired by Henry S. Warren, Jr.'s "Hacker's Delight" (Chapter 11).
   /// Costs only 9 gas in comparison to the 16 gas `sui::math::sqrt` costs (tested on Aptos).
-  public fun sqrt(y: u256): u256 {
-    let z = 0;
-    if (y > 3) {
-      z = y;
-      let x = y / 2 + 1;
-      while (x < z) {
-        z = x;
-        x = (y / x + x) / 2;
-      }
-    } else if (y != 0) {
-      z = 1;
-    };
-    z
+  public fun sqrt(a: u256): u256 {
+    if (a == 0) return 0;
+
+    let result = 1 << ((log2(a) >> 1) as u8);
+
+    result = (result + a / result) >> 1;
+    result = (result + a / result) >> 1;
+    result = (result + a / result) >> 1;
+    result = (result + a / result) >> 1;
+    result = (result + a / result) >> 1;
+    result = (result + a / result) >> 1;
+    result = (result + a / result) >> 1;
+
+    min(result, a / result)
   }
 
-      /**
-     * @dev Return the log in base 2 of a positive value rounded towards zero.
-     * Returns 0 if given 0.
-     */
-    public fun log2(value: u256): u256 {
+  // * Log functions from https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/math/Math.sol
+
+  public fun log2(value: u256): u256 {
         let result = 0;
         if (value >> 128 > 0) {
           value = value >> 128;
@@ -153,4 +152,62 @@ module suitears::math256 {
        result
     }
 
+  public fun log10(value: u256): u256 {
+        let result = 0;
+
+        if (value >= 10000000000000000000000000000000000000000000000000000000000000000) {
+          value = value / 10000000000000000000000000000000000000000000000000000000000000000;
+          result = result + 64;
+        };
+        
+        if (value >= 100000000000000000000000000000000) {
+            value = value / 100000000000000000000000000000000;
+            result = result + 16;
+        };
+        
+        if (value >= 1000000000) {
+            value = value / 100000000;
+            result = result + 8;
+        };
+        
+        if (value >= 10000) {
+            value = value / 10000;
+            result = result + 4;
+        };
+        
+       if (value >= 100) {
+            value = value / 100;
+            result = result + 2;
+        };
+        
+        
+       if (value >= 10) 
+           result = result + 1;
+
+       result
+  }
+
+  public fun log256(value: u256): u256 {
+    let result = 0;
+
+    if (value >> 128 > 0) {
+      value = value >> 128;
+      result = result + 16;
+    };
+
+    if (value >> 64 > 0) {
+      value = value >> 64;
+      result = result + 8;
+    };
+
+    if (value >> 32 > 0) {
+      value = value >> 32;
+      result = result + 4;
+    };
+
+    if (value >> 8 > 0)
+      result = result + 1;
+
+    result
+  }
 }
