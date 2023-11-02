@@ -26,15 +26,13 @@ module suitears::dao_treasury {
 
   struct TreasuryActionWitness has drop {}
 
-  struct TransferPayload has key, store {
-    id: UID,
+  struct TransferPayload has store, drop, copy {
     type: TypeName,
     value: u64,
     publisher_id: ID
   }
 
-  struct TransferVestingWalletPayload has key, store {
-    id: UID,
+  struct TransferVestingWalletPayload has store, drop, copy {
     start: u64,
     duration: u64,
     type: TypeName,
@@ -42,8 +40,7 @@ module suitears::dao_treasury {
     publisher_id: ID
   }
 
-  struct TransferQuadraticWalletPayload has key, store {
-    id: UID,
+  struct TransferQuadraticWalletPayload has store, drop, copy {
     vesting_curve_a: u64,
     vesting_curve_b: u64,
     vesting_curve_c: u64,
@@ -164,7 +161,6 @@ module suitears::dao_treasury {
       }
     );
 
-    destroy_transfer_payload(payload);
     token
   }
 
@@ -192,8 +188,6 @@ module suitears::dao_treasury {
         wallet_id: object::id(&wallet) 
       }
     );
-
-    destroy_transfer_linear_vesting_wallet_payload(payload);
     
     wallet
   }
@@ -236,69 +230,32 @@ module suitears::dao_treasury {
         cliff: payload.cliff 
       }
     );
-
-    destroy_transfer_quadratic_vesting_wallet_payload(payload);
     
     wallet
   }
 
-  public fun view_transfer_payload(payload: &TransferPayload): (ID, TypeName, u64, ID) {
-    (object::id(payload), payload.type, payload.value, payload.publisher_id)
-  }
 
-  public fun create_transfer_payload<CoinType>(value: u64, publisher_id: ID, ctx: &mut TxContext): TransferPayload {
+  public fun create_transfer_payload<CoinType>(value: u64, publisher_id: ID): TransferPayload {
     TransferPayload {
-      id: object::new(ctx),
       type: get<CoinType>(),
       value,
       publisher_id
     }
   }
 
-  public fun destroy_transfer_payload(payload: TransferPayload) {
-    let TransferPayload { id, type: _, value: _, publisher_id: _} = payload;
-    object::delete(id);
-  }
-
-  public fun view_transfer_linear_vesting_wallet_payload(payload: &TransferVestingWalletPayload): (ID, TypeName, u64, ID, u64, u64) {
-    (object::id(payload), payload.type, payload.value, payload.publisher_id, payload.start, payload.duration)
-  }
-
   public fun create_transfer_linear_vesting_wallet_payload<CoinType>(
     value: u64, 
     publisher_id: ID,
     start: u64, 
-    duration: u64,
-    ctx: &mut TxContext
+    duration: u64
   ): TransferVestingWalletPayload {
     TransferVestingWalletPayload {
-      id: object::new(ctx),
       type: get<CoinType>(),
       value,
       publisher_id,
       start,
       duration
     }
-  }
-
-  public fun destroy_transfer_linear_vesting_wallet_payload(payload: TransferVestingWalletPayload) {
-    let TransferVestingWalletPayload { id, type: _, value: _, publisher_id: _, start: _, duration: _} = payload;
-    object::delete(id);
-  }
-
-  public fun view_transfer_quadratic_vesting_wallet_payload(payload: &TransferQuadraticWalletPayload): (ID, TypeName, u64, ID, u64, u64, u64, u64, u64, u64) {
-    (
-      object::id(payload), 
-      payload.type, 
-      payload.value, 
-      payload.publisher_id, 
-      payload.cliff,
-      payload.start, 
-      payload.vesting_curve_a, 
-      payload.vesting_curve_b, 
-      payload.vesting_curve_c, 
-      payload.duration
-      )
   }
 
   public fun create_transfer_quadratic_vesting_wallet_payload<CoinType>(
@@ -309,11 +266,9 @@ module suitears::dao_treasury {
     vesting_curve_a: u64,
     vesting_curve_b: u64,
     vesting_curve_c: u64,
-    duration: u64,
-    ctx: &mut TxContext
+    duration: u64
   ): TransferQuadraticWalletPayload {
     TransferQuadraticWalletPayload {
-      id: object::new(ctx),
       type: get<CoinType>(),
       value,
       publisher_id,
@@ -324,22 +279,6 @@ module suitears::dao_treasury {
       vesting_curve_b,
       vesting_curve_c
     }
-  }
-
-  public fun destroy_transfer_quadratic_vesting_wallet_payload(payload: TransferQuadraticWalletPayload) {
-    let TransferQuadraticWalletPayload { 
-      id, 
-      type: _, 
-      value: _, 
-      publisher_id: _, 
-      cliff: _,
-      start: _, 
-      duration: _,
-      vesting_curve_a: _,
-      vesting_curve_b: _,
-      vesting_curve_c: _ 
-    } = payload;
-    object::delete(id);
   }
 
   // Flash loan logic
