@@ -10,7 +10,7 @@ module suitears::dao_treasury {
   use sui::balance::{Self, Balance};
   use sui::tx_context::{Self, TxContext};
 
-  use suitears::fixed_point_wad::wad_mul_up;
+  use suitears::fixed_point_roll::roll_mul_up;
   use suitears::dao_action::{Action, finish_action};
   use suitears::linear_vesting_wallet::{Self, Wallet as LinearWallet};
   use suitears::quadratic_vesting_wallet::{Self, Wallet as QuadraticWallet};
@@ -365,7 +365,7 @@ module suitears::dao_treasury {
     let FlashLoan { initial_balance, type } = flash_loan;
     balance::join(bag::borrow_mut(&mut treasury.coins, type), coin::into_balance(token));
 
-    let final_balance = initial_balance + (wad_mul_up((initial_balance as u128), FLASH_LOAN_FEE) as u64);
+    let final_balance = initial_balance + (roll_mul_up((initial_balance as u128), FLASH_LOAN_FEE) as u64);
     assert!(final_balance >= balance::value(bag::borrow<TypeName, Balance<CoinType>>(&treasury.coins, type)), ERepayAmountTooLow);
   }
 }
