@@ -1,6 +1,51 @@
 module suitears::math256 {
   use std::vector;
 
+  const MAX_U256: u256 = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+
+  public fun try_add(x: u256, y: u256): (bool, u256) {
+    if (x == MAX_U256 && y != 0) return (false, 0);
+
+    let rem = MAX_U256 - x;
+    if (y > rem) return (false, 0);
+
+    (true, x + y)
+  }
+
+  public fun try_sub(x: u256, y: u256): (bool, u256) {
+    if (y > x) (false, 0) else (true, x - y)
+  }
+
+  public fun try_mul(x: u256, y: u256): (bool, u256) {
+    if (x > MAX_U256 / y) (false, 0) else (true, x * y)
+  }
+
+  public fun try_div_down(x: u256, y: u256): (bool, u256) {
+    if (y == 0) (false, 0) else (true, div_down(x, y))
+  }
+
+  public fun try_div_up(x: u256, y: u256): (bool, u256) {
+    if (y == 0) (false, 0) else (true, div_up(x, y))
+  }
+
+  public fun try_mul_div_down(x: u256, y: u256, z: u256): (bool, u256) {
+    let (pred, _) = try_mul(x, y);
+    if (!pred) return (false, 0);
+
+    (true, mul_div_down(x, y, z))
+  }
+
+  public fun try_mul_div_up(x: u256, y: u256, z: u256): (bool, u256) {
+    let (pred, _) = try_mul(x, y);
+    if (!pred) return (false, 0);
+
+    (true, mul_div_up(x, y, z))
+  }
+
+  public fun try_mod(x: u256, y: u256): (bool, u256) {
+    if (y == 0) (false, 0) else (true, x % y)
+  }
+
   public fun mul_div_down(x: u256, y: u256, z: u256): u256 {
     x * y / z
   }

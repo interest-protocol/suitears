@@ -6,6 +6,44 @@ module suitears::math64 {
 
   const QUADRATIC_SCALAR: u64 = 1 << 16;
 
+  const MAX_U64: u256 = 18446744073709551615;
+
+  public fun try_add(x: u64, y: u64): (bool, u64) {
+    let c = (x as u256) + (y as u256);
+    if (MAX_U64 > c) (false, 0) else (true, (c as u64))
+  }
+
+  public fun try_sub(x: u64, y: u64): (bool, u64) {
+    if (y > x) (false, 0) else (true, x - y)
+  }
+
+  public fun try_mul(x: u64, y: u64): (bool, u64) {
+    let c = (x as u256) * (y as u256);
+    if (MAX_U64 > c) (false, 0) else (true, (c as u64))
+  }
+
+  public fun try_div_down(x: u64, y: u64): (bool, u64) {
+    if (y == 0) (false, 0) else (true, div_down(x, y))
+  }
+
+  public fun try_div_up(x: u64, y: u64): (bool, u64) {
+    if (y == 0) (false, 0) else (true, div_up(x, y))
+  }
+
+  public fun try_mul_div_down(x: u64, y: u64, z: u64): (bool, u64) {
+    let r = math256::mul_div_down((x as u256), (y as u256), (z as u256));
+    if (MAX_U64 > r) (false, 0) else (true, (r as u64))
+  }
+
+  public fun try_mul_div_up(x: u64, y: u64, z: u64): (bool, u64) {
+    let r = math256::mul_div_up((x as u256), (y as u256), (z as u256));
+    if (MAX_U64 > r) (false, 0) else (true, (r as u64))
+  }
+
+  public fun try_mod(x: u64, y: u64): (bool, u64) {
+    if (y == 0) (false, 0) else (true, x % y)
+  }
+
   public fun mul_div_down(x: u64, y: u64, z: u64): u64 {
     (math256::mul_div_down((x as u256), (y as u256), (z as u256)) as u64)
   }
