@@ -46,8 +46,8 @@ governance
 ├─ dao_treasury — "A treasury plugin for the DAO module"
 math
 ├─ fixed_point64 — "Fixed point math module for x << 64 numbers"
-├─ fixed_point_ray — "Fixed point math module for numbers with 1e18 decimals"
-├─ fixed_point_wad — "Fixed point math module for numbers with 1e9 decimals"
+├─ fixed_point_roll — "Fixed point math module for numbers with 1e9 decimals"
+├─ fixed_point_wad — "Fixed point math module for numbers with 1e18 decimals"
 ├─ math128 — "Utility math functions for u128 numbers"
 ├─ math256 — "Utility math functions for u256 numbers"
 ├─ math64 — "Utility math functions for u64 numbers"
