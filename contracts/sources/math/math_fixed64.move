@@ -25,16 +25,39 @@ module suitears::math_fixed64 {
         fixed_point64::create_from_raw_value((exp_raw(raw_value) as u128))
     }
 
+        // Return log2(x) as FixedPoint64
+    public fun log2(x: u128): FixedPoint64 {
+        let integer_part = math128::floor_log2(x);
+        // Normalize x to [1, 2) in fixed point 63. To ensure x is smaller then 1<<64
+        if (x >= 1 << 63) {
+            x = x >> (integer_part - 63);
+        } else {
+            x = x << (63 - integer_part);
+        };
+        let frac = 0;
+        let delta = 1 << 63;
+        while (delta != 0) {
+            // log x = 1/2 log x^2
+            // x in [1, 2)
+            x = (x * x) >> 63;
+            // x is now in [1, 4)
+            // if x in [2, 4) then log x = 1 + log (x / 2)
+            if (x >= (2 << 63)) { frac = frac + delta; x = x >> 1; };
+            delta = delta >> 1;
+        };
+        fixed_point64::create_from_raw_value (((integer_part as u128) << 64) + frac)
+    }
+
     /// Because log2 is negative for values < 1 we instead return log2(x) + 64 which
     /// is positive for all values of x.
     public fun log2_plus_64(x: FixedPoint64): FixedPoint64 {
         let raw_value = (fixed_point64::get_raw_value(x) as u128);
-        math128::log2(raw_value)
+        log2(raw_value)
     }
 
     public fun ln_plus_32ln2(x: FixedPoint64): FixedPoint64 {
         let raw_value = fixed_point64::get_raw_value(x);
-        let x = (fixed_point64::get_raw_value(math128::log2(raw_value)) as u256);
+        let x = (fixed_point64::get_raw_value(log2(raw_value)) as u256);
         fixed_point64::create_from_raw_value(((x * LN2) >> 64 as u128))
     }
 

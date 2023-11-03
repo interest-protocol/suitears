@@ -6,7 +6,8 @@ module suitears::math256 {
   }
 
   public fun mul_div_up(x: u256, y: u256, z: u256): u256 {
-    div_up(x * y, z)
+    let r = mul_div_down(x, y, z);
+    r + if (x * y % z > 0) 1 else 0
   }
 
   /// @dev Returns the smallest of two numbers.
@@ -50,17 +51,21 @@ module suitears::math256 {
     }
   }
 
-  /// https://github.com/pentagonxyz/movemate
-  public fun pow(a: u256, b: u128): u256 {
-    let c = 1;
-
-    while (b > 0) {
-      if (b & 1 > 0) c = c * a;
-        b = b >> 1;
-        a = a * a;
-      };
-
-    c
+  // https://github.com/aptos-labs/aptos-core/blob/main/aptos-move/framework/aptos-stdlib/sources/math128.move
+  public fun pow(n: u256, e: u256): u256 {
+      if (e == 0) {
+            1
+        } else {
+            let p = 1;
+            while (e > 1) {
+                if (e % 2 == 1) {
+                    p = p * n;
+                };
+                e = e / 2;
+                n = n * n;
+            };
+            p * n
+        }
   }
 
   /// calculate sum of nums
@@ -91,10 +96,10 @@ module suitears::math256 {
   /// @dev Returns the square root of a number. If the number is not a perfect square, the value is rounded down.
   /// Inspired by Henry S. Warren, Jr.'s "Hacker's Delight" (Chapter 11).
   /// Costs only 9 gas in comparison to the 16 gas `sui::math::sqrt` costs (tested on Aptos).
-  public fun sqrt(a: u256): u256 {
+  public fun sqrt_down(a: u256): u256 {
     if (a == 0) return 0;
 
-    let result = 1 << ((log2(a) >> 1) as u8);
+    let result = 1 << ((log2_down(a) >> 1) as u8);
 
     result = (result + a / result) >> 1;
     result = (result + a / result) >> 1;
@@ -107,9 +112,14 @@ module suitears::math256 {
     min(result, a / result)
   }
 
+  public fun sqrt_up(value: u256): u256 {
+    let r = sqrt_down(value);
+    r + if (r * r < value) 1 else 0
+  }
+
   // * Log functions from https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/math/Math.sol
 
-  public fun log2(value: u256): u256 {
+  public fun log2_down(value: u256): u256 {
         let result = 0;
         if (value >> 128 > 0) {
           value = value >> 128;
@@ -152,7 +162,12 @@ module suitears::math256 {
        result
     }
 
-  public fun log10(value: u256): u256 {
+  public fun log2_up(value: u256): u256 {
+    let r = log10_down(value);
+    r + if (1 << (r as u8) < value) 1 else 0
+  } 
+
+  public fun log10_down(value: u256): u256 {
         let result = 0;
 
         if (value >= 10000000000000000000000000000000000000000000000000000000000000000) {
@@ -187,7 +202,12 @@ module suitears::math256 {
        result
   }
 
-  public fun log256(value: u256): u256 {
+  public fun log10_up(value: u256): u256 {
+    let r = log10_down(value);
+    r + if (pow(10, r) < value) 1 else 0
+  }
+
+  public fun log256_down(value: u256): u256 {
     let result = 0;
 
     if (value >> 128 > 0) {
@@ -209,5 +229,10 @@ module suitears::math256 {
       result = result + 1;
 
     result
+  }
+
+  public fun log256_up(value: u256): u256 {
+    let r = log256_down(value);
+    r + if ((1 << ((r << 3) as u8)) < value) 1 else 0
   }
 }
