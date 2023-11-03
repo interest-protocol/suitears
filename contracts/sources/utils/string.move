@@ -50,12 +50,12 @@ module suitears::string {
             loop {
                 if (into_char(haystack, i + j) == into_char(needle, j)) {
                     if (j == 0) {
-                        return true; // Found the substring
+                        return true // Found the substring
                     } else {
                         j = j - 1;
                     }
                 } else {
-                    break;
+                    break
                 }
             };
             i = i + 1;
@@ -263,6 +263,7 @@ module suitears::string {
 
     #[test_only]
     use std::ascii::{string, length};
+    #[test_only]
     use sui::test_scenario;
 
     #[test]
