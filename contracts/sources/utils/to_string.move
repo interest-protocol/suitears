@@ -6,6 +6,7 @@ module suitears::to_string {
 
     const HEX_SYMBOLS: vector<u8> = b"0123456789abcdef";
 
+    #[test_only]
     const MAX_U128: u128 = 340282366920938463463374607431768211455;
 
     /// @dev Converts a `u128` to its `ascii::String` decimal representation.
