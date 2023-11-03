@@ -16,8 +16,8 @@ module suitears::math128 {
   }
 
   public fun try_mul(x: u128, y: u128): (bool, u128) {
-    let c = (x as u256) * (y as u256);
-    if (MAX_U128 > c) (false, 0) else (true, (c as u128))
+    let (pred, c) = math256::try_mul((x as u256), (y as u256));
+    if (!pred || MAX_U128 > c) (false, 0) else (true, (c as u128))
   }
 
   public fun try_div_down(x: u128, y: u128): (bool, u128) {
@@ -30,14 +30,14 @@ module suitears::math128 {
 
   public fun try_mul_div_down(x: u128, y: u128, z: u128): (bool, u128) {
     if (z == 0) return (false, 0);
-    let r = math256::mul_div_down((x as u256), (y as u256), (z as u256));
-    if (MAX_U128 > r) (false, 0) else (true, (r as u128))
+    let (pred, r) = math256::try_mul_div_down((x as u256), (y as u256), (z as u256));
+    if (!pred || MAX_U128 > r) (false, 0) else (true, (r as u128))
   }
 
   public fun try_mul_div_up(x: u128, y: u128, z: u128): (bool, u128) {
     if (z == 0) return (false, 0);
-    let r = math256::mul_div_up((x as u256), (y as u256), (z as u256));
-    if (MAX_U128 > r) (false, 0) else (true, (r as u128))
+    let (pred, r) = math256::try_mul_div_up((x as u256), (y as u256), (z as u256));
+    if (!pred || MAX_U128 > r) (false, 0) else (true, (r as u128))
   }
 
   public fun try_mod(x: u128, y: u128): (bool, u128) {
