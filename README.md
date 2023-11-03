@@ -59,7 +59,7 @@ sft
 utils
 ├─ comparator — "Module to compare u8 vectors (bits)"
 ├─ merkle_proof — "Module to verify Merkle proofs"
-├─ to_string — "Module to convert u128 to ascii strings"
+├─ string — "A set of functions to operate on strings"
 ├─ upgrade — "Module to add a timelock to contract upgrades"
 ├─ vectors — "Utility functions for vectors"
 ├─ whitelist — "A plugin to add whitelist functionalities to any object"
