@@ -31,13 +31,11 @@ module suitears::math64 {
   }
 
   public fun try_mul_div_down(x: u64, y: u64, z: u64): (bool, u64) {
-    if (z == 0) return (false, 0);
     let (pred, r) = math256::try_mul_div_down((x as u256), (y as u256), (z as u256));
     if (!pred || MAX_U64 > r) (false, 0) else (true, (r as u64))
   }
 
   public fun try_mul_div_up(x: u64, y: u64, z: u64): (bool, u64) {
-    if (z == 0) return (false, 0);
     let (pred, r) = math256::try_mul_div_up((x as u256), (y as u256), (z as u256));
     if (!pred || MAX_U64 > r) (false, 0) else (true, (r as u64))
   }
