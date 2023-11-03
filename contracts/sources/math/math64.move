@@ -1,9 +1,48 @@
+// * Make sure the results are within u64 range
 module suitears::math64 {
   use std::vector;
 
   use suitears::math256;
 
   const QUADRATIC_SCALAR: u64 = 1 << 16;
+
+  const MAX_U64: u256 = 18446744073709551615;
+
+  public fun try_add(x: u64, y: u64): (bool, u64) {
+    let c = (x as u256) + (y as u256);
+    if (MAX_U64 > c) (false, 0) else (true, (c as u64))
+  }
+
+  public fun try_sub(x: u64, y: u64): (bool, u64) {
+    if (y > x) (false, 0) else (true, x - y)
+  }
+
+  public fun try_mul(x: u64, y: u64): (bool, u64) {
+    let (pred, c) = math256::try_mul((x as u256), (y as u256));
+    if (!pred || MAX_U64 > c) (false, 0) else (true, (c as u64))
+  }
+
+  public fun try_div_down(x: u64, y: u64): (bool, u64) {
+    if (y == 0) (false, 0) else (true, div_down(x, y))
+  }
+
+  public fun try_div_up(x: u64, y: u64): (bool, u64) {
+    if (y == 0) (false, 0) else (true, div_up(x, y))
+  }
+
+  public fun try_mul_div_down(x: u64, y: u64, z: u64): (bool, u64) {
+    let (pred, r) = math256::try_mul_div_down((x as u256), (y as u256), (z as u256));
+    if (!pred || MAX_U64 > r) (false, 0) else (true, (r as u64))
+  }
+
+  public fun try_mul_div_up(x: u64, y: u64, z: u64): (bool, u64) {
+    let (pred, r) = math256::try_mul_div_up((x as u256), (y as u256), (z as u256));
+    if (!pred || MAX_U64 > r) (false, 0) else (true, (r as u64))
+  }
+
+  public fun try_mod(x: u64, y: u64): (bool, u64) {
+    if (y == 0) (false, 0) else (true, x % y)
+  }
 
   public fun mul_div_down(x: u64, y: u64, z: u64): u64 {
     (math256::mul_div_down((x as u256), (y as u256), (z as u256)) as u64)
@@ -46,15 +85,7 @@ module suitears::math64 {
 
   /// SRC https://github.com/pentagonxyz/movemate/blob/main/sui/sources/math_u64.move
   public fun pow(x: u64, n: u64): u64 {
-    let c = 1;
-
-    while (n > 0) {
-      if (n & 1 > 0) c = c * x;
-        n = n >> 1;
-        x = x * x;
-      };
-
-    c
+    (math256::pow((x as u256), (n as u256)) as u64)
   }
 
   /// calculate sum of nums
@@ -72,9 +103,9 @@ module suitears::math64 {
   }
 
     /// Return x clamped to the interval [lower, upper].
-    public fun clamp(x: u64, lower: u64, upper: u64): u64 {
-        min(upper, max(lower, x))
-    }
+  public fun clamp(x: u64, lower: u64, upper: u64): u64 {
+    min(upper, max(lower, x))
+  }
 
   public fun avg(nums: &vector<u64>): u64{
     let len = vector::length(nums);
@@ -96,56 +127,27 @@ module suitears::math64 {
     (pow(x, 2) / QUADRATIC_SCALAR * a / QUADRATIC_SCALAR) + (b * x / QUADRATIC_SCALAR) + c
   }
   
-  /// Source: https://github.com/pentagonxyz/movemate/blob/main/sui/sources/math_u64.move
-  /// @dev Returns the square root of a number. If the number is not a perfect square, the value is rounded down.
-  /// Inspired by Henry S. Warren, Jr.'s "Hacker's Delight" (Chapter 11).
-  /// Costs only 9 gas in comparison to the 16 gas `sui::math::sqrt` costs (tested on Aptos).
-  public fun sqrt(a: u64): u64 {
-    if (a == 0) {
-      return 0
-    };
+  public fun sqrt_down(a: u64): u64 {
+    (math256::sqrt_down((a as u256)) as u64)
+  }
 
-    // For our first guess, we get the biggest power of 2 which is smaller than the square root of the target.
-    // We know that the "msb" (most significant bit) of our target number `a` is a power of 2 such that we have
-    // `msb(a) <= a < 2*msb(a)`.
-    // We also know that `k`, the position of the most significant bit, is such that `msb(a) = 2**k`.
-    // This gives `2**k < a <= 2**(k+1)` => `2**(k/2) <= sqrt(a) < 2 ** (k/2+1)`.
-    // Using an algorithm similar to the msb computation, we are able to compute `result = 2**(k/2)` which is a
-    // good first approximation of `sqrt(a)` with at least 1 correct bit.
-    let result = 1;
-    let x = a;
-    
-    if (x >> 32 > 0) {
-      x = x >> 32;
-      result = result << 16;
-    };
-    if (x >> 16 > 0) {
-      x = x >> 16;
-      result = result << 8;
-    };
-    if (x >> 8 > 0) {
-      x = x >> 8;
-      result = result << 4;
-    };
-    if (x >> 4 > 0) {
-      x = x >> 4;
-      result = result << 2;
-    };
-    if (x >> 2 > 0) {
-      result = result << 1;
-    };
+  public fun sqrt_up(a: u64): u64 {
+    (math256::sqrt_up((a as u256)) as u64)
+  }
 
-    // At this point `result` is an estimation with one bit of precision. We know the true value is a uint128,
-    // since it is the square root of a uint256. Newton's method converges quadratically (precision doubles at
-    // every iteration). We thus need at most 7 iteration to turn our partial result with one bit of precision
-    // into the expected uint128 result.
-    result = (result + a / result) >> 1;
-    result = (result + a / result) >> 1;
-    result = (result + a / result) >> 1;
-    result = (result + a / result) >> 1;
-    result = (result + a / result) >> 1;
-    result = (result + a / result) >> 1;
-    result = (result + a / result) >> 1;
-    min(result, a / result)
+  public fun log2_down(value: u64): u8 {
+    math256::log2_down((value as u256))
+  }
+
+  public fun log2_up(value: u64): u8 {
+    math256::log2_up((value as u256))
+  }
+
+  public fun log10_down(value: u64): u8 {
+    math256::log10_down((value as u256))
+  }
+
+  public fun log10_up(value: u64): u8 {
+    math256::log10_up((value as u256))
   }
 }

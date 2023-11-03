@@ -2,9 +2,9 @@
 /// Standard math utilities missing in the Move Language.
 
 module suitears::math_fixed64 {
-    use suitears::fixed_point64::{Self, FixedPoint64};
     use suitears::math128;
-
+    use suitears::fixed_point64::{Self, FixedPoint64};
+    
     // Abort code on overflow
     const EOverflowExp: u64 = 1;
 
@@ -14,7 +14,7 @@ module suitears::math_fixed64 {
         /// Square root of fixed point number
     public fun sqrt(x: FixedPoint64): FixedPoint64 {
         let y = fixed_point64::get_raw_value(x);
-        let z = (math128::sqrt(y) << 32 as u256);
+        let z = (math128::sqrt_down(y) << 32 as u256);
         z = (z + ((y as u256) << 64) / z) >> 1;
         fixed_point64::create_from_raw_value((z as u128))
     }
@@ -25,16 +25,39 @@ module suitears::math_fixed64 {
         fixed_point64::create_from_raw_value((exp_raw(raw_value) as u128))
     }
 
+        // Return log2(x) as FixedPoint64
+    public fun log2(x: u128): FixedPoint64 {
+        let integer_part = (math128::log2_down(x) as u8);
+        // Normalize x to [1, 2) in fixed point 63. To ensure x is smaller then 1<<64
+        if (x >= 1 << 63) {
+            x = x >> (integer_part - 63);
+        } else {
+            x = x << (63 - integer_part);
+        };
+        let frac = 0;
+        let delta = 1 << 63;
+        while (delta != 0) {
+            // log x = 1/2 log x^2
+            // x in [1, 2)
+            x = (x * x) >> 63;
+            // x is now in [1, 4)
+            // if x in [2, 4) then log x = 1 + log (x / 2)
+            if (x >= (2 << 63)) { frac = frac + delta; x = x >> 1; };
+            delta = delta >> 1;
+        };
+        fixed_point64::create_from_raw_value (((integer_part as u128) << 64) + frac)
+    }
+
     /// Because log2 is negative for values < 1 we instead return log2(x) + 64 which
     /// is positive for all values of x.
     public fun log2_plus_64(x: FixedPoint64): FixedPoint64 {
         let raw_value = (fixed_point64::get_raw_value(x) as u128);
-        math128::log2(raw_value)
+        log2(raw_value)
     }
 
     public fun ln_plus_32ln2(x: FixedPoint64): FixedPoint64 {
         let raw_value = fixed_point64::get_raw_value(x);
-        let x = (fixed_point64::get_raw_value(math128::log2(raw_value)) as u256);
+        let x = (fixed_point64::get_raw_value(log2(raw_value)) as u256);
         fixed_point64::create_from_raw_value(((x * LN2) >> 64 as u128))
     }
 
@@ -45,19 +68,11 @@ module suitears::math_fixed64 {
     }
 
     /// Specialized function for x * y / z that omits intermediate shifting
-    public fun mul_div_down(x: FixedPoint64, y: FixedPoint64, z: FixedPoint64): FixedPoint64 {
+    public fun mul_div(x: FixedPoint64, y: FixedPoint64, z: FixedPoint64): FixedPoint64 {
         let a = fixed_point64::get_raw_value(x);
         let b = fixed_point64::get_raw_value(y);
         let c = fixed_point64::get_raw_value(z);
         fixed_point64::create_from_raw_value (math128::mul_div_down(a, b, c))
-    }
-
-    /// Specialized function for x * y / z that omits intermediate shifting
-    public fun mul_div_up(x: FixedPoint64, y: FixedPoint64, z: FixedPoint64): FixedPoint64 {
-        let a = fixed_point64::get_raw_value(x);
-        let b = fixed_point64::get_raw_value(y);
-        let c = fixed_point64::get_raw_value(z);
-        fixed_point64::create_from_raw_value(math128::mul_div_up(a, b, c))
     }
 
     // Calculate e^x where x and the result are fixed point numbers
@@ -101,6 +116,4 @@ module suitears::math_fixed64 {
         };
         res
     }
-
-
 }

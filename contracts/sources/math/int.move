@@ -87,61 +87,61 @@ module suitears::int {
         ret
     }
 
-    public fun bits(x: &Int): u256 {
+    public fun bits(x: Int): u256 {
         x.bits
     }
 
-    public fun as_u8(x: &Int): u8 {
+    public fun as_u8(x: Int): u8 {
         assert!(is_positive(x), EConversionUnderflow);
         (x.bits as u8)
     }
 
-    public fun as_u16(x: &Int): u16 {
+    public fun as_u16(x: Int): u16 {
         assert!(is_positive(x), EConversionUnderflow);
         (x.bits as u16)
     }
 
-    public fun as_u32(x: &Int): u32 {
+    public fun as_u32(x: Int): u32 {
         assert!(is_positive(x), EConversionUnderflow);
         (x.bits as u32)
     }
 
-    public fun as_u64(x: &Int): u64 {
+    public fun as_u64(x: Int): u64 {
         assert!(is_positive(x), EConversionUnderflow);
         (x.bits as u64)
     }
 
-    public fun as_u128(x: &Int): u128 {
+    public fun as_u128(x: Int): u128 {
         assert!(is_positive(x), EConversionUnderflow);
         (x.bits as u128)
     }
 
-    public fun as_u256(x: &Int): u256 {
+    public fun as_u256(x: Int): u256 {
         assert!(is_positive(x), EConversionUnderflow);
         x.bits
     }
 
-    public fun truncate_to_u8(x: &Int): u8 {
+    public fun truncate_to_u8(x: Int): u8 {
         assert!(is_positive(x), EConversionUnderflow);
         ((x.bits & 0xFF) as u8)
     }
 
-    public fun truncate_to_u16(x: &Int): u16 {
+    public fun truncate_to_u16(x: Int): u16 {
         assert!(is_positive(x), EConversionUnderflow);
         ((x.bits & 0xFFFF) as u16)
     }
 
-    public fun truncate_to_u32(x: &Int): u32 {
+    public fun truncate_to_u32(x: Int): u32 {
         assert!(is_positive(x), EConversionUnderflow);
         ((x.bits & 0xFFFFFFFF) as u32)
     }
 
-    public fun truncate_to_u64(x: &Int): u64 {
+    public fun truncate_to_u64(x: Int): u64 {
         assert!(is_positive(x), EConversionUnderflow);
         ((x.bits & 0xFFFFFFFFFFFFFFFF) as u64)
     }
 
-    public fun truncate_to_u128(x: &Int): u128 {
+    public fun truncate_to_u128(x: Int): u128 {
         assert!(is_positive(x), EConversionUnderflow);
         ((x.bits & 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF) as u128)
     }
@@ -158,7 +158,7 @@ module suitears::int {
         Int { bits: MAX_I256_AS_U256 }
     }
 
-    public fun is_neg(x: &Int): bool {
+    public fun is_neg(x: Int): bool {
         (x.bits & U256_WITH_FIRST_BIT_SET) != 0
     }
 
@@ -166,20 +166,20 @@ module suitears::int {
         x.bits == 0
     }
 
-    public fun is_positive(x: &Int): bool {
+    public fun is_positive(x: Int): bool {
         U256_WITH_FIRST_BIT_SET > x.bits
     }
 
-    public fun flip(x: &Int): Int {
+    public fun flip(x: Int): Int {
         if (is_neg(x)) { abs(x) } else { neg_from_u256(x.bits) } 
     }
 
-    public fun abs(x: &Int): Int {
-        if (is_neg(x)) from_u256((x.bits ^ MAX_U256) + 1) else *x 
+    public fun abs(x: Int): Int {
+        if (is_neg(x)) from_u256((x.bits ^ MAX_U256) + 1) else x 
     }
 
     /// @notice Compare `a` and `b`.
-    public fun compare(a: &Int, b: &Int): u8 {
+    public fun compare(a: Int, b: Int): u8 {
         if (a.bits == b.bits) return EQUAL;
         if (is_positive(a)) {
             // A is positive
@@ -202,29 +202,29 @@ module suitears::int {
         }
     }
 
-    public fun eq(a: &Int, b: &Int): bool {
+    public fun eq(a: Int, b: Int): bool {
         compare(a, b) == EQUAL
     }
 
-    public fun lt(a: &Int, b: &Int): bool {
+    public fun lt(a: Int, b: Int): bool {
         compare(a, b) == LESS_THAN
     }
 
-    public fun lte(a: &Int, b: &Int): bool {
+    public fun lte(a: Int, b: Int): bool {
         let pred = compare(a, b);
         pred == LESS_THAN || pred == EQUAL
     }
 
-    public fun gt(a: &Int, b: &Int): bool {
+    public fun gt(a: Int, b: Int): bool {
         compare(a, b) == GREATER_THAN
     }
 
-    public fun gte(a: &Int, b: &Int): bool {
+    public fun gte(a: Int, b: Int): bool {
         let pred = compare(a, b);
         pred == GREATER_THAN || pred == EQUAL
     }
 
-    public fun add(a: &Int, b: &Int): Int {
+    public fun add(a: Int, b: Int): Int {
         if (is_positive(a)) {
             // A is posiyive
             if (is_positive(b)) {
@@ -251,7 +251,7 @@ module suitears::int {
     }
 
     /// @notice Subtract `a - b`.
-    public fun sub(a: &Int, b: &Int): Int {
+    public fun sub(a: Int, b: Int): Int {
         if (is_positive(a)) {
             // A is positive
             if (is_positive(b)) {
@@ -278,7 +278,7 @@ module suitears::int {
     }
 
     /// @notice Multiply `a * b`.
-    public fun mul(a: &Int, b: &Int): Int {
+    public fun mul(a: Int, b: Int): Int {
         if (is_positive(a)) {
             // A is positive
             if (is_positive(b)) {
@@ -301,7 +301,7 @@ module suitears::int {
     }
 
     /// @notice Divide `a / b`.
-    public fun div(a: &Int, b: &Int): Int {
+    public fun div(a: Int, b: Int): Int {
         if (is_positive(a)) {
             // A is positive
             if (is_positive(b)) {
@@ -323,7 +323,7 @@ module suitears::int {
         }    
     }
 
-    public fun mod(a: &Int, b: &Int): Int {
+    public fun mod(a: Int, b: Int): Int {
         let a_abs = abs(a);
         let b_abs = abs(b);
 
@@ -332,7 +332,7 @@ module suitears::int {
        if (is_neg(a) && result != 0)   neg_from_u256(result) else from_u256(result)
     }
 
-    public fun shr(a: &Int, rhs: u8): Int { 
+    public fun shr(a: Int, rhs: u8): Int { 
 
      Int {
         bits: if (is_positive(a)) {
@@ -344,19 +344,19 @@ module suitears::int {
      } 
     }     
 
-    public fun shl(a: &Int, rhs: u8): Int {
+    public fun shl(a: Int, rhs: u8): Int {
         Int {
             bits: a.bits << rhs
         } 
     }
 
-    public fun or(a: &Int, b: &Int): Int {
+    public fun or(a: Int, b: Int): Int {
       Int {
         bits: a.bits | b.bits
       } 
     }
 
-     public fun and(a: &Int, b: &Int): Int {
+     public fun and(a: Int, b: Int): Int {
       Int {
         bits: a.bits & b.bits
       } 
