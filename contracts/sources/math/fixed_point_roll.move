@@ -18,7 +18,7 @@ module suitears::fixed_point_roll {
   }
 
   public fun try_roll_div_down(x: u128, y: u128): (bool, u128) {
-    math128::try_mul_div_down(x, y, ROLL)
+    math128::try_mul_div_down(x, ROLL, y)
   }
 
   public fun try_roll_div_up(x: u128, y: u128): (bool, u128) {
