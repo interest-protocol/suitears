@@ -29,6 +29,7 @@ module suitears::math256 {
   }
 
   public fun try_mul_div_down(x: u256, y: u256, z: u256): (bool, u256) {
+    if (z == 0) return (false, 0);
     let (pred, _) = try_mul(x, y);
     if (!pred) return (false, 0);
 
@@ -36,6 +37,7 @@ module suitears::math256 {
   }
 
   public fun try_mul_div_up(x: u256, y: u256, z: u256): (bool, u256) {
+    if (z == 0) return (false, 0);
     let (pred, _) = try_mul(x, y);
     if (!pred) return (false, 0);
 
