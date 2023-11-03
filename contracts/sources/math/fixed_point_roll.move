@@ -1,7 +1,6 @@
 // Fixed Point Math without a Type guard/wrapper  
 // Wad has the decimal factor as Sui - 9 decimals
 module suitears::fixed_point_roll {
-
   use suitears::math128;
   use suitears::math256;
 

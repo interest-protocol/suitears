@@ -1,7 +1,6 @@
 // Source & inspired from Scallop 
 
 module suitears::whitelist {
-
   use sui::object::UID;
   use sui::dynamic_field as df;
 

@@ -1,7 +1,6 @@
 // Fixed Point Math without a Type guard/wrapper  
 // Wad has a higher accurate and assumes values have 18 decimals
 module suitears::fixed_point_wad {
-
   use suitears::int::{Self, Int};
   use suitears::math256::{Self, pow, log2_down};
 

@@ -2,9 +2,9 @@
 /// Standard math utilities missing in the Move Language.
 
 module suitears::math_fixed64 {
-    use suitears::fixed_point64::{Self, FixedPoint64};
     use suitears::math128;
-
+    use suitears::fixed_point64::{Self, FixedPoint64};
+    
     // Abort code on overflow
     const EOverflowExp: u64 = 1;
 
