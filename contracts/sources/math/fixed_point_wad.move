@@ -67,7 +67,7 @@ module suitears::fixed_point_wad {
   public fun ln_wad(x: Int): Int {
     assert!(int::is_positive(x), EUndefined);
 
-    let k = int::sub(int::from_u256(log2_down(int::as_u256(x))), int::from_u256(96));
+    let k = int::sub(int::from_u8(log2_down(int::as_u256(x))), int::from_u256(96));
 
     x = int::shl(x, (156 - int::as_u8(k)));
     x = int::neg_from_u256(int::as_u256(x) >> 159);

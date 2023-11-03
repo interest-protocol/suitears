@@ -14,7 +14,7 @@ module suitears::math_fixed64 {
         /// Square root of fixed point number
     public fun sqrt(x: FixedPoint64): FixedPoint64 {
         let y = fixed_point64::get_raw_value(x);
-        let z = (math128::sqrt(y) << 32 as u256);
+        let z = (math128::sqrt_down(y) << 32 as u256);
         z = (z + ((y as u256) << 64) / z) >> 1;
         fixed_point64::create_from_raw_value((z as u128))
     }
@@ -27,7 +27,7 @@ module suitears::math_fixed64 {
 
         // Return log2(x) as FixedPoint64
     public fun log2(x: u128): FixedPoint64 {
-        let integer_part = math128::floor_log2(x);
+        let integer_part = (math128::log2_down(x) as u8);
         // Normalize x to [1, 2) in fixed point 63. To ensure x is smaller then 1<<64
         if (x >= 1 << 63) {
             x = x >> (integer_part - 63);

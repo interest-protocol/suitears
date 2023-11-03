@@ -119,7 +119,7 @@ module suitears::math256 {
 
   // * Log functions from https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/math/Math.sol
 
-  public fun log2_down(value: u256): u256 {
+  public fun log2_down(value: u256): u8 {
         let result = 0;
         if (value >> 128 > 0) {
           value = value >> 128;
@@ -162,12 +162,12 @@ module suitears::math256 {
        result
     }
 
-  public fun log2_up(value: u256): u256 {
+  public fun log2_up(value: u256): u8 {
     let r = log10_down(value);
     r + if (1 << (r as u8) < value) 1 else 0
   } 
 
-  public fun log10_down(value: u256): u256 {
+  public fun log10_down(value: u256): u8 {
         let result = 0;
 
         if (value >= 10000000000000000000000000000000000000000000000000000000000000000) {
@@ -202,12 +202,12 @@ module suitears::math256 {
        result
   }
 
-  public fun log10_up(value: u256): u256 {
+  public fun log10_up(value: u256): u8 {
     let r = log10_down(value);
-    r + if (pow(10, r) < value) 1 else 0
+    r + if (pow(10, (r as u256)) < value) 1 else 0
   }
 
-  public fun log256_down(value: u256): u256 {
+  public fun log256_down(value: u256): u8 {
     let result = 0;
 
     if (value >> 128 > 0) {
@@ -231,8 +231,8 @@ module suitears::math256 {
     result
   }
 
-  public fun log256_up(value: u256): u256 {
+  public fun log256_up(value: u256): u8 {
     let r = log256_down(value);
-    r + if ((1 << ((r << 3) as u8)) < value) 1 else 0
+    r + if (1 << ((r << 3)) < value) 1 else 0
   }
 }
