@@ -68,19 +68,11 @@ module suitears::math_fixed64 {
     }
 
     /// Specialized function for x * y / z that omits intermediate shifting
-    public fun mul_div_down(x: FixedPoint64, y: FixedPoint64, z: FixedPoint64): FixedPoint64 {
+    public fun mul_div(x: FixedPoint64, y: FixedPoint64, z: FixedPoint64): FixedPoint64 {
         let a = fixed_point64::get_raw_value(x);
         let b = fixed_point64::get_raw_value(y);
         let c = fixed_point64::get_raw_value(z);
         fixed_point64::create_from_raw_value (math128::mul_div_down(a, b, c))
-    }
-
-    /// Specialized function for x * y / z that omits intermediate shifting
-    public fun mul_div_up(x: FixedPoint64, y: FixedPoint64, z: FixedPoint64): FixedPoint64 {
-        let a = fixed_point64::get_raw_value(x);
-        let b = fixed_point64::get_raw_value(y);
-        let c = fixed_point64::get_raw_value(z);
-        fixed_point64::create_from_raw_value(math128::mul_div_up(a, b, c))
     }
 
     // Calculate e^x where x and the result are fixed point numbers
@@ -124,6 +116,4 @@ module suitears::math_fixed64 {
         };
         res
     }
-
-
 }

@@ -1,3 +1,4 @@
+// * Make sure the results are within u64 range
 module suitears::math64 {
   use std::vector;
 

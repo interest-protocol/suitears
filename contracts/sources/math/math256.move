@@ -7,7 +7,7 @@ module suitears::math256 {
 
   public fun mul_div_up(x: u256, y: u256, z: u256): u256 {
     let r = mul_div_down(x, y, z);
-    r + if (x * y % z > 0) 1 else 0
+    r + if ((x * y) % z > 0) 1 else 0
   }
 
   /// @dev Returns the smallest of two numbers.

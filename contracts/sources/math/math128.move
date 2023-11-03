@@ -1,3 +1,4 @@
+// * Make sure the results are within u128 range
 module suitears::math128 {
   use std::vector;
 
