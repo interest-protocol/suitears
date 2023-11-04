@@ -1,8 +1,6 @@
 // Credits: https://github.com/pancakeswap/pancake-contracts-move/blob/main/pancake-smart-chef/sources/smart_chef.move
 // ** IMPORTANT ALL TIMESTAMPS IN SECOND
 module suitears::farm {
-  use std::type_name;
-
   use sui::math;
   use sui::event::emit;
   use sui::clock::{Self, Clock};
@@ -16,14 +14,13 @@ module suitears::farm {
   // Errors
   const EInvalidStartTime: u64 = 0;
   const EInvalidEndTime: u64 = 1;
-  const ESameCoin: u64 = 2;
+  const EFarmAlreadyStarted: u64 = 2;
   const EFarmLimitZero: u64 = 3;
   const EFarmEnded: u64 = 4;
   const EStakeAboveLimit: u64 = 5;
   const EInsufficientStakeAmount: u64 = 6;
   const ENoLimitSet: u64 = 7;
   const ELimitPerUserMustBeHigher: u64 = 8;
-  const EFarmAlreadyStarted: u64 = 9;
 
   struct FarmWitness has drop {}
 
@@ -134,7 +131,6 @@ module suitears::farm {
   ): Farm<Label, StakeCoin, RewardCoin> {
     assert!(clock_timestamp_s(c) > start_timestamp, EInvalidStartTime);
     assert!(end_timestamp > start_timestamp, EInvalidEndTime);
-    assert!(type_name::get<StakeCoin>() != type_name::get<RewardCoin>(), ESameCoin);
 
     if (seconds_for_user_limit != 0) {
       assert!(farm_limit_per_user != 0, EFarmLimitZero);
