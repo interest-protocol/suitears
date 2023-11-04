@@ -11,7 +11,7 @@ module suitears::dao_treasury {
   use sui::tx_context::{Self, TxContext};
 
   use suitears::fixed_point_roll::roll_mul_up;
-  use suitears::dao_action::{Action, finish_action};
+  use suitears::dao_action::{Action, finish_action, complete_rule};
   use suitears::linear_vesting_wallet::{Self, Wallet as LinearWallet};
   use suitears::quadratic_vesting_wallet::{Self, Wallet as QuadraticWallet};
 
@@ -145,10 +145,11 @@ module suitears::dao_treasury {
   public fun transfer<DaoWitness: drop, CoinType>(
     treasury: &mut DaoTreasury<DaoWitness>,
     pub: &Publisher,
-    action: Action<DaoWitness, TreasuryActionWitness, CoinType, TransferPayload>, 
+    action: Action<DaoWitness, CoinType, TransferPayload>, 
     ctx: &mut TxContext
   ): Coin<CoinType> {
-    let payload = finish_action(TreasuryActionWitness {}, action);
+    complete_rule(TreasuryActionWitness {}, &mut action);
+    let payload = finish_action(action);
     assert!(get<CoinType>() == payload.type, EMismatchCoinType);
     assert!(object::id(pub) == payload.publisher_id, EInvalidPublisher);
     
@@ -168,10 +169,11 @@ module suitears::dao_treasury {
     treasury: &mut DaoTreasury<DaoWitness>,
     c: &Clock,
     pub: &Publisher,
-    action: Action<DaoWitness, TreasuryActionWitness, CoinType, TransferVestingWalletPayload>, 
+    action: Action<DaoWitness, CoinType, TransferVestingWalletPayload>, 
     ctx: &mut TxContext    
   ): LinearWallet<CoinType> {
-    let payload = finish_action(TreasuryActionWitness {}, action);
+    complete_rule(TreasuryActionWitness {}, &mut action);
+    let payload = finish_action( action);
     assert!(get<CoinType>() == payload.type, EMismatchCoinType);
     assert!(object::id(pub) == payload.publisher_id, EInvalidPublisher);
     
@@ -196,10 +198,11 @@ module suitears::dao_treasury {
     treasury: &mut DaoTreasury<DaoWitness>,
     c: &Clock,
     pub: &Publisher,
-    action: Action<DaoWitness, TreasuryActionWitness, CoinType, TransferQuadraticWalletPayload>, 
+    action: Action<DaoWitness, CoinType, TransferQuadraticWalletPayload>, 
     ctx: &mut TxContext    
   ): QuadraticWallet<CoinType> {
-    let payload = finish_action(TreasuryActionWitness {}, action);
+    complete_rule(TreasuryActionWitness {}, &mut action);
+    let payload = finish_action(action);
     assert!(get<CoinType>() == payload.type, EMismatchCoinType);
     assert!(object::id(pub) == payload.publisher_id, EInvalidPublisher);
     
