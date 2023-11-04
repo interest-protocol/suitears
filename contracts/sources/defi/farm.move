@@ -21,6 +21,7 @@ module suitears::farm {
   const EInsufficientStakeAmount: u64 = 6;
   const ENoLimitSet: u64 = 7;
   const ELimitPerUserMustBeHigher: u64 = 8;
+  const EAccountHasValue: u64 = 8;
 
   struct FarmWitness has drop {}
 
@@ -375,6 +376,12 @@ module suitears::farm {
     object::delete(id);
     balance::destroy_zero(balance_reward_coin);
     balance::destroy_zero(balance_stake_coin)
+  }
+
+  public fun destroy_account<Label, StakeCoin, RewardCoin>(account: Account<Label, StakeCoin, RewardCoin>) {
+    let Account { id, amount, reward_debt: _ } = account;
+    assert!(amount == 0, EAccountHasValue);
+    object::delete(id);
   }
 
   // @dev Can attach the Account to the farm and other data
