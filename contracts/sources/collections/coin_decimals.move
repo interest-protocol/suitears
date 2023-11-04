@@ -41,4 +41,9 @@ module suitears::coin_decimals {
   public fun is_coin_registered<CoinType>(self: &CoinDecimals): bool {
     df::exists_(&self.id, get<CoinType>())
   }
+
+  #[test_only]
+  fun init_for_testing(ctx: &mut TxContext) {
+    init(ctx);
+  }
 }
