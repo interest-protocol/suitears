@@ -43,7 +43,7 @@ module suitears::coin_decimals {
   }
 
   #[test_only]
-  fun init_for_testing(ctx: &mut TxContext) {
+  public fun init_for_testing(ctx: &mut TxContext) {
     init(ctx);
   }
 }
