@@ -70,7 +70,7 @@ module suitears::dao {
     treasury: Option<ID>
   }
 
-  struct Proposal<phantom DaoWitness: drop, phantom ModuleWitness: drop, phantom CoinType, T: store> has key, store {
+  struct Proposal<phantom DaoWitness: drop, phantom CoinType, T: store> has key, store {
     id: UID,
     proposer: address,
     start_time: u64,
@@ -85,7 +85,7 @@ module suitears::dao {
     hash: vector<u8>
   }
 
-  struct Vote<phantom DaoWitness: drop, phantom ModuleWitness: drop, phantom CoinType, phantom T> has  key, store {
+  struct Vote<phantom DaoWitness: drop, phantom CoinType, phantom T> has  key, store {
     id: UID,
     balance: Balance<CoinType>,
     proposal_id: ID,
@@ -114,12 +114,12 @@ module suitears::dao {
     min_quorum_votes: u64
   }
 
-  struct NewProposal<phantom DaoWitness, phantom ModuleWitness, phantom CoinType, phantom T> has copy, drop {
+  struct NewProposal<phantom DaoWitness, phantom CoinType, phantom T> has copy, drop {
     proposal_id: ID,
     proposer: address,
   }
 
-  struct CastVote<phantom DaoWitness, phantom ModuleWitness, phantom CoinType, phantom T> has copy, drop {
+  struct CastVote<phantom DaoWitness, phantom CoinType, phantom T> has copy, drop {
     voter: address, 
     proposal_id: ID,
     agree: bool,
@@ -127,7 +127,7 @@ module suitears::dao {
     value: u64
   }
 
-  struct ChangeVote<phantom DaoWitness, phantom ModuleWitness, phantom CoinType, phantom T> has copy, drop {
+  struct ChangeVote<phantom DaoWitness, phantom CoinType, phantom T> has copy, drop {
     voter: address, 
     proposal_id: ID,
     vote_id: ID,
@@ -136,14 +136,14 @@ module suitears::dao {
     value: u64
   }
 
-  struct RevokeVote<phantom DaoWitness, phantom ModuleWitness, phantom CoinType, phantom T> has copy, drop {
+  struct RevokeVote<phantom DaoWitness, phantom CoinType, phantom T> has copy, drop {
     voter: address, 
     proposal_id: ID,
     agree: bool,
     value: u64
   }
 
-  struct UnstakeVote<phantom DaoWitness, phantom ModuleWitness, phantom CoinType, phantom T> has copy, drop {
+  struct UnstakeVote<phantom DaoWitness, phantom CoinType, phantom T> has copy, drop {
     voter: address, 
     proposal_id: ID,
     agree: bool,
@@ -212,7 +212,7 @@ module suitears::dao {
     )
   }
 
-  public fun propose_with_action<DaoWitness: drop, ModuleWitness: drop, CoinType, T: store>(
+  public fun propose_with_action<DaoWitness: drop, CoinType, T: store>(
     dao: &mut Dao<DaoWitness, CoinType>,
     c: &Clock,
     payload: T,
@@ -220,7 +220,7 @@ module suitears::dao {
     min_quorum_votes: u64,
     hash: vector<u8>,//
     ctx: &mut TxContext
-  ): Proposal<DaoWitness, ModuleWitness,  CoinType, T> {
+  ): Proposal<DaoWitness, CoinType, T> {
    propose(dao, c, option::some(payload), action_delay, min_quorum_votes, hash, ctx)
   }
 
@@ -231,17 +231,17 @@ module suitears::dao {
     min_quorum_votes: u64,
     hash: vector<u8>,//
     ctx: &mut TxContext
-  ): Proposal<DaoWitness, Nothing,  CoinType, Nothing> {
+  ): Proposal<DaoWitness, CoinType, Nothing> {
    propose(dao, c, option::none(), action_delay, min_quorum_votes, hash, ctx)
   }
 
-  public fun cast_vote<DaoWitness: drop, ModuleWitness: drop, CoinType, T: store>(
-    proposal: &mut Proposal<DaoWitness, ModuleWitness,  CoinType, T>,
+  public fun cast_vote<DaoWitness: drop, CoinType, T: store>(
+    proposal: &mut Proposal<DaoWitness, CoinType, T>,
     c: &Clock,
     stake: Coin<CoinType>,
     agree: bool,
     ctx: &mut TxContext
-  ): Vote<DaoWitness, ModuleWitness,  CoinType, T> {
+  ): Vote<DaoWitness, CoinType, T> {
     assert!(get_proposal_state(proposal, clock::timestamp_ms(c)) == ACTIVE, EProposalMustBeActive);
 
     let value = coin::value(&stake);
@@ -251,7 +251,7 @@ module suitears::dao {
 
     let proposal_id = object::id(proposal);
 
-    emit(CastVote<DaoWitness, ModuleWitness,  CoinType, T>{ proposal_id: proposal_id, value, voter: tx_context::sender(ctx), end_time: proposal.end_time, agree });
+    emit(CastVote<DaoWitness,  CoinType, T>{ proposal_id: proposal_id, value, voter: tx_context::sender(ctx), end_time: proposal.end_time, agree });
 
     Vote {
       id: object::new(ctx),
@@ -262,9 +262,9 @@ module suitears::dao {
     }
   }
 
-  public fun change_vote<DaoWitness: drop, ModuleWitness: drop, CoinType, T: store>(
-    proposal: &mut Proposal<DaoWitness, ModuleWitness,  CoinType, T>,
-    vote: &mut Vote<DaoWitness, ModuleWitness,  CoinType, T>,
+  public fun change_vote<DaoWitness: drop, CoinType, T: store>(
+    proposal: &mut Proposal<DaoWitness,  CoinType, T>,
+    vote: &mut Vote<DaoWitness,  CoinType, T>,
     c: &Clock,
     ctx: &mut TxContext
   ) {
@@ -283,12 +283,12 @@ module suitears::dao {
       proposal.against_votes = proposal.against_votes + value;
     };
 
-    emit(ChangeVote<DaoWitness, ModuleWitness,  CoinType, T>{ proposal_id, value, voter: tx_context::sender(ctx), end_time: proposal.end_time, agree: vote.agree, vote_id: object::id(vote) });
+    emit(ChangeVote<DaoWitness,  CoinType, T>{ proposal_id, value, voter: tx_context::sender(ctx), end_time: proposal.end_time, agree: vote.agree, vote_id: object::id(vote) });
   }
 
-  public fun revoke_vote<DaoWitness: drop, ModuleWitness: drop, CoinType, T: store>(
-    proposal: &mut Proposal<DaoWitness, ModuleWitness,  CoinType, T>,
-    vote: Vote<DaoWitness, ModuleWitness,  CoinType, T>,
+  public fun revoke_vote<DaoWitness: drop, CoinType, T: store>(
+    proposal: &mut Proposal<DaoWitness,  CoinType, T>,
+    vote: Vote<DaoWitness, CoinType, T>,
     c: &Clock,
     ctx: &mut TxContext    
   ): Coin<CoinType> {
@@ -299,14 +299,14 @@ module suitears::dao {
     let value = balance::value(&vote.balance);
     if (vote.agree) proposal.for_votes = proposal.for_votes - value else proposal.against_votes = proposal.against_votes - value;
 
-    emit(RevokeVote<DaoWitness, ModuleWitness,  CoinType, T>{ proposal_id: proposal_id, value, agree: vote.agree, voter: tx_context::sender(ctx) });
+    emit(RevokeVote<DaoWitness,  CoinType, T>{ proposal_id: proposal_id, value, agree: vote.agree, voter: tx_context::sender(ctx) });
 
     destroy_vote(vote, ctx)
   }
 
-  public fun unstake_vote<DaoWitness: drop, ModuleWitness: drop, CoinType, T: store>(
-    proposal: &Proposal<DaoWitness, ModuleWitness,  CoinType, T>,
-    vote: Vote<DaoWitness, ModuleWitness,  CoinType, T>,
+  public fun unstake_vote<DaoWitness: drop, CoinType, T: store>(
+    proposal: &Proposal<DaoWitness, CoinType, T>,
+    vote: Vote<DaoWitness, CoinType, T>,
     c: &Clock,
     ctx: &mut TxContext      
   ): Coin<CoinType> {
@@ -315,13 +315,13 @@ module suitears::dao {
     let proposal_id = object::id(proposal);
     assert!(proposal_id == vote.proposal_id, EVoteAndProposalIdMismatch);
 
-    emit(UnstakeVote<DaoWitness, ModuleWitness,  CoinType, T>{ proposal_id: proposal_id, value: balance::value(&vote.balance), agree: vote.agree, voter: tx_context::sender(ctx) });
+    emit(UnstakeVote<DaoWitness, CoinType, T>{ proposal_id: proposal_id, value: balance::value(&vote.balance), agree: vote.agree, voter: tx_context::sender(ctx) });
 
     destroy_vote(vote, ctx)
   }
 
   public fun execute_proposal<DaoWitness: drop, ModuleWitness: drop, CoinType, T: store>(
-    proposal: &mut Proposal<DaoWitness, ModuleWitness,  CoinType, T>, 
+    proposal: &mut Proposal<DaoWitness, CoinType, T>, 
     c: &Clock
   ): Action<DaoWitness, ModuleWitness, CoinType, T> {
     let now = clock::timestamp_ms(c);
@@ -333,24 +333,24 @@ module suitears::dao {
     dao_action::create(payload)
   }
 
-  public fun proposal_state<DaoWitness: drop, ModuleWitness: drop, CoinType, T: store>(proposal: &Proposal<DaoWitness, ModuleWitness,  CoinType, T>, c: &Clock): u8 {
+  public fun proposal_state<DaoWitness: drop, CoinType, T: store>(proposal: &Proposal<DaoWitness, CoinType, T>, c: &Clock): u8 {
     get_proposal_state(proposal, clock::timestamp_ms(c))
   }
 
-  public fun view_vote<DaoWitness: drop, ModuleWitness: drop, CoinType, T: store>(
-    vote: &Vote<DaoWitness, ModuleWitness,  CoinType, T>
+  public fun view_vote<DaoWitness: drop, CoinType, T: store>(
+    vote: &Vote<DaoWitness, CoinType, T>
   ): (ID, ID, u64, bool, u64) {
     (object::id(vote), vote.proposal_id, balance::value(&vote.balance), vote.agree, vote.end_time)
   }
 
-  public fun view_proposal<DaoWitness: drop, ModuleWitness: drop, CoinType, T: store>(
-    proposal: &Proposal<DaoWitness, ModuleWitness,  CoinType, T>, 
+  public fun view_proposal<DaoWitness: drop, CoinType, T: store>(
+    proposal: &Proposal<DaoWitness,  CoinType, T>, 
     c: &Clock
   ): (ID, address, u8, u64, u64, u64, u64, u64, u64, u64, vector<u8>, &Option<T>) {
     (object::id(proposal), proposal.proposer, proposal_state(proposal, c), proposal.start_time, proposal.end_time, proposal.for_votes, proposal.against_votes, proposal.eta, proposal.action_delay, proposal.quorum_votes, proposal.hash, &proposal.payload)
   }
 
-  fun propose<DaoWitness: drop, ModuleWitness: drop, CoinType, T: store>(
+  fun propose<DaoWitness: drop, CoinType, T: store>(
     dao: &mut Dao<DaoWitness, CoinType>,
     c: &Clock,
     payload: Option<T>,
@@ -358,7 +358,7 @@ module suitears::dao {
     quorum_votes: u64,
     hash: vector<u8>,// hash proposal title/content
     ctx: &mut TxContext    
-  ): Proposal<DaoWitness, ModuleWitness,  CoinType, T> {
+  ): Proposal<DaoWitness, CoinType, T> {
     assert!(action_delay >= dao.min_action_delay, EActionDelayTooSmall);
     assert!(quorum_votes >= dao.min_quorum_votes, EMinQuorumVotesTooSmall);
     assert!(vector::length(&hash) != 0, EEmptyHash);
@@ -380,20 +380,20 @@ module suitears::dao {
       payload
     };
     
-    emit(NewProposal<DaoWitness, ModuleWitness,  CoinType, T> { proposal_id: object::id(&proposal), proposer: proposal.proposer });
+    emit(NewProposal<DaoWitness, CoinType, T> { proposal_id: object::id(&proposal), proposer: proposal.proposer });
 
     proposal
   }
 
-  fun destroy_vote<DaoWitness: drop, ModuleWitness: drop, CoinType, T: store>(vote: Vote<DaoWitness, ModuleWitness,  CoinType, T>, ctx: &mut TxContext): Coin<CoinType> {
+  fun destroy_vote<DaoWitness: drop, CoinType, T: store>(vote: Vote<DaoWitness, CoinType, T>, ctx: &mut TxContext): Coin<CoinType> {
     let Vote {id, balance, agree: _, end_time: _, proposal_id: _} = vote;
     object::delete(id);
 
     coin::from_balance(balance, ctx)
   }
 
-  fun get_proposal_state<DaoWitness: drop, ModuleWitness: drop, CoinType, T: store>(
-    proposal: &Proposal<DaoWitness, ModuleWitness,  CoinType, T>,
+  fun get_proposal_state<DaoWitness: drop, CoinType, T: store>(
+    proposal: &Proposal<DaoWitness, CoinType, T>,
     current_time: u64,
   ): u8 {
     if (current_time < proposal.start_time) {
