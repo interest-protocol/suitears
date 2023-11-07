@@ -2,9 +2,33 @@
 module suitears::math128 {
   use std::vector;
 
+  use suitears::int;
   use suitears::math256;
 
   const MAX_U128: u256 = 340282366920938463463374607431768211455;
+
+  const WRAPPING_MAX: u256 = 340282366920938463463374607431768211456; // MAX_U64 + 1
+
+  public fun wrapping_add(x: u128, y: u128): u128 {
+    (math256::wrap_number(
+      int::add(int::from_u128(x), int::from_u128(y)),
+      WRAPPING_MAX
+    ) as u128)
+  }
+
+  public fun wrapping_sub(x: u128, y: u128): u128 {
+    (math256::wrap_number(
+      int::sub(int::from_u128(x), int::from_u128(y)),
+      WRAPPING_MAX
+    ) as u128)
+  }
+
+  public fun wrapping_mul(x: u128, y: u128): u128 {
+    (math256::wrap_number(
+      int::mul(int::from_u128(x), int::from_u128(y)),
+      WRAPPING_MAX
+    ) as u128)
+  }
 
   public fun try_add(x: u128, y: u128): (bool, u128) {
     let c = (x as u256) + (y as u256);

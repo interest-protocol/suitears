@@ -2,11 +2,34 @@
 module suitears::math64 {
   use std::vector;
 
+  use suitears::int;
   use suitears::math256;
 
   const QUADRATIC_SCALAR: u64 = 1 << 16;
 
   const MAX_U64: u256 = 18446744073709551615;
+  const WRAPPING_MAX: u256 = 18446744073709551616; // MAX_U64 + 1
+
+  public fun wrapping_add(x: u64, y: u64): u64 {
+    (math256::wrap_number(
+      int::add(int::from_u64(x), int::from_u64(y)),
+      WRAPPING_MAX
+    ) as u64)
+  }
+
+  public fun wrapping_sub(x: u64, y: u64): u64 {
+    (math256::wrap_number(
+      int::sub(int::from_u64(x), int::from_u64(y)),
+      WRAPPING_MAX
+    ) as u64)
+  }
+
+  public fun wrapping_mul(x: u64, y: u64): u64 {
+    (math256::wrap_number(
+      int::mul(int::from_u64(x), int::from_u64(y)),
+      WRAPPING_MAX
+    ) as u64)
+  }
 
   public fun try_add(x: u64, y: u64): (bool, u64) {
     let c = (x as u256) + (y as u256);
