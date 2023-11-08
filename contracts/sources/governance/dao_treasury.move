@@ -300,6 +300,10 @@ module suitears::dao_treasury {
     )
   }
 
+  public fun view_flash_loan<DaoWitness: drop, CoinType>(flash_loan: &FlashLoan<DaoWitness, CoinType>): (TypeName, u64) {
+    (flash_loan.type, flash_loan.fee)
+  }
+
   public fun repay_flash_loan<DaoWitness: drop, CoinType>(
     treasury: &mut DaoTreasury<DaoWitness>, 
     flash_loan: FlashLoan<DaoWitness, CoinType>,
