@@ -1,6 +1,6 @@
 module suitears::dao_action {
   use std::vector;
-  use std::type_name::{get, TypeName};
+  use std::type_name::{Self, TypeName};
 
   use sui::vec_set::{Self, VecSet};
 
@@ -24,7 +24,7 @@ module suitears::dao_action {
   }
 
   public fun complete_rule<DaoWitness: drop, CoinType, T: store, Rule: drop>(_: Rule, action: &mut Action<DaoWitness, CoinType, T>) {
-    vec_set::insert(&mut action.completed, get<Rule>());
+    vec_set::insert(&mut action.completed, type_name::get<Rule>());
   }
 
   public fun finish_action<DaoWitness: drop, CoinType, T: store>(action: Action<DaoWitness, CoinType, T>): T {
@@ -36,8 +36,10 @@ module suitears::dao_action {
     let index = 0;
     
     while (rules_size > index) {
-      let rule = *vector::borrow(&rules, index);
-      assert!(vec_set::contains(&completed, &rule), EInvalidRules);
+      let rule = vector::borrow(&rules, index);
+      assert!(vec_set::contains(&completed, rule), EInvalidRules);
+
+      index = index + 1;
     };
 
     payload

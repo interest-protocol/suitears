@@ -1,5 +1,6 @@
 // Based from https://github.com/starcoinorg/starcoin-framework/blob/main/sources/Dao.move
 // Before creating a DAO make sure your tokens are properly distributed
+// Do not add capabilities to hot potatoes (see https://docs.sui.io/concepts/sui-move-concepts/patterns/hot-potato)
 module suitears::dao {
   use std::vector;
   use std::option::{Self, Option};

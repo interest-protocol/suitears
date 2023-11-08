@@ -60,7 +60,6 @@ module suitears::dao_treasury {
   }
 
   // * IMPORTANT do not add abilities 
-  // (see https://docs.sui.io/concepts/sui-move-concepts/patterns/hot-potato)
   struct FlashLoan<phantom DaoWitness, phantom CoinType> {
     initial_balance: u64,
     fee: u64,
