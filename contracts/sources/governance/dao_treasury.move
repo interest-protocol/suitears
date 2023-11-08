@@ -59,9 +59,11 @@ module suitears::dao_treasury {
     allow_flashloan: bool
   }
 
-  // * IMPORTANT do not add abilities
+  // * IMPORTANT do not add abilities 
+  // (see https://docs.sui.io/concepts/sui-move-concepts/patterns/hot-potato)
   struct FlashLoan<phantom DaoWitness, phantom CoinType> {
     initial_balance: u64,
+    fee: u64,
     type: TypeName
   }
 
@@ -295,8 +297,12 @@ module suitears::dao_treasury {
 
     (
       coin::take<CoinType>(bag::borrow_mut(&mut treasury.coins, type), value, ctx),
-      FlashLoan { initial_balance , type }
+      FlashLoan { initial_balance , type, fee: (roll_mul_up((value as u128), FLASH_LOAN_FEE) as u64) }
     )
+  }
+
+  public fun view_flash_loan<DaoWitness: drop, CoinType>(flash_loan: &FlashLoan<DaoWitness, CoinType>): (TypeName, u64) {
+    (flash_loan.type, flash_loan.fee)
   }
 
   public fun repay_flash_loan<DaoWitness: drop, CoinType>(
@@ -304,10 +310,10 @@ module suitears::dao_treasury {
     flash_loan: FlashLoan<DaoWitness, CoinType>,
     token: Coin<CoinType>
   ) {
-    let FlashLoan { initial_balance, type } = flash_loan;
+    let FlashLoan { initial_balance, type, fee } = flash_loan;
     balance::join(bag::borrow_mut(&mut treasury.coins, type), coin::into_balance(token));
 
-    let final_balance = initial_balance + (roll_mul_up((initial_balance as u128), FLASH_LOAN_FEE) as u64);
+    let final_balance = initial_balance + fee;
     assert!(final_balance >= balance::value(bag::borrow<TypeName, Balance<CoinType>>(&treasury.coins, type)), ERepayAmountTooLow);
   }
 }
