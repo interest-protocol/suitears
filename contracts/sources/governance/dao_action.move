@@ -38,6 +38,7 @@ module suitears::dao_action {
     while (rules_size > index) {
       let rule = *vector::borrow(&rules, index);
       assert!(vec_set::contains(&completed, &rule), EInvalidRules);
+      index = index + 1;
     };
 
     payload
