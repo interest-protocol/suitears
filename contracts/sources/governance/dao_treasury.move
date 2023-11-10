@@ -128,6 +128,7 @@ module suitears::dao_treasury {
 
   public fun donate<DaoWitness: drop, CoinType>(treasury: &mut DaoTreasury<DaoWitness>, token: Coin<CoinType>, ctx: &mut TxContext) {
     let key = get<CoinType>();
+    let value = coin::value(&token);
 
     if (!bag::contains(&treasury.coins, key)) {
       bag::add(&mut treasury.coins, key, coin::into_balance(token))
@@ -135,7 +136,7 @@ module suitears::dao_treasury {
       balance::join(bag::borrow_mut<TypeName, Balance<CoinType>>(&mut treasury.coins, key), coin::into_balance(token));
     };
 
-    emit(Donate<DaoWitness, CoinType> { value: coin::value(&token), donator: tx_context::sender(ctx) });
+    emit(Donate<DaoWitness, CoinType> { value, donator: tx_context::sender(ctx) });
   }
 
   public fun view_coin_balance<DaoWitness: drop, CoinType>(treasury: &DaoTreasury<DaoWitness>): u64 {

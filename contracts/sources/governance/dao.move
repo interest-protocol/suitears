@@ -43,6 +43,7 @@ module suitears::dao {
   const ECannotExecuteThisProposal: u64 = 12;
   const ETooEarlyToExecute: u64 = 13;
   const EEmptyHash: u64 = 14;
+  const EProposalNotPassed: u64 = 15;
 
   // Generic Struct represents null/undefined
   struct Nothing has drop, copy, store {}
@@ -82,13 +83,13 @@ module suitears::dao {
   struct Proposal<phantom DaoWitness: drop, phantom CoinType, T: store> has key, store {
     id: UID,
     proposer: address,
-    start_time: u64,
-    end_time: u64,
+    start_time: u64, // when voting begins
+    end_time: u64, // when voting ends
     for_votes: u64,
     against_votes: u64,
-    eta: u64,
-    action_delay: u64,
-    quorum_votes: u64,
+    eta: u64, // executable after this time
+    action_delay: u64, // after how long, the agreed proposal can be executed.
+    quorum_votes: u64, // how many votes to reach to make the proposal pass.
     voting_quorum_rate: u64, 
     rules: Option<Rules<T>>,
     hash: vector<u8>
@@ -336,6 +337,16 @@ module suitears::dao {
     destroy_vote(vote, ctx)
   }
 
+  public fun queue_proposal<DaoWitness: drop, CoinType, T: store>(
+    proposal: &mut Proposal<DaoWitness, CoinType, T>, 
+    c: &Clock
+  ) {
+    // Only agreed proposal can be submitted.
+    let now = clock::timestamp_ms(c);
+    assert!(get_proposal_state(proposal, now) == AGREED, EProposalNotPassed);
+    proposal.eta = now + proposal.action_delay;
+  }
+
   public fun execute_proposal<DaoWitness: drop, CoinType, T: store>(
     proposal: &mut Proposal<DaoWitness, CoinType, T>, 
     c: &Clock
@@ -422,8 +433,11 @@ module suitears::dao {
     } else if (current_time <= proposal.end_time) {
       // Active
       ACTIVE
-    } else if (proposal.for_votes <= proposal.against_votes ||
-      proposal.for_votes < proposal.quorum_votes || (proposal.voting_quorum_rate as u128) > roll_div_down((proposal.for_votes as u128), ((proposal.for_votes + proposal.against_votes) as u128)) ) {
+    } else if (
+      proposal.for_votes <= proposal.against_votes ||
+      proposal.for_votes < proposal.quorum_votes || 
+      (proposal.voting_quorum_rate as u128) > roll_div_down((proposal.for_votes as u128), ((proposal.for_votes + proposal.against_votes) as u128))
+    ) {
       // Defeated
       DEFEATED
     } else if (proposal.eta == 0) {
