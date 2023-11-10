@@ -47,9 +47,9 @@ module suitears::dao {
   // Generic Struct represents null/undefined
   struct Nothing has drop, copy, store {}
 
-  struct DaoActionWitness has drop {}
+  struct ActionWitness has drop {}
 
-  struct DaoConfig has store, copy, drop {
+  struct Config has store, copy, drop {
     voting_delay: Option<u64>,
     voting_period: Option<u64>,
     voting_quorum_rate: Option<u64>,
@@ -161,23 +161,23 @@ module suitears::dao {
 
   public fun create<OTW: drop, CoinType>(
     otw: OTW, 
-    voting_delay: Option<u64>, 
-    voting_period: Option<u64>, 
-    voting_quorum_rate: Option<u64>, 
-    min_action_delay: Option<u64>, 
-    min_quorum_votes: Option<u64>,
+    voting_delay: u64, 
+    voting_period: u64, 
+    voting_quorum_rate: u64, 
+    min_action_delay: u64, 
+    min_quorum_votes: u64,
     ctx: &mut TxContext
   ): Dao<OTW, CoinType> {
     assert!(is_one_time_witness(&otw), EInvalidOTW);
-    assert!(100 * 1_000_000_000 >= option::get_with_default(&voting_quorum_rate, 0) && option::get_with_default(&voting_quorum_rate, 0) != 0, EInvalidQuorumRate);
+    assert!(100 * 1_000_000_000 >= voting_quorum_rate && voting_quorum_rate != 0, EInvalidQuorumRate);
 
     let dao = Dao<OTW, CoinType> {
       id: object::new(ctx),
-      voting_delay: option::get_with_default(&voting_delay, 0),
-      voting_period: option::get_with_default(&voting_period, 0),
-      voting_quorum_rate: option::get_with_default(&voting_quorum_rate, 0),
-      min_action_delay: option::get_with_default(&min_action_delay, 0),
-      min_quorum_votes: option::get_with_default(&min_quorum_votes, 0),
+      voting_delay: voting_delay,
+      voting_period: voting_period,
+      voting_quorum_rate: voting_quorum_rate,
+      min_action_delay: min_action_delay,
+      min_quorum_votes: min_quorum_votes,
       treasury: option::none()
     };
 
@@ -185,11 +185,11 @@ module suitears::dao {
       CreateDao<OTW, CoinType> {
         dao_id: object::id(&dao),
         creator: tx_context::sender(ctx),
-        voting_delay: option::get_with_default(&voting_delay, 0),
-        voting_period: option::get_with_default(&voting_period, 0),
-        voting_quorum_rate: option::get_with_default(&voting_quorum_rate, 0),
-        min_action_delay: option::get_with_default(&min_action_delay, 0),
-        min_quorum_votes: option::get_with_default(&min_quorum_votes, 0)
+        voting_delay: voting_delay,
+        voting_period: voting_period,
+        voting_quorum_rate: voting_quorum_rate,
+        min_action_delay: min_action_delay,
+        min_quorum_votes: min_quorum_votes
       }
     );
 
@@ -200,24 +200,20 @@ module suitears::dao {
   // ** Also major stakeholders should monitor all proposals to ensure they vote against malicious proposals.
   public fun create_with_treasury<OTW: drop, CoinType>(
     otw: OTW, 
-    voting_delay: Option<u64>, 
-    voting_period: Option<u64>, 
-    voting_quorum_rate: Option<u64>, 
-    min_action_delay: Option<u64>, 
-    min_quorum_votes: Option<u64>,
+    voting_delay: u64, 
+    voting_period: u64, 
+    voting_quorum_rate: u64, 
+    min_action_delay: u64, 
+    min_quorum_votes: u64,
     allow_flashloan: bool,
     ctx: &mut TxContext
   ): (Dao<OTW, CoinType>, DaoTreasury<OTW>) {
     let dao = create<OTW, CoinType>(otw, voting_delay, voting_period, voting_quorum_rate, min_action_delay, min_quorum_votes, ctx);
-
     let treasury = dao_treasury::create<OTW>(object::id(&dao), allow_flashloan, ctx);
 
     option::fill(&mut dao.treasury, object::id(&treasury));
     
-    (
-      dao,
-      treasury
-    )
+    (dao, treasury)
   }
 
   public fun propose_with_action<DaoWitness: drop, CoinType, T: store>(
@@ -451,19 +447,19 @@ module suitears::dao {
     voting_quorum_rate: Option<u64>, 
     min_action_delay: Option<u64>, 
     min_quorum_votes: Option<u64>,
-  ): DaoConfig {
-    DaoConfig { voting_delay, voting_period, voting_quorum_rate, min_action_delay, min_quorum_votes }
+  ): Config {
+    Config { voting_delay, voting_period, voting_quorum_rate, min_action_delay, min_quorum_votes }
   } 
 
   public fun update_dao_config<DaoWitness: drop, CoinType>(
     dao: &mut Dao<DaoWitness, CoinType>,
-    action: Action<DaoWitness, CoinType, DaoConfig>
+    action: Action<DaoWitness, CoinType, Config>
   ) {
 
-    dao_action::complete_rule(DaoActionWitness {}, &mut action);
+    dao_action::complete_rule(ActionWitness {}, &mut action);
     let payload = dao_action::finish_action(action);
 
-    let DaoConfig { voting_delay, voting_period, voting_quorum_rate, min_action_delay, min_quorum_votes  } = payload;
+    let Config { voting_delay, voting_period, voting_quorum_rate, min_action_delay, min_quorum_votes  } = payload;
 
     dao.voting_delay = option::destroy_with_default(voting_delay, dao.voting_delay);
     dao.voting_period = option::destroy_with_default(voting_period, dao.voting_period);
