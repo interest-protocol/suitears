@@ -1,5 +1,6 @@
 // Based from https://github.com/starcoinorg/starcoin-framework/blob/main/sources/Dao.move
 // Before creating a DAO make sure your tokens are properly distributed
+// Do not add capabilities to hot potatoes (see https://docs.sui.io/concepts/sui-move-concepts/patterns/hot-potato)
 module suitears::dao {
   use std::vector;
   use std::option::{Self, Option};
@@ -16,7 +17,7 @@ module suitears::dao {
 
   use suitears::dao_action::{Self, Action};
   use suitears::dao_treasury::{Self, DaoTreasury};
-  use suitears::fixed_point_roll::{roll, roll_div_down};
+  use suitears::fixed_point_roll::{roll_div_down};
 
   /// Proposal state
   const PENDING: u8 = 1;
@@ -42,16 +43,17 @@ module suitears::dao {
   const ECannotExecuteThisProposal: u64 = 12;
   const ETooEarlyToExecute: u64 = 13;
   const EEmptyHash: u64 = 14;
+  const EProposalNotPassed: u64 = 15;
 
   // Generic Struct represents null/undefined
   struct Nothing has drop, copy, store {}
 
-  struct DaoActionWitness has drop {}
+  struct ActionWitness has drop {}
 
-  struct DaoConfig has store, copy, drop {
+  struct Config has store, copy, drop {
     voting_delay: Option<u64>,
     voting_period: Option<u64>,
-    voting_quorum_rate: Option<u128>,
+    voting_quorum_rate: Option<u64>,
     min_action_delay: Option<u64>,
     min_quorum_votes: Option<u64>    
   }
@@ -64,14 +66,14 @@ module suitears::dao {
 
   struct Dao<phantom OTW, phantom CoinType> has key, store {
     id: UID,
-    /// after proposal created, how long use should wait before he can vote (in milliseconds)
+    /// after proposal created, how long user should wait before being able to vote (in milliseconds)
     voting_delay: u64,
     /// how long the voting window is (in milliseconds).
     voting_period: u64,
     /// the quorum rate to agree on the proposal.
     /// if 50% votes needed, then the voting_quorum_rate should be 50.
-    /// it should between (0, 100 wad].
-    voting_quorum_rate: u128,
+    /// it should between (0, 100 * 1e9].
+    voting_quorum_rate: u64,
     /// how long the proposal should wait before it can be executed (in milliseconds).
     min_action_delay: u64,
     min_quorum_votes: u64,
@@ -81,14 +83,14 @@ module suitears::dao {
   struct Proposal<phantom DaoWitness: drop, phantom CoinType, T: store> has key, store {
     id: UID,
     proposer: address,
-    start_time: u64,
-    end_time: u64,
+    start_time: u64, // when voting begins
+    end_time: u64, // when voting ends
     for_votes: u64,
     against_votes: u64,
-    eta: u64,
-    action_delay: u64,
-    quorum_votes: u64,
-    voting_quorum_rate: u128, 
+    eta: u64, // executable after this time
+    action_delay: u64, // after how long, the agreed proposal can be executed.
+    quorum_votes: u64, // the number of votes to pass the proposal.
+    voting_quorum_rate: u64, 
     rules: Option<Rules<T>>,
     hash: vector<u8>
   }
@@ -108,7 +110,7 @@ module suitears::dao {
     creator: address,
     voting_delay: u64, 
     voting_period: u64, 
-    voting_quorum_rate: u128, 
+    voting_quorum_rate: u64, 
     min_action_delay: u64, 
     min_quorum_votes: u64
   }
@@ -117,7 +119,7 @@ module suitears::dao {
     dao_id: ID,
     voting_delay: u64, 
     voting_period: u64, 
-    voting_quorum_rate: u128, 
+    voting_quorum_rate: u64, 
     min_action_delay: u64, 
     min_quorum_votes: u64
   }
@@ -162,34 +164,33 @@ module suitears::dao {
     otw: OTW, 
     voting_delay: u64, 
     voting_period: u64, 
-    voting_quorum_rate: u128, 
+    voting_quorum_rate: u64, 
     min_action_delay: u64, 
     min_quorum_votes: u64,
     ctx: &mut TxContext
   ): Dao<OTW, CoinType> {
     assert!(is_one_time_witness(&otw), EInvalidOTW);
+    assert!(100 * 1_000_000_000 >= voting_quorum_rate && voting_quorum_rate != 0, EInvalidQuorumRate);
 
     let dao = Dao<OTW, CoinType> {
       id: object::new(ctx),
-      voting_delay,
-      voting_period,
-      voting_quorum_rate,
-      min_action_delay,
-      min_quorum_votes,
+      voting_delay: voting_delay,
+      voting_period: voting_period,
+      voting_quorum_rate: voting_quorum_rate,
+      min_action_delay: min_action_delay,
+      min_quorum_votes: min_quorum_votes,
       treasury: option::none()
     };
-
-    assert_dao_config(&dao);
 
     emit(
       CreateDao<OTW, CoinType> {
         dao_id: object::id(&dao),
         creator: tx_context::sender(ctx),
-        voting_delay,
-        voting_period,
-        voting_quorum_rate,
-        min_action_delay,
-        min_quorum_votes
+        voting_delay: voting_delay,
+        voting_period: voting_period,
+        voting_quorum_rate: voting_quorum_rate,
+        min_action_delay: min_action_delay,
+        min_quorum_votes: min_quorum_votes
       }
     );
 
@@ -202,22 +203,18 @@ module suitears::dao {
     otw: OTW, 
     voting_delay: u64, 
     voting_period: u64, 
-    voting_quorum_rate: u128, 
+    voting_quorum_rate: u64, 
     min_action_delay: u64, 
     min_quorum_votes: u64,
     allow_flashloan: bool,
     ctx: &mut TxContext
   ): (Dao<OTW, CoinType>, DaoTreasury<OTW>) {
     let dao = create<OTW, CoinType>(otw, voting_delay, voting_period, voting_quorum_rate, min_action_delay, min_quorum_votes, ctx);
-
     let treasury = dao_treasury::create<OTW>(object::id(&dao), allow_flashloan, ctx);
 
     option::fill(&mut dao.treasury, object::id(&treasury));
     
-    (
-      dao,
-      treasury
-    )
+    (dao, treasury)
   }
 
   public fun propose_with_action<DaoWitness: drop, CoinType, T: store>(
@@ -229,7 +226,7 @@ module suitears::dao {
     hash: vector<u8>,//
     ctx: &mut TxContext
   ): Proposal<DaoWitness, CoinType, T> {
-   propose(dao, c, option::some(rules), action_delay, min_quorum_votes, hash, ctx)
+    propose(dao, c, option::some(rules), action_delay, min_quorum_votes, hash, ctx)
   }
 
   public fun propose_without_action<DaoWitness: drop, CoinType>(
@@ -240,7 +237,7 @@ module suitears::dao {
     hash: vector<u8>,//
     ctx: &mut TxContext
   ): Proposal<DaoWitness, CoinType, Nothing> {
-   propose(dao, c, option::none(), action_delay, min_quorum_votes, hash, ctx)
+    propose(dao, c, option::none(), action_delay, min_quorum_votes, hash, ctx)
   }
 
   public fun create_rules<T: store>(payload: T, ctx: &mut TxContext): Rules<T> {
@@ -340,6 +337,16 @@ module suitears::dao {
     destroy_vote(vote, ctx)
   }
 
+  public fun queue_proposal<DaoWitness: drop, CoinType, T: store>(
+    proposal: &mut Proposal<DaoWitness, CoinType, T>, 
+    c: &Clock
+  ) {
+    // Only agreed proposal can be submitted.
+    let now = clock::timestamp_ms(c);
+    assert!(get_proposal_state(proposal, now) == AGREED, EProposalNotPassed);
+    proposal.eta = now + proposal.action_delay;
+  }
+
   public fun execute_proposal<DaoWitness: drop, CoinType, T: store>(
     proposal: &mut Proposal<DaoWitness, CoinType, T>, 
     c: &Clock
@@ -426,8 +433,11 @@ module suitears::dao {
     } else if (current_time <= proposal.end_time) {
       // Active
       ACTIVE
-    } else if (proposal.for_votes <= proposal.against_votes ||
-      proposal.for_votes < proposal.quorum_votes || proposal.voting_quorum_rate > roll_div_down((proposal.for_votes as u128), ((proposal.for_votes + proposal.against_votes) as u128)) ) {
+    } else if (
+      proposal.for_votes <= proposal.against_votes ||
+      proposal.for_votes < proposal.quorum_votes || 
+      (proposal.voting_quorum_rate as u128) > roll_div_down((proposal.for_votes as u128), ((proposal.for_votes + proposal.against_votes) as u128))
+    ) {
       // Defeated
       DEFEATED
     } else if (proposal.eta == 0) {
@@ -442,43 +452,28 @@ module suitears::dao {
       EXTRACTED
     }
   }
-
-  fun assert_dao_config<DaoWitness: drop, CoinType>(dao: &Dao<DaoWitness, CoinType>) {
-    assert!(100 * roll() >= dao.voting_quorum_rate && dao.voting_quorum_rate != 0, EInvalidQuorumRate);
-    assert!(dao.voting_delay != 0, EInvalidVotingDelay);
-    assert!(dao.voting_period != 0, EInvalidVotingPeriod);
-    assert!(dao.min_action_delay != 0, EInvalidMinActionDelay);
-    assert!(dao.min_quorum_votes != 0, EInvalidMinQuorumVotes);
-  }
-
   
    // Only Proposal can update Dao settings
 
-   public fun make_dao_config(
-    voting_delay: u64,
-    voting_period: u64,
-    voting_quorum_rate: u128,
-    min_action_delay: u64,
-    min_quorum_votes: u64
-   ): DaoConfig {
-    DaoConfig {
-      voting_delay: if (voting_delay == 0)  option::none() else option::some(voting_delay),
-      voting_period: if (voting_period == 0) option::none() else option::some(voting_period),
-      voting_quorum_rate:  if (voting_quorum_rate == 0) option::none() else option::some(voting_quorum_rate),
-      min_action_delay: if (min_action_delay == 0) option::none() else option::some(min_action_delay),
-      min_quorum_votes: if (min_quorum_votes == 0) option::none() else option::some(min_quorum_votes),
-    }
-   } 
+  public fun make_dao_config(
+    voting_delay: Option<u64>, 
+    voting_period: Option<u64>, 
+    voting_quorum_rate: Option<u64>, 
+    min_action_delay: Option<u64>, 
+    min_quorum_votes: Option<u64>,
+  ): Config {
+    Config { voting_delay, voting_period, voting_quorum_rate, min_action_delay, min_quorum_votes }
+  } 
 
-   public fun update_dao_config<DaoWitness: drop, CoinType>(
+  public fun update_dao_config<DaoWitness: drop, CoinType>(
     dao: &mut Dao<DaoWitness, CoinType>,
-    action: Action<DaoWitness, CoinType, DaoConfig>
-   ) {
+    action: Action<DaoWitness, CoinType, Config>
+  ) {
 
-    dao_action::complete_rule(DaoActionWitness {}, &mut action);
+    dao_action::complete_rule(ActionWitness {}, &mut action);
     let payload = dao_action::finish_action(action);
 
-    let DaoConfig { voting_delay, voting_period, voting_quorum_rate, min_action_delay, min_quorum_votes  } = payload;
+    let Config { voting_delay, voting_period, voting_quorum_rate, min_action_delay, min_quorum_votes  } = payload;
 
     dao.voting_delay = option::destroy_with_default(voting_delay, dao.voting_delay);
     dao.voting_period = option::destroy_with_default(voting_period, dao.voting_period);
@@ -486,7 +481,7 @@ module suitears::dao {
     dao.min_action_delay = option::destroy_with_default(min_action_delay, dao.min_action_delay);
     dao.min_quorum_votes = option::destroy_with_default(min_quorum_votes, dao.min_quorum_votes);
 
-    assert_dao_config(dao);
+    assert!(100 * 1_000_000_000 >= dao.voting_quorum_rate && dao.voting_quorum_rate != 0, EInvalidQuorumRate);
 
     emit(
       UpdateDao<DaoWitness, CoinType> {
@@ -498,5 +493,5 @@ module suitears::dao {
         min_quorum_votes: dao.min_quorum_votes
       }
     );
-   }
+  }
 }

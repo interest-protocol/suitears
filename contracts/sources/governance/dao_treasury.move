@@ -60,7 +60,6 @@ module suitears::dao_treasury {
   }
 
   // * IMPORTANT do not add abilities 
-  // (see https://docs.sui.io/concepts/sui-move-concepts/patterns/hot-potato)
   struct FlashLoan<phantom DaoWitness, phantom CoinType> {
     initial_balance: u64,
     fee: u64,
@@ -128,19 +127,19 @@ module suitears::dao_treasury {
   }
 
   public fun donate<DaoWitness: drop, CoinType>(treasury: &mut DaoTreasury<DaoWitness>, token: Coin<CoinType>, ctx: &mut TxContext) {
-    emit(Donate<DaoWitness, CoinType> { value: coin::value(&token), donator: tx_context::sender(ctx) });
-
     let key = get<CoinType>();
+    let value = coin::value(&token);
 
-    if (!bag::contains(&treasury.coins, key))
+    if (!bag::contains(&treasury.coins, key)) {
       bag::add(&mut treasury.coins, key, coin::into_balance(token))
-    else 
-      {
-        balance::join(bag::borrow_mut<TypeName, Balance<CoinType>>(&mut treasury.coins, key), coin::into_balance(token));
-      }
+    } else {
+      balance::join(bag::borrow_mut<TypeName, Balance<CoinType>>(&mut treasury.coins, key), coin::into_balance(token));
+    };
+
+    emit(Donate<DaoWitness, CoinType> { value, donator: tx_context::sender(ctx) });
   }
 
-  public fun view<DaoWitness: drop, CoinType>(treasury: &DaoTreasury<DaoWitness>): u64 {
+  public fun view_coin_balance<DaoWitness: drop, CoinType>(treasury: &DaoTreasury<DaoWitness>): u64 {
     balance::value(bag::borrow<TypeName, Balance<CoinType>>(&treasury.coins, get<CoinType>()))
   }
 
@@ -152,6 +151,7 @@ module suitears::dao_treasury {
   ): Coin<CoinType> {
     complete_rule(TreasuryActionWitness {}, &mut action);
     let payload = finish_action(action);
+
     assert!(get<CoinType>() == payload.type, EMismatchCoinType);
     assert!(object::id(pub) == payload.publisher_id, EInvalidPublisher);
     
@@ -176,6 +176,7 @@ module suitears::dao_treasury {
   ): LinearWallet<CoinType> {
     complete_rule(TreasuryActionWitness {}, &mut action);
     let payload = finish_action( action);
+
     assert!(get<CoinType>() == payload.type, EMismatchCoinType);
     assert!(object::id(pub) == payload.publisher_id, EInvalidPublisher);
     
@@ -205,6 +206,7 @@ module suitears::dao_treasury {
   ): QuadraticWallet<CoinType> {
     complete_rule(TreasuryActionWitness {}, &mut action);
     let payload = finish_action(action);
+
     assert!(get<CoinType>() == payload.type, EMismatchCoinType);
     assert!(object::id(pub) == payload.publisher_id, EInvalidPublisher);
     
@@ -288,8 +290,13 @@ module suitears::dao_treasury {
 
   // Flash loan logic
 
-  public fun flash_loan<DaoWitness: drop, CoinType>(treasury: &mut DaoTreasury<DaoWitness>, value: u64, ctx: &mut TxContext):(Coin<CoinType>, FlashLoan<DaoWitness, CoinType>) {
+  public fun flash_loan<DaoWitness: drop, CoinType>(
+    treasury: &mut DaoTreasury<DaoWitness>, 
+    value: u64, 
+    ctx: &mut TxContext
+  ): (Coin<CoinType>, FlashLoan<DaoWitness, CoinType>) {
     assert!(treasury.allow_flashloan, EFlashloanNotAllowed);
+
     let type = get<CoinType>();
     let initial_balance = balance::value(bag::borrow<TypeName, Balance<CoinType>>(&treasury.coins, type));
 
@@ -311,9 +318,8 @@ module suitears::dao_treasury {
     token: Coin<CoinType>
   ) {
     let FlashLoan { initial_balance, type, fee } = flash_loan;
-    balance::join(bag::borrow_mut(&mut treasury.coins, type), coin::into_balance(token));
+    assert!(coin::value(&token) >= initial_balance + fee, ERepayAmountTooLow);
 
-    let final_balance = initial_balance + fee;
-    assert!(final_balance >= balance::value(bag::borrow<TypeName, Balance<CoinType>>(&treasury.coins, type)), ERepayAmountTooLow);
+    balance::join(bag::borrow_mut(&mut treasury.coins, type), coin::into_balance(token));
   }
 }
