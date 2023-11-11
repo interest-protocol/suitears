@@ -39,7 +39,7 @@ module suitears::timelock_v2 {
     }
   }
 
-  // @dev We do not show the Data because it is an Admin Capability
+  // @dev We do not show the Data because if it is an Admin Capability
   // It would allow the owner to use admin functions while the lock is active!
   public fun view_lock<T: store>(lock: &Timelock<T>): (u64, bool) {
     (lock.timestamp, lock.obligation)
