@@ -5,6 +5,9 @@
 module suitears::vectors {
     use std::vector;
 
+    #[test_only]
+    use sui::test_utils::assert_eq;
+
     use suitears::math64::average;
 
     /// @dev When you supply vectors of different lengths to a function requiring equal-length vectors.
@@ -129,24 +132,29 @@ module suitears::vectors {
     x
   }  
 
-  // Our pools will not have more than 4 tokens
-  // Bubble sort is enough
   public fun descending_insertion_sort(x: &vector<u256>): vector<u256> {
-    let x = *x;
-    let len = vector::length(&x) - 1;
-    let i = 0;
+    let a = *x;
+    let len = vector::length(&a);
+    let i = 1;
 
-    while (i < len) {
-      let j = i;
-      while (j > 0 && *vector::borrow(&x, j - 1) <  *vector::borrow(&x, j)) {
-        vector::swap(&mut x, j, j - 1);
-        j = j - 1;
+    while (len > i) {
+      let x = *vector::borrow(&a, i);
+      let curr = i;
+      let j = 0;
+
+      while (len > j) {
+        let y = *vector::borrow(&a, curr - 1);
+        if (y > x) break;
+        *vector::borrow_mut(&mut a, curr) = y;
+        curr = curr - 1;
+        if (curr == 0) break;
       };
 
+      *vector::borrow_mut(&mut a, curr) = x;  
       i = i + 1;
     }; 
 
-    x
+    a
   }
 
 // @dev From https://github.com/suidouble/suidouble-liquid/blob/main/move/sources/suidouble_liquid_staker.move
@@ -233,5 +241,33 @@ fun partion(values: &mut vector<u128>, left: u64, right: u64): u64 {
         assert!(gte(&x"14329832", &x"14329832"), 1);
         assert!(!gte(&x"12654586", &x"12654587"), 2);
         assert!(!gte(&x"12654577", &x"12654587"), 3);
+    }
+
+    #[test]
+    fun test_descending_insertion_sort() {
+        assert_eq(
+            descending_insertion_sort(&vector[5, 2, 9, 1, 5, 6]),
+            vector[9 , 6, 5, 5, 2, 1]
+        );
+
+        assert_eq(
+            descending_insertion_sort(&vector[1, 2, 3, 4, 5, 6]),
+            vector[6, 5, 4, 3, 2, 1]
+        );
+
+        assert_eq(
+            descending_insertion_sort(&vector[6, 5, 4, 3, 2, 1]),
+            vector[6, 5, 4, 3, 2, 1]
+        );
+
+        assert_eq(
+            descending_insertion_sort(&vector[3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5]),
+            vector[9, 6, 5, 5, 5, 4, 3, 3, 2, 1, 1]
+        );
+
+        assert_eq(
+            descending_insertion_sort(&vector[12, 23, 4, 5, 2, 34, 1, 43, 54, 32, 45, 6, 7, 8, 9, 10, 21, 20]),
+            vector[54, 45, 43, 34, 32, 23, 21, 20, 12, 10, 9, 8, 7, 6, 5, 4, 2, 1]
+        );
     }
 }
