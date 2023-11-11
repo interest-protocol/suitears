@@ -279,7 +279,7 @@ module suitears::string {
         {
             let type = string(b"0x21a31ea6f1924898b78f06f0d929f3b91a2748c0::schema::Schema");
             let delimeter = string(b"::");
-            let i = contains_sub_string(&type, &delimeter);
+            contains_sub_string(&type, &delimeter);
 
             let slice = sub_string(&type, 0, 42);
             assert!(string(b"0x21a31ea6f1924898b78f06f0d929f3b91a2748c0") == slice, 0);
