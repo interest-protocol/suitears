@@ -174,11 +174,11 @@ module suitears::dao {
 
     let dao = Dao<OTW, CoinType> {
       id: object::new(ctx),
-      voting_delay: voting_delay,
-      voting_period: voting_period,
-      voting_quorum_rate: voting_quorum_rate,
-      min_action_delay: min_action_delay,
-      min_quorum_votes: min_quorum_votes,
+      voting_delay,
+      voting_period,
+      voting_quorum_rate,
+      min_action_delay,
+      min_quorum_votes,
       treasury: option::none()
     };
 
@@ -186,11 +186,11 @@ module suitears::dao {
       CreateDao<OTW, CoinType> {
         dao_id: object::id(&dao),
         creator: tx_context::sender(ctx),
-        voting_delay: voting_delay,
-        voting_period: voting_period,
-        voting_quorum_rate: voting_quorum_rate,
-        min_action_delay: min_action_delay,
-        min_quorum_votes: min_quorum_votes
+        voting_delay,
+        voting_period,
+        voting_quorum_rate,
+        min_action_delay,
+        min_quorum_votes
       }
     );
 
@@ -275,7 +275,7 @@ module suitears::dao {
       agree,
       balance: coin::into_balance(stake),
       end_time: proposal.end_time,
-      proposal_id: proposal_id
+      proposal_id
     }
   }
 
