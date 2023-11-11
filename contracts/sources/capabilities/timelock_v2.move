@@ -73,15 +73,12 @@ module suitears::timelock_v2 {
     data: T, 
     ctx: &mut TxContext
   ): Timelock<T> {
-   // It makes no sense to lock in the past
-    assert!(obligation.timestamp > clock::timestamp_ms(c), EInvalidTime);
-
     let Obligation { timestamp } = obligation;
 
     Timelock {
       id: object::new(ctx),
       data,
-      timestamp,
+      timestamp: clock::timestamp_ms(c) + timestamp,
       obligation: true
     }
   }
