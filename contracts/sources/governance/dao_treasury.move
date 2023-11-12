@@ -10,7 +10,7 @@ module suitears::dao_treasury {
   use sui::balance::{Self, Balance};
   use sui::tx_context::{Self, TxContext};
 
-  use suitears::dao_quest_witness::DaoQuest;
+  use suitears::dao_quest::DaoQuest;
   use suitears::quest::{finish_quest, Quest};
   use suitears::fixed_point_roll::roll_mul_up;
   use suitears::linear_vesting_wallet::{Self, Wallet as LinearWallet};

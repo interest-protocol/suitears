@@ -1,4 +1,4 @@
-module suitears::dao_quest_witness {
+module suitears::dao_quest {
   use std::type_name::TypeName;
 
   use sui::vec_set::VecSet;

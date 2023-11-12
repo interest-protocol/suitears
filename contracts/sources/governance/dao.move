@@ -18,7 +18,7 @@ module suitears::dao {
   use suitears::quest::{Self, Quest};
   use suitears::dao_treasury::{Self, DaoTreasury};
   use suitears::fixed_point_roll::{roll_div_down};
-  use suitears::dao_quest_witness::{create_quest, DaoQuest};
+  use suitears::dao_quest::{create_quest, DaoQuest};
 
   /// Proposal state
   const PENDING: u8 = 1;
