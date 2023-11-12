@@ -1,6 +1,5 @@
 /*
-* An Example on how to implement a Two Step TimeLock Admin Transfer.  
-* It gives enough time for users to adapt to a new admin
+* An Example on how to implement a TimeLocked Two Step
 */
 module examples::admin {
   
@@ -11,16 +10,19 @@ module examples::admin {
   use sui::types::is_one_time_witness;
   use sui::tx_context::{Self, TxContext};
 
-  use suitears::timelock::{Self, Timelock};
 
   // Errors
   const EZeroAddress: u64 = 0;
   const EInvalidAcceptSender: u64 = 1;
   const EAdminDidNotAccept: u64 = 2;
-  const EInvalidWitness: u64 = 5;
+  const EInvalidWitness: u64 = 3;
+  const ETooEarly: u64 = 4;
+
+  const SENTINAL_VALUE: u64 = 18446744073709551615;
 
   // The owner of this object can add and remove minters + update the metadata
-  struct AdminCap<phantom T: drop> has key, store {
+  // * important NO store key, so it cannot be transferred
+  struct AdminCap<phantom T: drop> has key {
     id: UID
   }
 
@@ -28,16 +30,16 @@ module examples::admin {
     id: UID,
     pending_admin: address,
     accepted: bool,
-    time_delay: u64
+    time_delay: u64,
+    start: u64
   }
 
   // * Events
 
   struct Create<phantom T> has copy, drop {
-    storage_id: ID,
-    cap_id: ID,
     sender: address,
-    time_delay: u64
+    time_delay: u64,
+    start: u64
   }
 
   struct StartTransfer has copy, drop {
@@ -65,14 +67,14 @@ module examples::admin {
         id: object::new(ctx),
         pending_admin: @0x0,
         accepted: false,
-        time_delay
+        time_delay,
+        start: SENTINAL_VALUE
     };
 
     emit(Create<T> { 
       sender, 
-      storage_id: object::id(&admin_storage), 
-      cap_id: object::id(&admin_cap),
-      time_delay
+      time_delay,
+      start: SENTINAL_VALUE
     });
 
     (admin_storage, admin_cap)
@@ -102,6 +104,7 @@ module examples::admin {
   public fun cancel_transfer<T: drop>(_: &AdminCap<T>, storage: &mut AdminStorage<T>, ctx: &mut TxContext) {
     storage.pending_admin = @0x0;
     storage.accepted = false;
+    storage.start = SENTINAL_VALUE;
 
     emit(CancelTransfer<T> {
       current_admin: tx_context::sender(ctx)
@@ -113,10 +116,11 @@ module examples::admin {
   * @param admin_cap The AdminCap that will be transferred
   * @recipient the new admin address
   */
-  public fun accept_transfer<T: drop>(storage: &mut AdminStorage<T>, ctx: &mut TxContext) {
+  public fun accept_transfer<T: drop>(c: &Clock, storage: &mut AdminStorage<T>, ctx: &mut TxContext) {
     assert!(tx_context::sender(ctx) == storage.pending_admin, EInvalidAcceptSender);
 
     storage.accepted = true;
+    storage.start = clock::timestamp_ms(c);
 
     emit(AcceptTransfer<T> {
       pending_admin: storage.pending_admin,
@@ -128,25 +132,21 @@ module examples::admin {
   * @param admin_cap The AdminCap that will be transferred
   * @recipient the new admin address
   */
-  public fun transfer<T: drop>(cap: AdminCap<T>, c: &Clock, storage: &mut AdminStorage<T>, ctx: &mut TxContext) {
+  public fun transfer<T: drop>(cap: AdminCap<T>, c: &Clock, storage: &mut AdminStorage<T>) {
     // New admin must accept the capability
     assert!(storage.accepted, EAdminDidNotAccept);
+    let now = clock::timestamp_ms(c);
+    assert!(now >= storage.start + storage.time_delay, ETooEarly);
 
     storage.accepted = false;
     let new_admin = storage.pending_admin;
     storage.pending_admin = @0x0;
+    storage.start = SENTINAL_VALUE;
 
-    transfer::public_transfer(
-      timelock::lock(c, cap, clock::timestamp_ms(c) + storage.time_delay, false, ctx),
-      new_admin
-    );
+    transfer::transfer(cap,new_admin);
 
     emit(NewAdmin<T> { admin: new_admin });
   } 
-
-  public fun unlock_cap<T: drop>(c: &Clock, lock: Timelock<AdminCap<T>>): AdminCap<T> {
-    timelock::unlock(c, lock)
-  }
 
   // Careful, this cannot be reverted
   public fun destroy_cap<T: drop>(cap: AdminCap<T>) {
@@ -156,7 +156,7 @@ module examples::admin {
 
   // Careful, this cannot be reverted
   public fun destroy_storage<T: drop>(storage: AdminStorage<T>) {
-    let AdminStorage { id, time_delay: _, accepted: _, pending_admin: _ } = storage;
+    let AdminStorage { id, time_delay: _, accepted: _, pending_admin: _, start: _ } = storage;
     object::delete(id);
   }
 }
