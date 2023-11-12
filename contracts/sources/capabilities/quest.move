@@ -13,10 +13,10 @@ module suitears::quest {
 
   const EWrongTasks: u64 = 0;
 
-  struct Quest<phantom T, R: store> {
+  struct Quest<phantom QuestGiver: drop, Reward: store> {
     completed_tasks: VecSet<TypeName>,
     required_tasks: VecSet<TypeName>,
-    reward: R,
+    reward: Reward,
   }
 
   public fun create<Witness: drop, Reward: store>(_: Witness, required_tasks: VecSet<TypeName>, reward: Reward): Quest<Witness, Reward> {
