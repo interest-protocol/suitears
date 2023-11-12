@@ -1,4 +1,4 @@
-module examples::timelock_admin {
+module examples::permanent_lock_admin {
     use sui::clock::Clock;
     use sui::tx_context::TxContext;
     use sui::types::is_one_time_witness;    
