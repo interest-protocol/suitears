@@ -15,7 +15,7 @@ module suitears::dao {
   use sui::types::is_one_time_witness;
   use sui::tx_context::{Self, TxContext};
 
-  use suitears::quest::{Self, Quest};
+  use suitears::atomic_quest::{Self, AtomicQuest};
   use suitears::dao_treasury::{Self, DaoTreasury};
   use suitears::fixed_point_roll::{roll_div_down};
   use suitears::dao_quest::{create_quest, DaoQuest};
@@ -345,7 +345,7 @@ module suitears::dao {
   public fun execute_proposal<DaoWitness: drop, CoinType, T: store>(
     proposal: &mut Proposal<DaoWitness, CoinType, T>, 
     c: &Clock
-  ): Quest<DaoQuest, T> {
+  ): AtomicQuest<DaoQuest, T> {
     let now = clock::timestamp_ms(c);
     assert!(get_proposal_state(proposal, now) == EXECUTABLE, ECannotExecuteThisProposal);
     assert!(now >= proposal.end_time + proposal.action_delay, ETooEarlyToExecute);
@@ -462,10 +462,10 @@ module suitears::dao {
 
   public fun update_dao_config<DaoWitness: drop, CoinType>(
     dao: &mut Dao<DaoWitness, CoinType>,
-    action: Quest<DaoQuest, Config>
+    action: AtomicQuest<DaoQuest, Config>
   ) {
     // @dev We can finish a quest instantly that has no tasks
-    let payload = quest::finish_quest(action);
+    let payload = atomic_quest::finish_quest(action);
 
     let Config { voting_delay, voting_period, voting_quorum_rate, min_action_delay, min_quorum_votes  } = payload;
 

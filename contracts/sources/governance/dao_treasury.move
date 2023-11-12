@@ -11,7 +11,7 @@ module suitears::dao_treasury {
   use sui::tx_context::{Self, TxContext};
 
   use suitears::dao_quest::DaoQuest;
-  use suitears::quest::{finish_quest, Quest};
+  use suitears::atomic_quest::{finish_quest, AtomicQuest};
   use suitears::fixed_point_roll::roll_mul_up;
   use suitears::linear_vesting_wallet::{Self, Wallet as LinearWallet};
   use suitears::quadratic_vesting_wallet::{Self, Wallet as QuadraticWallet};
@@ -145,7 +145,7 @@ module suitears::dao_treasury {
   public fun transfer<DaoWitness: drop, CoinType>(
     treasury: &mut DaoTreasury<DaoWitness>,
     pub: &Publisher,
-    action: Quest<DaoQuest, TransferPayload>, 
+    action: AtomicQuest<DaoQuest, TransferPayload>, 
     ctx: &mut TxContext
   ): Coin<CoinType> {
     let payload = finish_quest(action);
@@ -169,7 +169,7 @@ module suitears::dao_treasury {
     treasury: &mut DaoTreasury<DaoWitness>,
     c: &Clock,
     pub: &Publisher,
-    action: Quest<DaoQuest, TransferVestingWalletPayload>, 
+    action: AtomicQuest<DaoQuest, TransferVestingWalletPayload>, 
     ctx: &mut TxContext    
   ): LinearWallet<CoinType> {
     let payload = finish_quest( action);
@@ -198,7 +198,7 @@ module suitears::dao_treasury {
     treasury: &mut DaoTreasury<DaoWitness>,
     c: &Clock,
     pub: &Publisher,
-    action: Quest<DaoQuest, TransferQuadraticWalletPayload>, 
+    action: AtomicQuest<DaoQuest, TransferQuadraticWalletPayload>, 
     ctx: &mut TxContext    
   ): QuadraticWallet<CoinType> {
     let payload = finish_quest(action);
