@@ -1,15 +1,13 @@
 /*
 * An Example on how to implement a TimeLocked Two Step
 */
-module examples::admin {
+module examples::two_step_admin {
   
   use sui::transfer;
-  use sui::event::emit;
   use sui::clock::{Self, Clock};
-  use sui::object::{Self, UID, ID};
+  use sui::object::{Self, UID};
   use sui::types::is_one_time_witness;
   use sui::tx_context::{Self, TxContext};
-
 
   // Errors
   const EZeroAddress: u64 = 0;
@@ -21,7 +19,7 @@ module examples::admin {
   const SENTINAL_VALUE: u64 = 18446744073709551615;
 
   // The owner of this object can add and remove minters + update the metadata
-  // * important NO store key, so it cannot be transferred
+  // * Important NO store key, so it cannot be transferred
   struct AdminCap<phantom T: drop> has key {
     id: UID
   }
@@ -34,33 +32,8 @@ module examples::admin {
     start: u64
   }
 
-  // * Events
-
-  struct Create<phantom T> has copy, drop {
-    sender: address,
-    time_delay: u64,
-    start: u64
-  }
-
-  struct StartTransfer has copy, drop {
-    pending_admin: address
-  }
-
-  struct AcceptTransfer<phantom T> has copy, drop {
-    pending_admin: address
-  }
-
-  struct CancelTransfer<phantom T> has copy,drop {
-    current_admin: address,
-  }
-
-  struct NewAdmin<phantom T> has copy, drop {
-    admin: address
-  }
-
   public fun create<T: drop>(witness: T, time_delay: u64, ctx: &mut TxContext): (AdminStorage<T>, AdminCap<T>) {
     assert!(is_one_time_witness(&witness), EInvalidWitness);
-    let sender = tx_context::sender(ctx);
 
     let admin_cap = AdminCap<T> { id: object::new(ctx) };
     let admin_storage = AdminStorage<T> {
@@ -70,12 +43,6 @@ module examples::admin {
         time_delay,
         start: SENTINAL_VALUE
     };
-
-    emit(Create<T> { 
-      sender, 
-      time_delay,
-      start: SENTINAL_VALUE
-    });
 
     (admin_storage, admin_cap)
   }
@@ -89,11 +56,6 @@ module examples::admin {
     assert!(recipient != @0x0, EZeroAddress);
     storage.pending_admin = recipient;
     storage.accepted = false;
-  
-
-    emit(StartTransfer {
-      pending_admin: recipient,
-    });
   } 
 
   /**
@@ -101,14 +63,10 @@ module examples::admin {
   * @param admin_cap The AdminCap that will be transferred
   * @recipient the new admin address
   */
-  public fun cancel_transfer<T: drop>(_: &AdminCap<T>, storage: &mut AdminStorage<T>, ctx: &mut TxContext) {
+  public fun cancel_transfer<T: drop>(_: &AdminCap<T>, storage: &mut AdminStorage<T>) {
     storage.pending_admin = @0x0;
     storage.accepted = false;
     storage.start = SENTINAL_VALUE;
-
-    emit(CancelTransfer<T> {
-      current_admin: tx_context::sender(ctx)
-    });
   } 
 
   /**
@@ -121,10 +79,6 @@ module examples::admin {
 
     storage.accepted = true;
     storage.start = clock::timestamp_ms(c);
-
-    emit(AcceptTransfer<T> {
-      pending_admin: storage.pending_admin,
-    });
   } 
 
   /**
@@ -144,8 +98,6 @@ module examples::admin {
     storage.start = SENTINAL_VALUE;
 
     transfer::transfer(cap,new_admin);
-
-    emit(NewAdmin<T> { admin: new_admin });
   } 
 
   // Careful, this cannot be reverted

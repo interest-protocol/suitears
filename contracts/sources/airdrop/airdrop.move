@@ -9,11 +9,11 @@ module suitears::airdrop {
 
   use suitears::airdrop_utils::verify;
   use suitears::bitmap::{Self, Bitmap};
+  use suitears::timelock::{Self, Timelock};
 
   const EAlreadyClaimed: u64 = 0;
-  const ETooEarly: u64 = 1;
-  const EInvalidRoot: u64 = 2;
-  const EInvalidStartTime: u64 = 3;
+  const EInvalidRoot: u64 = 1;
+  const EInvalidStartTime: u64 = 2;
 
   struct AirdropStorage<phantom T> has key, store { 
     id: UID,
@@ -40,21 +40,19 @@ module suitears::airdrop {
   }
 
   public fun get_airdrop<T>(
+    c: &Clock,
     storage: &mut AirdropStorage<T>, 
-    clock_object: &Clock,
     proof: vector<vector<u8>>, 
     amount: u64, 
     ctx: &mut TxContext
-  ): Coin<T> {
-    assert!(storage.start >= clock::timestamp_ms(clock_object), ETooEarly);
-
+  ): Timelock<Coin<T>> {
     let index = verify(storage.root, proof, amount, ctx);
 
     assert!(!bitmap::get(&storage.map, index), EAlreadyClaimed);
 
     bitmap::set(&mut storage.map, index);
 
-    coin::take(&mut storage.balance, amount, ctx)
+    timelock::lock(c, coin::take(&mut storage.balance, amount, ctx), storage.start, ctx)
   }
 
   public fun has_account_claimed<T>(

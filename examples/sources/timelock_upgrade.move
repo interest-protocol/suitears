@@ -1,5 +1,5 @@
 // It adds a timelock before the admin can upgrade a package
-module suitears::upgrade {
+module examples::timelock_upgrade {
     use std::vector;
 
     use sui::event::emit;
@@ -76,7 +76,7 @@ module suitears::upgrade {
         
         emit(InitUpgrade { unlock_timestamp, policy, digest });
 
-        timelock::lock(c, cap, unlock_timestamp, false, ctx)
+        timelock::lock(c, cap, unlock_timestamp,  ctx)
     }
 
     public fun cancel_upgrade(c: &Clock, lock: Timelock<UpgradeWrapper>): UpgradeWrapper {

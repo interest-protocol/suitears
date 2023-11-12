@@ -6,67 +6,88 @@ module suitears::timelock {
 
   const EInvalidTime: u64 = 0;
   const ETooEarly: u64 = 1;
-  const EYouMustRelock: u64 = 2;
-  const EYouCannotUnlockTemporarly: u64 = 3;
 
   struct Timelock<T: store> has key, store {
     id: UID,
-    timestamp: u64,
+    unlock_time: u64,
     data: T,
-    permanent: bool
+  }
+
+  struct PermanentLock<T: store> has key, store {
+    id: UID,
+    start: u64,
+    data: T,
+    time_delay: u64
   }
 
   // Hot Potatoe to force the data to be locked again
   struct Temporary<phantom T> {
-    timestamp: u64
+    time_delay: u64, 
   }
 
   public fun lock<T: store>(
-    c:&Clock, 
+    c:&Clock,
     data: T, 
-    timestamp: u64, 
-    permanent: bool, // @dev Careful this makes the capability forever locked
+    unlock_time: u64,
     ctx: &mut TxContext
   ): Timelock<T> {
     // It makes no sense to lock in the past
-    assert!(timestamp > clock::timestamp_ms(c), EInvalidTime);
+    assert!(unlock_time > clock::timestamp_ms(c), EInvalidTime);
 
     Timelock {
       id: object::new(ctx),
       data,
-      timestamp,
-      permanent
+      unlock_time
+    }
+  }
+
+  public fun lock_permanently<T: store>(
+    c:&Clock,
+    data: T,
+    time_delay: u64,
+    ctx: &mut TxContext
+  ): PermanentLock<T> {
+    // It makes no sense to lock in the past
+    assert!(time_delay != 0, EInvalidTime);
+
+    PermanentLock {
+      id: object::new(ctx),
+      data,
+      start: clock::timestamp_ms(c),
+      time_delay
     }
   }
 
   // @dev We do not show the Data because if it is an Admin Capability
   // It would allow the owner to use admin functions while the lock is active!
-  public fun view_lock<T: store>(lock: &Timelock<T>): (u64, bool) {
-    (lock.timestamp, lock.permanent)
+  public fun view_lock<T: store>(lock: &Timelock<T>): u64 {
+    lock.unlock_time
+  }
+
+    // @dev We do not show the Data because if it is an Admin Capability
+  // It would allow the owner to use admin functions while the lock is active!
+  public fun view_permanent_lock<T: store>(lock: &PermanentLock<T>): u64 {
+    lock.start + lock.time_delay
   }
 
   public fun unlock<T: store>(c:&Clock, lock: Timelock<T>): T {
-    assert!(clock::timestamp_ms(c) >= lock.timestamp, ETooEarly);
+    assert!(clock::timestamp_ms(c) >= lock.unlock_time, ETooEarly);
 
-    let Timelock { data, timestamp: _, id, permanent } = lock;
-
-    assert!(!permanent, EYouMustRelock);
+    let Timelock { data, unlock_time: _, id } = lock;
 
     object::delete(id);
 
     data
   }
 
-  public fun unlock_temporarily<T: store>(c:&Clock, lock: Timelock<T>): (T, Temporary<T>) {
-    assert!(clock::timestamp_ms(c) >= lock.timestamp, ETooEarly);
+  public fun unlock_temporarily<T: store>(c:&Clock, lock: PermanentLock<T>): (T, Temporary<T>) {
+    assert!(clock::timestamp_ms(c) >= lock.start + lock.time_delay, ETooEarly);
 
-    let Timelock { data, timestamp, id, permanent } = lock;
-
-    assert!(permanent, EYouCannotUnlockTemporarly);
+    let PermanentLock { data, start: _, id, time_delay } = lock;
 
     object::delete(id);
 
-   (data, Temporary { timestamp })
+   (data, Temporary { time_delay })
   }
 
   public fun relock_permanently<T: store>(
@@ -74,14 +95,14 @@ module suitears::timelock {
     temporary: Temporary<T>,
     data: T, 
     ctx: &mut TxContext
-  ): Timelock<T> {
-    let Temporary { timestamp } = temporary;
+  ): PermanentLock<T> {
+    let Temporary { time_delay } = temporary;
 
-    Timelock {
+    PermanentLock {
       id: object::new(ctx),
       data,
-      timestamp: clock::timestamp_ms(c) + timestamp,
-      permanent: true
+      start: clock::timestamp_ms(c),
+      time_delay
     }
   }
 }
