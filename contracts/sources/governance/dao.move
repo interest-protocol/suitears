@@ -15,9 +15,10 @@ module suitears::dao {
   use sui::types::is_one_time_witness;
   use sui::tx_context::{Self, TxContext};
 
-  use suitears::dao_action::{Self, Action};
+  use suitears::quest::{Self, Quest};
   use suitears::dao_treasury::{Self, DaoTreasury};
   use suitears::fixed_point_roll::{roll_div_down};
+  use suitears::dao_quest_witness::{create_quest, DaoQuest};
 
   /// Proposal state
   const PENDING: u8 = 1;
@@ -30,11 +31,7 @@ module suitears::dao {
 
   const EInvalidOTW: u64 = 0;
   const EInvalidQuorumRate: u64 = 1;
-  const EInvalidVotingDelay: u64 = 2;
-  const EInvalidVotingPeriod: u64 = 3;
-  const EInvalidMinActionDelay: u64 = 4;
   const EActionDelayTooSmall: u64 = 5;
-  const EInvalidMinQuorumVotes: u64 = 6;
   const EMinQuorumVotesTooSmall: u64 = 7;
   const EProposalMustBeActive: u64 = 8;
   const ECannotVoteWithZeroCoinValue: u64 = 9;
@@ -47,8 +44,6 @@ module suitears::dao {
 
   // Generic Struct represents null/undefined
   struct Nothing has drop, copy, store {}
-
-  struct ActionWitness has drop {}
 
   struct Config has store, copy, drop {
     voting_delay: Option<u64>,
@@ -350,7 +345,7 @@ module suitears::dao {
   public fun execute_proposal<DaoWitness: drop, CoinType, T: store>(
     proposal: &mut Proposal<DaoWitness, CoinType, T>, 
     c: &Clock
-  ): Action<DaoWitness, CoinType, T> {
+  ): Quest<DaoQuest, T> {
     let now = clock::timestamp_ms(c);
     assert!(get_proposal_state(proposal, now) == EXECUTABLE, ECannotExecuteThisProposal);
     assert!(now >= proposal.end_time + proposal.action_delay, ETooEarlyToExecute);
@@ -361,7 +356,7 @@ module suitears::dao {
 
     object::delete(id);
 
-    dao_action::create(rules, payload)
+    create_quest(rules, payload)
   }
 
   public fun proposal_state<DaoWitness: drop, CoinType, T: store>(proposal: &Proposal<DaoWitness, CoinType, T>, c: &Clock): u8 {
@@ -467,11 +462,10 @@ module suitears::dao {
 
   public fun update_dao_config<DaoWitness: drop, CoinType>(
     dao: &mut Dao<DaoWitness, CoinType>,
-    action: Action<DaoWitness, CoinType, Config>
+    action: Quest<DaoQuest, Config>
   ) {
-
-    dao_action::complete_rule(ActionWitness {}, &mut action);
-    let payload = dao_action::finish_action(action);
+    // @dev We can finish a quest instantly that has no tasks
+    let payload = quest::finish_quest(action);
 
     let Config { voting_delay, voting_period, voting_quorum_rate, min_action_delay, min_quorum_votes  } = payload;
 
