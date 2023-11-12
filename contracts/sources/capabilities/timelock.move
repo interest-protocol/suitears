@@ -25,7 +25,7 @@ module suitears::timelock {
     c:&Clock, 
     data: T, 
     timestamp: u64, 
-    permanent: bool,
+    permanent: bool, // @dev Careful this makes the capability forever locked
     ctx: &mut TxContext
   ): Timelock<T> {
     // It makes no sense to lock in the past
