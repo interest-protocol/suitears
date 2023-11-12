@@ -1,6 +1,6 @@
 /*
-* A Quest is a hot potatoe 
-* Quest can only be completed if all tasks are completed IN ORDER
+* A Quest is a hot potato
+* Quests can only be completed if all tasks are completed IN ORDER
 * To complete a task the function quest::complete_task must be called with the Witness
 * Only a quest giver can create quests by passing a Witness
 * It is possible to make a Quest with no tasks!
