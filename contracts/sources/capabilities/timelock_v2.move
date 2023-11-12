@@ -1,4 +1,4 @@
-module suitears::timelock_v2 {
+module suitears::timelock {
 
   use sui::object::{Self, UID};
   use sui::clock::{Self, Clock};
@@ -6,18 +6,18 @@ module suitears::timelock_v2 {
 
   const EInvalidTime: u64 = 0;
   const ETooEarly: u64 = 1;
-  const EYouHaveAnObligation: u64 = 2;
-  const EYouHaveNoObligation: u64 = 3;
+  const EYouMustRelock: u64 = 2;
+  const EYouCannotUnlockTemporarly: u64 = 3;
 
   struct Timelock<T: store> has key, store {
     id: UID,
     timestamp: u64,
     data: T,
-    obligation: bool
+    permanent: bool
   }
 
   // Hot Potatoe to force the data to be locked again
-  struct Obligation<phantom T> {
+  struct Temporary<phantom T> {
     timestamp: u64
   }
 
@@ -25,7 +25,7 @@ module suitears::timelock_v2 {
     c:&Clock, 
     data: T, 
     timestamp: u64, 
-    obligation: bool,
+    permanent: bool,
     ctx: &mut TxContext
   ): Timelock<T> {
     // It makes no sense to lock in the past
@@ -35,53 +35,53 @@ module suitears::timelock_v2 {
       id: object::new(ctx),
       data,
       timestamp,
-      obligation
+      permanent
     }
   }
 
   // @dev We do not show the Data because if it is an Admin Capability
   // It would allow the owner to use admin functions while the lock is active!
   public fun view_lock<T: store>(lock: &Timelock<T>): (u64, bool) {
-    (lock.timestamp, lock.obligation)
+    (lock.timestamp, lock.permanent)
   }
 
   public fun unlock<T: store>(c:&Clock, lock: Timelock<T>): T {
     assert!(clock::timestamp_ms(c) >= lock.timestamp, ETooEarly);
 
-    let Timelock { data, timestamp: _, id, obligation } = lock;
+    let Timelock { data, timestamp: _, id, permanent } = lock;
 
-    assert!(!obligation, EYouHaveAnObligation);
+    assert!(!permanent, EYouMustRelock);
 
     object::delete(id);
 
     data
   }
 
-  public fun unlock_with_obligation<T: store>(c:&Clock, lock: Timelock<T>): (T, Obligation<T>) {
+  public fun unlock_temporarily<T: store>(c:&Clock, lock: Timelock<T>): (T, Temporary<T>) {
     assert!(clock::timestamp_ms(c) >= lock.timestamp, ETooEarly);
 
-    let Timelock { data, timestamp, id, obligation } = lock;
+    let Timelock { data, timestamp, id, permanent } = lock;
 
-    assert!(obligation, EYouHaveNoObligation);
+    assert!(permanent, EYouCannotUnlockTemporarly);
 
     object::delete(id);
 
-   (data, Obligation { timestamp })
+   (data, Temporary { timestamp })
   }
 
-  public fun relock_with_obligation<T: store>(
+  public fun relock_permanently<T: store>(
     c:&Clock, 
-    obligation: Obligation<T>,
+    temporary: Temporary<T>,
     data: T, 
     ctx: &mut TxContext
   ): Timelock<T> {
-    let Obligation { timestamp } = obligation;
+    let Temporary { timestamp } = temporary;
 
     Timelock {
       id: object::new(ctx),
       data,
       timestamp: clock::timestamp_ms(c) + timestamp,
-      obligation: true
+      permanent: true
     }
   }
 }
