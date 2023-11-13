@@ -7,9 +7,9 @@ module suitears::dao_quest {
 
   struct DaoQuest has drop {}
 
-   friend suitears::dao;
+  friend suitears::dao;
 
-   public(friend) fun create_quest<Reward: store>(required_tasks: VecSet<TypeName>, reward: Reward): AtomicQuest<DaoQuest, Reward> {
+  public(friend) fun create_quest<Reward: store>(required_tasks: VecSet<TypeName>, reward: Reward): AtomicQuest<DaoQuest, Reward> {
     atomic_quest::create(DaoQuest {}, required_tasks, reward)
-   }
+  }
 }
