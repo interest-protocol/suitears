@@ -11,8 +11,8 @@ module suitears::dao_treasury {
   use sui::tx_context::{Self, TxContext};
 
   use suitears::dao_quest::DaoQuest;
-  use suitears::atomic_quest::{finish_quest, AtomicQuest};
   use suitears::fixed_point_roll::roll_mul_up;
+  use suitears::atomic_quest::{finish_quest, AtomicQuest};
   use suitears::linear_vesting_wallet::{Self, Wallet as LinearWallet};
   use suitears::quadratic_vesting_wallet::{Self, Wallet as QuadraticWallet};
 
