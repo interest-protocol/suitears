@@ -145,19 +145,19 @@ module suitears::dao_treasury {
   public fun transfer<DaoWitness: drop, CoinType>(
     treasury: &mut DaoTreasury<DaoWitness>,
     pub: &Publisher,
-    action: AtomicQuest<DaoQuest, TransferPayload>, 
+    quest: AtomicQuest<DaoQuest, TransferPayload>, 
     ctx: &mut TxContext
   ): Coin<CoinType> {
-    let payload = finish_quest(action);
+    let TransferPayload { type: coin_typename, publisher_id, value} = finish_quest(quest);
 
-    assert!(get<CoinType>() == payload.type, EMismatchCoinType);
-    assert!(object::id(pub) == payload.publisher_id, EInvalidPublisher);
+    assert!(get<CoinType>() == coin_typename, EMismatchCoinType);
+    assert!(object::id(pub) == publisher_id, EInvalidPublisher);
     
-    let token = coin::take(bag::borrow_mut(&mut treasury.coins, payload.type), payload.value, ctx);
+    let token = coin::take(bag::borrow_mut(&mut treasury.coins, coin_typename), value, ctx);
 
     emit(Transfer<DaoWitness, CoinType> { 
-        value: payload.value, 
-        publisher_id: payload.publisher_id, 
+        value: value, 
+        publisher_id, 
         sender: tx_context::sender(ctx) 
       }
     );
@@ -169,24 +169,24 @@ module suitears::dao_treasury {
     treasury: &mut DaoTreasury<DaoWitness>,
     c: &Clock,
     pub: &Publisher,
-    action: AtomicQuest<DaoQuest, TransferVestingWalletPayload>, 
+    quest: AtomicQuest<DaoQuest, TransferVestingWalletPayload>, 
     ctx: &mut TxContext    
   ): LinearWallet<CoinType> {
-    let payload = finish_quest( action);
+    let TransferVestingWalletPayload { publisher_id, start, duration, value, type: coin_typename } = finish_quest(quest);
 
-    assert!(get<CoinType>() == payload.type, EMismatchCoinType);
-    assert!(object::id(pub) == payload.publisher_id, EInvalidPublisher);
+    assert!(get<CoinType>() == coin_typename, EMismatchCoinType);
+    assert!(object::id(pub) == publisher_id, EInvalidPublisher);
     
-    let token = coin::take<CoinType>(bag::borrow_mut(&mut treasury.coins, payload.type), payload.value, ctx);
+    let token = coin::take<CoinType>(bag::borrow_mut(&mut treasury.coins, coin_typename), value, ctx);
 
-    let wallet = linear_vesting_wallet::create(token, c, payload.start, payload.duration, ctx);
+    let wallet = linear_vesting_wallet::create(token, c, start, duration, ctx);
 
     emit(TransferLinearWallet<DaoWitness, CoinType> { 
-        value: payload.value, 
-        publisher_id: payload.publisher_id, 
+        value, 
+        publisher_id, 
         sender: tx_context::sender(ctx), 
-        duration: payload.duration, 
-        start: payload.start, 
+        duration, 
+        start, 
         wallet_id: object::id(&wallet) 
       }
     );
@@ -198,39 +198,50 @@ module suitears::dao_treasury {
     treasury: &mut DaoTreasury<DaoWitness>,
     c: &Clock,
     pub: &Publisher,
-    action: AtomicQuest<DaoQuest, TransferQuadraticWalletPayload>, 
+    quest: AtomicQuest<DaoQuest, TransferQuadraticWalletPayload>, 
     ctx: &mut TxContext    
   ): QuadraticWallet<CoinType> {
-    let payload = finish_quest(action);
+    let TransferQuadraticWalletPayload 
+    { 
+      type: coin_typename, 
+      publisher_id,
+      vesting_curve_a,
+      vesting_curve_b,
+      vesting_curve_c,
+      start,
+      cliff,
+      duration,
+      value 
+    } = finish_quest(quest);
 
-    assert!(get<CoinType>() == payload.type, EMismatchCoinType);
-    assert!(object::id(pub) == payload.publisher_id, EInvalidPublisher);
+    assert!(get<CoinType>() == coin_typename, EMismatchCoinType);
+    assert!(object::id(pub) == publisher_id, EInvalidPublisher);
     
-    let token = coin::take<CoinType>(bag::borrow_mut(&mut treasury.coins, payload.type), payload.value, ctx);
+    let token = coin::take<CoinType>(bag::borrow_mut(&mut treasury.coins, coin_typename), value, ctx);
 
     let wallet = quadratic_vesting_wallet::create(
       token, 
       c,
-      payload.vesting_curve_a,
-      payload.vesting_curve_b,
-      payload.vesting_curve_c,
-      payload.start,
-      payload.cliff,
-      payload.duration, 
+      vesting_curve_a,
+      vesting_curve_b,
+      vesting_curve_c,
+      start,
+      cliff,
+      duration, 
       ctx
     );
 
     emit(TransferQuadraticWallet<DaoWitness, CoinType> {
-        value: payload.value, 
-        publisher_id: payload.publisher_id, 
+        value, 
+        publisher_id, 
         sender: tx_context::sender(ctx), 
-        duration: payload.duration, 
-        start: payload.start, 
+        duration, 
+        start, 
         wallet_id: object::id(&wallet), 
-        vesting_curve_a: payload.vesting_curve_a, 
-        vesting_curve_b: payload.vesting_curve_b, 
-        vesting_curve_c: payload.vesting_curve_c, 
-        cliff: payload.cliff 
+        vesting_curve_a, 
+        vesting_curve_b, 
+        vesting_curve_c, 
+        cliff
       }
     );
     

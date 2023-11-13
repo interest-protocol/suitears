@@ -53,10 +53,10 @@ module suitears::dao {
     min_quorum_votes: Option<u64>    
   }
 
-  struct Rules<T: store> has key, store {
+  struct Tasks<T: store> has key, store {
     id: UID,
-    rules: VecSet<TypeName>,
-    payload: T
+    tasks: VecSet<TypeName>,
+    reward: T
   }
 
   struct Dao<phantom OTW, phantom CoinType> has key, store {
@@ -86,7 +86,7 @@ module suitears::dao {
     action_delay: u64, // after how long, the agreed proposal can be executed.
     quorum_votes: u64, // the number of votes to pass the proposal.
     voting_quorum_rate: u64, 
-    rules: Option<Rules<T>>,
+    tasks: Option<Tasks<T>>,
     hash: vector<u8>
   }
 
@@ -215,13 +215,13 @@ module suitears::dao {
   public fun propose_with_action<DaoWitness: drop, CoinType, T: store>(
     dao: &mut Dao<DaoWitness, CoinType>,
     c: &Clock,
-    rules: Rules<T>,
+    tasks: Tasks<T>,
     action_delay: u64,
     min_quorum_votes: u64,
     hash: vector<u8>,//
     ctx: &mut TxContext
   ): Proposal<DaoWitness, CoinType, T> {
-    propose(dao, c, option::some(rules), action_delay, min_quorum_votes, hash, ctx)
+    propose(dao, c, option::some(tasks), action_delay, min_quorum_votes, hash, ctx)
   }
 
   public fun propose_without_action<DaoWitness: drop, CoinType>(
@@ -235,16 +235,16 @@ module suitears::dao {
     propose(dao, c, option::none(), action_delay, min_quorum_votes, hash, ctx)
   }
 
-  public fun create_rules<T: store>(payload: T, ctx: &mut TxContext): Rules<T> {
-    Rules {
+  public fun create_tasks<T: store>(reward: T, ctx: &mut TxContext): Tasks<T> {
+    Tasks {
       id: object::new(ctx),
-      rules: vec_set::empty(),
-      payload
+      tasks: vec_set::empty(),
+      reward
     }
   }
 
-  public fun add_rule<T: store, Rule>(rules: &mut Rules<T>) {
-    vec_set::insert(&mut rules.rules, get<Rule>());
+  public fun add_task<T: store, Rule>(tasks: &mut Tasks<T>) {
+    vec_set::insert(&mut tasks.tasks, get<Rule>());
   }
 
   public fun cast_vote<DaoWitness: drop, CoinType, T: store>(
@@ -350,13 +350,12 @@ module suitears::dao {
     assert!(get_proposal_state(proposal, now) == EXECUTABLE, ECannotExecuteThisProposal);
     assert!(now >= proposal.end_time + proposal.action_delay, ETooEarlyToExecute);
 
-    let rules = option::extract(&mut proposal.rules);
 
-    let Rules { id, payload, rules } = rules;
+    let Tasks { id, reward, tasks } = option::extract(&mut proposal.tasks);
 
     object::delete(id);
 
-    create_quest(rules, payload)
+    create_quest(tasks, reward)
   }
 
   public fun proposal_state<DaoWitness: drop, CoinType, T: store>(proposal: &Proposal<DaoWitness, CoinType, T>, c: &Clock): u8 {
@@ -372,14 +371,14 @@ module suitears::dao {
   public fun view_proposal<DaoWitness: drop, CoinType, T: store>(
     proposal: &Proposal<DaoWitness,  CoinType, T>, 
     c: &Clock
-  ): (ID, address, u8, u64, u64, u64, u64, u64, u64, u64, vector<u8>, &Option<Rules<T>>) {
-    (object::id(proposal), proposal.proposer, proposal_state(proposal, c), proposal.start_time, proposal.end_time, proposal.for_votes, proposal.against_votes, proposal.eta, proposal.action_delay, proposal.quorum_votes, proposal.hash, &proposal.rules)
+  ): (ID, address, u8, u64, u64, u64, u64, u64, u64, u64, vector<u8>, &Option<Tasks<T>>) {
+    (object::id(proposal), proposal.proposer, proposal_state(proposal, c), proposal.start_time, proposal.end_time, proposal.for_votes, proposal.against_votes, proposal.eta, proposal.action_delay, proposal.quorum_votes, proposal.hash, &proposal.tasks)
   }
 
   fun propose<DaoWitness: drop, CoinType, T: store>(
     dao: &mut Dao<DaoWitness, CoinType>,
     c: &Clock,
-    rules: Option<Rules<T>>,
+    tasks: Option<Tasks<T>>,
     action_delay: u64,
     quorum_votes: u64,
     hash: vector<u8>,// hash proposal title/content
@@ -403,7 +402,7 @@ module suitears::dao {
       quorum_votes,
       voting_quorum_rate: dao.voting_quorum_rate,
       hash,
-      rules
+      tasks
     };
     
     emit(NewProposal<DaoWitness, CoinType, T> { proposal_id: object::id(&proposal), proposer: proposal.proposer });
@@ -441,7 +440,7 @@ module suitears::dao {
     } else if (current_time < proposal.eta) {
       // Queued, waiting to execute
       QUEUED
-    } else if (option::is_some(&proposal.rules)) {
+    } else if (option::is_some(&proposal.tasks)) {
       EXECUTABLE
     } else {
       EXTRACTED
@@ -462,12 +461,10 @@ module suitears::dao {
 
   public fun update_dao_config<DaoWitness: drop, CoinType>(
     dao: &mut Dao<DaoWitness, CoinType>,
-    action: AtomicQuest<DaoQuest, Config>
+    quest: AtomicQuest<DaoQuest, Config>
   ) {
     // @dev We can finish a quest instantly that has no tasks
-    let payload = atomic_quest::finish_quest(action);
-
-    let Config { voting_delay, voting_period, voting_quorum_rate, min_action_delay, min_quorum_votes  } = payload;
+    let Config { voting_delay, voting_period, voting_quorum_rate, min_action_delay, min_quorum_votes  } = atomic_quest::finish_quest(quest);
 
     dao.voting_delay = option::destroy_with_default(voting_delay, dao.voting_delay);
     dao.voting_period = option::destroy_with_default(voting_period, dao.voting_period);
