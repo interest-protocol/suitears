@@ -345,7 +345,7 @@ module suitears::dao {
   public fun execute_proposal<DaoWitness: drop, CoinType, T: store>(
     proposal: &mut Proposal<DaoWitness, CoinType, T>, 
     c: &Clock
-  ): AtomicQuest<DaoQuest, T> {
+  ): AtomicQuest<DaoQuest<DaoWitness>, T> {
     let now = clock::timestamp_ms(c);
     assert!(get_proposal_state(proposal, now) == EXECUTABLE, ECannotExecuteThisProposal);
     assert!(now >= proposal.end_time + proposal.action_delay, ETooEarlyToExecute);
@@ -461,7 +461,7 @@ module suitears::dao {
 
   public fun update_dao_config<DaoWitness: drop, CoinType>(
     dao: &mut Dao<DaoWitness, CoinType>,
-    quest: AtomicQuest<DaoQuest, Config>
+    quest: AtomicQuest<DaoQuest<DaoWitness>, Config>
   ) {
     // @dev We can finish a quest instantly that has no tasks
     let Config { voting_delay, voting_period, voting_quorum_rate, min_action_delay, min_quorum_votes  } = atomic_quest::finish_quest(quest);

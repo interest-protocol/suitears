@@ -145,7 +145,7 @@ module suitears::dao_treasury {
   public fun transfer<DaoWitness: drop, CoinType>(
     treasury: &mut DaoTreasury<DaoWitness>,
     pub: &Publisher,
-    quest: AtomicQuest<DaoQuest, TransferPayload>, 
+    quest: AtomicQuest<DaoQuest<DaoWitness>, TransferPayload>, 
     ctx: &mut TxContext
   ): Coin<CoinType> {
     let TransferPayload { type: coin_typename, publisher_id, value} = finish_quest(quest);
@@ -169,7 +169,7 @@ module suitears::dao_treasury {
     treasury: &mut DaoTreasury<DaoWitness>,
     c: &Clock,
     pub: &Publisher,
-    quest: AtomicQuest<DaoQuest, TransferVestingWalletPayload>, 
+    quest: AtomicQuest<DaoQuest<DaoWitness>, TransferVestingWalletPayload>, 
     ctx: &mut TxContext    
   ): LinearWallet<CoinType> {
     let TransferVestingWalletPayload { publisher_id, start, duration, value, type: coin_typename } = finish_quest(quest);
@@ -198,7 +198,7 @@ module suitears::dao_treasury {
     treasury: &mut DaoTreasury<DaoWitness>,
     c: &Clock,
     pub: &Publisher,
-    quest: AtomicQuest<DaoQuest, TransferQuadraticWalletPayload>, 
+    quest: AtomicQuest<DaoQuest<DaoWitness>, TransferQuadraticWalletPayload>, 
     ctx: &mut TxContext    
   ): QuadraticWallet<CoinType> {
     let TransferQuadraticWalletPayload 
