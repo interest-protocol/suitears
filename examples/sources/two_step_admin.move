@@ -16,99 +16,103 @@ module examples::two_step_admin {
   const EInvalidWitness: u64 = 3;
   const ETooEarly: u64 = 4;
 
-  const SENTINAL_VALUE: u64 = 18446744073709551615;
-
   // The owner of this object can add and remove minters + update the metadata
   // * Important NO store key, so it cannot be transferred
   struct AdminCap<phantom T: drop> has key {
     id: UID
   }
 
-  struct AdminStorage<phantom T: drop> has key, store {
+  // shared object
+  struct TransferRequest<phantom T: drop> has key {
     id: UID,
     pending_admin: address,
     accepted: bool,
-    time_delay: u64,
-    start: u64
+    delay: u64,
+    start: u64,
   }
 
-  public fun create<T: drop>(witness: T, time_delay: u64, ctx: &mut TxContext): (AdminStorage<T>, AdminCap<T>) {
+  /**
+  * @dev It creates and returns an AdminCap and share its associated TransferRequest
+  * @param witness type
+  * @param c: delay before each transfer activation 
+  * @returns AdminCap
+  */
+  public fun create<T: drop>(witness: T, delay: u64, ctx: &mut TxContext): AdminCap<T> {
     assert!(is_one_time_witness(&witness), EInvalidWitness);
 
-    let admin_cap = AdminCap<T> { id: object::new(ctx) };
-    let admin_storage = AdminStorage<T> {
+    transfer::share_object(TransferRequest<T> {
         id: object::new(ctx),
         pending_admin: @0x0,
         accepted: false,
-        time_delay,
-        start: SENTINAL_VALUE
-    };
+        delay,
+        start: 0,
+    });
 
-    (admin_storage, admin_cap)
+    AdminCap<T> { id: object::new(ctx) }
   }
 
   /**
   * @dev It initiates the transfer process of the AdminCap
-  * @param admin_cap The AdminCap that will be transferred
-  * @recipient the new admin address
+  * @param admin_cap: The AdminCap that will be transferred
+  * @param request: The associated TransferRequest
+  * @param recipient: the new admin address
   */
-  public fun start_transfer<T: drop>(_: &AdminCap<T>, storage: &mut AdminStorage<T>, recipient: address) {
+  public entry fun start_transfer<T: drop>(_: &AdminCap<T>, request: &mut TransferRequest<T>, recipient: address) {
     assert!(recipient != @0x0, EZeroAddress);
-    storage.pending_admin = recipient;
-    storage.accepted = false;
+    request.pending_admin = recipient;
   } 
 
   /**
   * @dev It cancels the transfer of the Admin Cap
-  * @param admin_cap The AdminCap that will be transferred
-  * @recipient the new admin address
+  * @param admin_cap: The AdminCap that will be transferred
+  * @param request: The associated TransferRequest
   */
-  public fun cancel_transfer<T: drop>(_: &AdminCap<T>, storage: &mut AdminStorage<T>) {
-    storage.pending_admin = @0x0;
-    storage.accepted = false;
-    storage.start = SENTINAL_VALUE;
+  public entry fun cancel_transfer<T: drop>(_: &AdminCap<T>, request: &mut TransferRequest<T>) {
+    request.pending_admin = @0x0;
+    request.accepted = false;
+    request.start = 0;
   } 
 
   /**
   * @dev It allows the pending admin to accept the {AdminCap}
-  * @param admin_cap The AdminCap that will be transferred
-  * @recipient the new admin address
+  * @param admin_cap: The AdminCap that will be transferred
+  * @param request: The associated TransferRequest
   */
-  public fun accept_transfer<T: drop>(c: &Clock, storage: &mut AdminStorage<T>, ctx: &mut TxContext) {
-    assert!(tx_context::sender(ctx) == storage.pending_admin, EInvalidAcceptSender);
+  public entry fun accept_transfer<T: drop>(c: &Clock, request: &mut TransferRequest<T>, ctx: &mut TxContext) {
+    assert!(tx_context::sender(ctx) == request.pending_admin, EInvalidAcceptSender);
 
-    storage.accepted = true;
-    storage.start = clock::timestamp_ms(c);
+    request.accepted = true;
+    request.start = clock::timestamp_ms(c);
   } 
 
   /**
-  * @dev It transfers the {AdminCap} to the pending admin
-  * @param admin_cap The AdminCap that will be transferred
+  * @dev It transfers the AdminCap to the pending admin
+  * @param admin_cap: The AdminCap that will be transferred
+  * @param c: the clock object
+  * @param request: The associated TransferRequest
   * @recipient the new admin address
   */
-  public fun transfer<T: drop>(cap: AdminCap<T>, c: &Clock, storage: &mut AdminStorage<T>) {
-    // New admin must accept the capability
-    assert!(storage.accepted, EAdminDidNotAccept);
+  public entry fun transfer<T: drop>(cap: AdminCap<T>, c: &Clock, request: &mut TransferRequest<T>) {
+    // New admin must have accepted the request
+    assert!(request.accepted, EAdminDidNotAccept);
     let now = clock::timestamp_ms(c);
-    assert!(now >= storage.start + storage.time_delay, ETooEarly);
+    assert!(now >= request.start + request.delay, ETooEarly);
 
-    storage.accepted = false;
-    let new_admin = storage.pending_admin;
-    storage.pending_admin = @0x0;
-    storage.start = SENTINAL_VALUE;
+    transfer::transfer(cap, request.pending_admin);
 
-    transfer::transfer(cap,new_admin);
+    // reset Request data
+    request.accepted = false;
+    request.pending_admin = @0x0;
+    request.start = 0;
   } 
 
   // Careful, this cannot be reverted
-  public fun destroy_cap<T: drop>(cap: AdminCap<T>) {
+  public entry fun destroy_cap<T: drop>(cap: AdminCap<T>) {
     let AdminCap { id } = cap;
     object::delete(id);
   }
 
-  // Careful, this cannot be reverted
-  public fun destroy_storage<T: drop>(storage: AdminStorage<T>) {
-    let AdminStorage { id, time_delay: _, accepted: _, pending_admin: _, start: _ } = storage;
-    object::delete(id);
-  }
+  // Not implemented yet because share object can't be deleted at the moment
+  // see https://github.com/MystenLabs/sui/issues/12653
+  // public entry fun destroy_request<T: drop>(request: TransferRequest<T>) {}
 }
