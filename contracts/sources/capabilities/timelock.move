@@ -1,67 +1,108 @@
-// it abstracts the Timelock Logic
 module suitears::timelock {
-    
-  use std::type_name::{Self, TypeName};
 
   use sui::object::{Self, UID};
-  use sui::dynamic_field as df;
   use sui::clock::{Self, Clock};
   use sui::tx_context::TxContext;
 
-  const EWrongPackage: u64 = 0;
+  const EInvalidTime: u64 = 0;
   const ETooEarly: u64 = 1;
-  const EInvalidTimestamp: u64 = 2;
-  const EInvalidOperation: u64 = 3;
 
-  struct TimeLockCap<phantom T: drop> has key, store {
+  struct Timelock<T: store> has key, store {
     id: UID,
-    unlock_timestamp: u64,
-    can_update_unlock_timestamp: bool,
-    name: TypeName,
+    unlock_time: u64,
+    data: T,
   }
 
-  public fun create<T: drop>(_: T, c: &Clock, unlock_timestamp: u64, can_update_unlock_timestamp: bool, ctx: &mut TxContext): TimeLockCap<T> {
-    assert!(unlock_timestamp > clock::timestamp_ms(c), EInvalidTimestamp);
+  struct PermanentLock<T: store> has key, store {
+    id: UID,
+    start: u64,
+    data: T,
+    time_delay: u64
+  }
 
-    TimeLockCap<T> {
+  // Hot Potatoe to force the data to be locked again
+  struct Temporary<phantom T> {
+    time_delay: u64, 
+  }
+
+  public fun lock<T: store>(
+    c:&Clock,
+    data: T, 
+    unlock_time: u64,
+    ctx: &mut TxContext
+  ): Timelock<T> {
+    // It makes no sense to lock in the past
+    assert!(unlock_time > clock::timestamp_ms(c), EInvalidTime);
+
+    Timelock {
       id: object::new(ctx),
-      unlock_timestamp,
-      can_update_unlock_timestamp,
-      name: type_name::get<T>()
+      data,
+      unlock_time
     }
   }
 
-  // @dev This does not make any assertion. It is only to get a gas rebate
-  public fun destroy<T: drop>(timelock: TimeLockCap<T>) {
-    let TimeLockCap<T> { id, unlock_timestamp: _, can_update_unlock_timestamp: _, name: _ } = timelock;
+  public fun lock_permanently<T: store>(
+    c:&Clock,
+    data: T,
+    time_delay: u64,
+    ctx: &mut TxContext
+  ): PermanentLock<T> {
+    // It makes no sense to lock in the past
+    assert!(time_delay != 0, EInvalidTime);
+
+    PermanentLock {
+      id: object::new(ctx),
+      data,
+      start: clock::timestamp_ms(c),
+      time_delay
+    }
+  }
+
+  // @dev We do not show the Data because if it is an Admin Capability
+  // It would allow the owner to use admin functions while the lock is active!
+  public fun view_lock<T: store>(lock: &Timelock<T>): u64 {
+    lock.unlock_time
+  }
+
+    // @dev We do not show the Data because if it is an Admin Capability
+  // It would allow the owner to use admin functions while the lock is active!
+  public fun view_permanent_lock<T: store>(lock: &PermanentLock<T>): u64 {
+    lock.start + lock.time_delay
+  }
+
+  public fun unlock<T: store>(c:&Clock, lock: Timelock<T>): T {
+    assert!(clock::timestamp_ms(c) >= lock.unlock_time, ETooEarly);
+
+    let Timelock { data, unlock_time: _, id } = lock;
+
     object::delete(id);
+
+    data
   }
 
-  public fun assert_unlock_epoch_and_destroy<T: drop>(_: T, c: &Clock, timelock: TimeLockCap<T>) {
-    assert!(clock::timestamp_ms(c) >= timelock.unlock_timestamp, ETooEarly);
-    let TimeLockCap<T> { id, unlock_timestamp: _, can_update_unlock_timestamp: _, name } = timelock;
-    assert!(name == type_name::get<T>(), EWrongPackage);
+  public fun unlock_temporarily<T: store>(c:&Clock, lock: PermanentLock<T>): (T, Temporary<T>) {
+    assert!(clock::timestamp_ms(c) >= lock.start + lock.time_delay, ETooEarly);
+
+    let PermanentLock { data, start: _, id, time_delay } = lock;
+
     object::delete(id);
-  } 
 
-  public fun update_unlock_timestamp<T: drop>(_: T, timelock: &mut TimeLockCap<T>, unlock_epoch: u64) {
-    assert!(timelock.can_update_unlock_timestamp, EInvalidOperation);
-    timelock.unlock_timestamp = unlock_epoch;
+   (data, Temporary { time_delay })
   }
 
-  public fun add_extra_data<T: drop, Key: store + drop + copy, D: store>(timelock: &mut TimeLockCap<T>, key: Key, data: D) {
-   df::add(&mut timelock.id, key, data);
-  }
+  public fun relock_permanently<T: store>(
+    c:&Clock, 
+    temporary: Temporary<T>,
+    data: T, 
+    ctx: &mut TxContext
+  ): PermanentLock<T> {
+    let Temporary { time_delay } = temporary;
 
-  public fun borrow_extra_data<T: drop, Key: store + drop + copy, D: store>(timelock: &TimeLockCap<T>, key: Key): &D {
-   df::borrow(&timelock.id, key)
-  }
-
-  public fun unlock_timestamp<T: drop>(timelock: &TimeLockCap<T>): u64 {
-    timelock.unlock_timestamp
-  }
-
-  public fun can_update_unlock_timestamp<T: drop>(timelock: &TimeLockCap<T>): bool {
-    timelock.can_update_unlock_timestamp
+    PermanentLock {
+      id: object::new(ctx),
+      data,
+      start: clock::timestamp_ms(c),
+      time_delay
+    }
   }
 }
