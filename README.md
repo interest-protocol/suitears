@@ -26,7 +26,6 @@ airdrop
 ├─ linear_vesting_airdrop — "An airdrop that distributes the tokens according to a linear vesting"
 ├─ quadratic_vesting_airdrop — "An airdrop that distributes the tokens according to a quadratic vesting"
 capabilities
-├─ admin — "Admin authorization capability"
 ├─ owner — "Owner capability to give access to multiple objects"
 ├─ timelock — "Timelock capability to add a delay between actions"
 collections
