@@ -14,24 +14,20 @@ module suitears::atomic_quest {
   const EWrongTasks: u64 = 0;
 
   struct AtomicQuest<phantom QuestGiver: drop, Reward: store> {
-    completed_tasks: VecSet<TypeName>,
     required_tasks: VecSet<TypeName>,
+    completed_tasks: VecSet<TypeName>,
     reward: Reward,
   }
 
   public fun create<Witness: drop, Reward: store>(_: Witness, required_tasks: VecSet<TypeName>, reward: Reward): AtomicQuest<Witness, Reward> {
-    AtomicQuest {
-      required_tasks,
-      completed_tasks: vec_set::empty(),
-      reward
-    }
+    AtomicQuest { required_tasks, completed_tasks: vec_set::empty(), reward }
   }
 
-  public fun view_required_tasks<QuestWitness: drop, Reward: store>(quest: &AtomicQuest<QuestWitness, Reward>): vector<TypeName> {
+  public fun get_required_tasks<QuestWitness: drop, Reward: store>(quest: &AtomicQuest<QuestWitness, Reward>): vector<TypeName> {
     *vec_set::keys(&quest.required_tasks)
   }
 
-  public fun view_completed_tasks<QuestWitness: drop, Reward: store>(quest: &AtomicQuest<QuestWitness, Reward>): vector<TypeName> {
+  public fun get_completed_tasks<QuestWitness: drop, Reward: store>(quest: &AtomicQuest<QuestWitness, Reward>): vector<TypeName> {
     *vec_set::keys(&quest.completed_tasks)
   }
 
@@ -40,19 +36,17 @@ module suitears::atomic_quest {
   }
 
   public fun finish_quest<QuestWitness: drop, Reward: store>(quest: AtomicQuest<QuestWitness, Reward>): Reward {
-    let AtomicQuest { completed_tasks, required_tasks, reward } = quest;
+    let AtomicQuest { required_tasks, completed_tasks, reward } = quest;
 
     let num_of_tasks = vec_set::size(&required_tasks);
     let required_tasks = vec_set::into_keys(required_tasks);
     let completed_tasks = vec_set::into_keys(completed_tasks);
 
     let index = 0;
-
     while (num_of_tasks > index) {
-      assert!(*vector::borrow(&required_tasks, index) == *vector::borrow(&completed_tasks, index), EWrongTasks);
+      assert!(vector::borrow(&required_tasks, index) == vector::borrow(&completed_tasks, index), EWrongTasks);
       index = index + 1;
     };
-
 
     reward
   }
