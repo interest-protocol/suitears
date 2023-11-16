@@ -24,7 +24,7 @@
   	id: UID
   }
 
-  public fun new(ctx:&mut TxContext): Object
+  public fun new(ctx:&mut TxContext): Object {}
 
   }
   ```
@@ -38,7 +38,7 @@
   	bits: vector<u8>
   }
 
-  public fun empty(): DataStructure
+  public fun empty(): DataStructure {}
 
   }
   ```
@@ -54,9 +54,9 @@
   	id: UID
   }
 
-  public fun new(ctx:&mut TxContext): Profile
+  public fun new(ctx:&mut TxContext): Profile {}
 
-  public fun share_profile(profile: Profile)
+  public fun share_profile(profile: Profile) {}
 
   }
   ```
@@ -72,9 +72,9 @@
   	age: u8
   }
 
-  public fun name(self: &Profile): String
+  public fun name(self: &Profile): String {}
 
-  public fun age(self: &Profile): u8
+  public fun age(self: &Profile): u8 {}
 
   }
   ```
@@ -90,9 +90,9 @@
   	age: u8
   }
 
-  public fun borrow_name(self: &Profile): &String
+  public fun borrow_name(self: &Profile): &String {}
 
-  public fun borrow_mut_age(self: &mut Profile): &mut u8
+  public fun borrow_mut_age(self: &mut Profile): &mut u8 {}
 
   }
   ```
