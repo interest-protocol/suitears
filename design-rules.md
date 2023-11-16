@@ -21,8 +21,8 @@
   module suitears::object {
 
   struct Object has key, store {
-  	id: UID
-  }
+    id: UID
+   }
 
   public fun new(ctx:&mut TxContext): Object {}
 
@@ -35,8 +35,8 @@
   module suitears::data_structure {
 
   struct DataStructure has copy, drop, store {
-  	bits: vector<u8>
-  }
+    bits: vector<u8>
+   }
 
   public fun empty(): DataStructure {}
 
@@ -51,8 +51,8 @@
   module suitera::profile {
 
   struct Profile has key {
-  	id: UID
-  }
+    id: UID
+   }
 
   public fun new(ctx:&mut TxContext): Profile {}
 
@@ -67,10 +67,10 @@
   module suitears::profile {
 
   struct Profile has key {
-  	id: UID,
-  	name: String,
-  	age: u8
-  }
+    id: UID,
+    name: String,
+    age: u8
+   }
 
   public fun name(self: &Profile): String {}
 
@@ -85,10 +85,10 @@
   module suitears::profile {
 
   struct Profile has key {
-  	id: UID,
-  	name: String,
-  	age: u8
-  }
+    id: UID,
+    name: String,
+    age: u8
+   }
 
   public fun borrow_name(self: &Profile): &String {}
 
@@ -101,17 +101,17 @@
 
   ```Move
   module suitears::wallet {
-  	struct Wallet has key, store {
-  		id: UID,
-  		amount: u64
-  	}
+   struct Wallet has key, store {
+     id: UID,
+     amount: u64
+    }
   }
 
   module suitears::claw_back_wallet {
-  	struct Wallet has key {
-  		id: UID,
-  		amount: u64
-  	}
+   struct Wallet has key {
+     id: UID,
+     amount: u64
+    }
   }
   ```
 
@@ -192,4 +192,6 @@
   module suitears::farm {
 
     public fun deposit(asset: Coin<SUI>, _ctx: &mut TxContext): u64 {}
+
+  }
   ```
