@@ -10,11 +10,11 @@ module suitears::atomic_quest {
   use std::vector;
   use std::type_name::{Self, TypeName};
 
-  use sui::dynamic_object_field as dfo;
   use sui::tx_context::TxContext;
   use sui::object::{Self, UID, ID};
   use sui::vec_set::{Self, VecSet};
-
+  use sui::dynamic_object_field as dfo;
+  
   const EWrongTasks: u64 = 0;
   const ETaskHasReward: u64 = 1;
   const ETaskHasNoReward: u64 = 2;
