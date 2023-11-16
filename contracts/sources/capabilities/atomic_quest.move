@@ -4,7 +4,7 @@
 * To complete a task the function quest::complete_task must be called with the Witness
 * Only a quest giver can create quests by passing a Witness
 * It is possible to make a Quest with no tasks!
-* Each Task contains a Reward payload
+* Each Task may contain a Reward payload
 */
 module suitears::atomic_quest {
   use std::vector;
