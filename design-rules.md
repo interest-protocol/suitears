@@ -115,7 +115,7 @@
   }
   ```
 
-- **Comment the functions with the following tags**
+- **Comment functions with tags and refer to parameters name with ``**
 
   - dev: An explanation to developers
   - param: It must be followed by the param name and a description
