@@ -61,7 +61,7 @@
   }
   ```
 
-- **Getter and view functions must be the name of the property and it has to return a copy of it.**
+- **Getter and view functions must follow this format object_name_property_name and it has to return a copy of it.**
 
   ```Move
   module suitears::profile {
@@ -72,14 +72,14 @@
     age: u8
    }
 
-  public fun name(self: &Profile): String {}
+  public fun profile_name(self: &Profile): String {}
 
-  public fun age(self: &Profile): u8 {}
+  public fun profile_age(self: &Profile): u8 {}
 
   }
   ```
 
-- **Functions that return a reference must be named borrow_property_name or borrow_mut_property_name.**
+- **Functions that return a reference must be named borrow_object_name_property_name or borrow_mut_object_name_property_name.**
 
   ```Move
   module suitears::profile {
@@ -90,14 +90,14 @@
     age: u8
    }
 
-  public fun borrow_name(self: &Profile): &String {}
+  public fun borrow_profile_name(self: &Profile): &String {}
 
-  public fun borrow_mut_age(self: &mut Profile): &mut u8 {}
+  public fun borrow_mut_profile_age(self: &mut Profile): &mut u8 {}
 
   }
   ```
 
-- **Module must operate over one Object or Data Structure.**
+- **Modules must be designed around one Object or Data Structure. A variant structure should have its own module to avoid complexity and bugs.**
 
   ```Move
   module suitears::wallet {
