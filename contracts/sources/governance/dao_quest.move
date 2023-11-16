@@ -1,7 +1,6 @@
 module suitears::dao_quest {
-  use std::type_name::TypeName;
 
-  use sui::vec_set::VecSet;
+  use sui::tx_context::TxContext;
 
   use suitears::atomic_quest::{Self, AtomicQuest};
 
@@ -9,7 +8,7 @@ module suitears::dao_quest {
 
   friend suitears::dao;
 
-  public(friend) fun create_quest<DaoOTW: drop, Reward: store>(required_tasks: VecSet<TypeName>, reward: Reward): AtomicQuest<DaoQuest<DaoOTW>, Reward> {
-    atomic_quest::create(DaoQuest {}, required_tasks, reward)
+  public(friend) fun create_quest<DaoOTW: drop>(ctx: &mut TxContext): AtomicQuest<DaoQuest<DaoOTW>> {
+    atomic_quest::create(DaoQuest {}, ctx)
   }
 }
