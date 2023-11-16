@@ -18,21 +18,29 @@
 #### Functions that create objects must be called new
 
 ```Move
+module suitears::object {
+
 struct Object has key, store {
 	id: UID
 }
 
 public fun new(ctx:&mut TxContext): Object
+
+}
 ```
 
 #### Functions that create data structures must be called empty
 
 ```Move
+module suitears::data_structure {
+
 struct DataStructure has copy, drop, store {
 	bits: vector<u8>
 }
 
 public fun empty(): DataStructure
+
+}
 ```
 
 #### Do not emit events. Sui emits native events on object mutations.
@@ -40,6 +48,8 @@ public fun empty(): DataStructure
 #### If a key only object is returned by a new function. A separate share function must be included. The share function must be named share_object_name
 
 ```Move
+module suitera::profile {
+
 struct Profile has key {
 	id: UID
 }
@@ -47,11 +57,15 @@ struct Profile has key {
 public fun new(ctx:&mut TxContext): Profile
 
 public fun share_profile(profile: Profile)
+
+}
 ```
 
 #### Getter and view functions must be the name of the property and it has to return a copy of it.
 
 ```Move
+module suitears::profile {
+
 struct Profile has key {
 	id: UID,
 	name: String,
@@ -61,11 +75,15 @@ struct Profile has key {
 public fun name(self: &Profile): String
 
 public fun age(self: &Profile): u8
+
+}
 ```
 
 #### Functions that return a reference must be named borrow_property_name or borrow_mut_property_name
 
 ```Move
+module suitears::profile {
+
 struct Profile has key {
 	id: UID,
 	name: String,
@@ -75,6 +93,8 @@ struct Profile has key {
 public fun borrow_name(self: &Profile): &String
 
 public fun borrow_mut_age(self: &mut Profile): &mut u8
+
+}
 ```
 
 #### Module must operate over one Object or Data Structure.
