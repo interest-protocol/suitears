@@ -114,3 +114,31 @@
   	}
   }
   ```
+
+- **Comment the functions with the following tags**
+
+  - dev: An explanation to developers
+  - notice: An explanation to the end user
+  - param: It must be followed by the param name and a description
+  - return: Name and type of the return
+  - aborts-if: Describe the abort conditions
+
+  ```Move
+  module suitears::math {
+
+    /**
+    * @dev It divides `x` by `y` and rounds down
+    * @param x The numerator in the division
+    * @param y the denominator in the division
+    * @return u64 The result of dividing `x` by `y`
+    *
+    * aborts-if
+    * - `y` is zero
+    */
+    public fun div(x: u64, y: u64): u64 {
+      assert!(y != 0, 0);
+      x / y
+    }
+
+  }
+  ```
