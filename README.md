@@ -26,7 +26,9 @@ airdrop
 ├─ linear_vesting_airdrop — "An airdrop that distributes the tokens according to a linear vesting"
 ├─ quadratic_vesting_airdrop — "An airdrop that distributes the tokens according to a quadratic vesting"
 capabilities
+├─ atomic_quest — "Hot potato to ensure a set of actions were completed to retrieve its payload"
 ├─ owner — "Owner capability to give access to multiple objects"
+├─ quest — "A wrapper that can only be unwrapped once a set of actions are completed"
 ├─ timelock — "Timelock capability to add a delay between actions"
 collections
 ├─ ac_collection — "Capability access wrapper for collections"
