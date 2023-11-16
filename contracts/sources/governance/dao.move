@@ -324,14 +324,13 @@ module suitears::dao {
 
   public fun execute_proposal<DaoWitness: drop, CoinType>(
     proposal: &mut Proposal<DaoWitness, CoinType>, 
-    c: &Clock,
-    ctx: &mut TxContext
+    c: &Clock
   ): AtomicQuest<DaoQuest<DaoWitness>> {
     let now = clock::timestamp_ms(c);
     assert!(get_proposal_state(proposal, now) == EXECUTABLE, ECannotExecuteThisProposal);
     assert!(now >= proposal.end_time + proposal.action_delay, ETooEarlyToExecute);
 
-    let quest = create_quest<DaoWitness>(ctx);
+    let quest = create_quest<DaoWitness>();
 
     let num_of_tasks = vector::length(&proposal.tasks);
     let index = 0;

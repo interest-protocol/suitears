@@ -28,7 +28,6 @@ module suitears::atomic_quest {
   }
 
   struct AtomicQuest<phantom QuestGiver: drop> {
-    id: UID,
     required_tasks: vector<Task>,
     completed_tasks: VecSet<TypeName>
   }
@@ -49,8 +48,8 @@ module suitears::atomic_quest {
     object::id(reward)
   }
 
-  public fun create<Witness: drop>(_: Witness, ctx: &mut TxContext): AtomicQuest<Witness> {
-    AtomicQuest { id: object::new(ctx), required_tasks: vector[], completed_tasks: vec_set::empty()}
+  public fun create<Witness: drop>(_: Witness): AtomicQuest<Witness> {
+    AtomicQuest { required_tasks: vector[], completed_tasks: vec_set::empty()}
   }
 
   public fun create_task<TaskName: drop>(ctx: &mut TxContext): Task {
@@ -116,9 +115,7 @@ module suitears::atomic_quest {
   }
 
   public fun finish_quest<QuestWitness: drop>(quest: AtomicQuest<QuestWitness>) {
-    let AtomicQuest { id, required_tasks, completed_tasks } = quest;
-
-    object::delete(id);
+    let AtomicQuest { required_tasks, completed_tasks } = quest;
 
     let num_of_tasks = vector::length(&required_tasks);
     let completed_tasks = vec_set::into_keys(completed_tasks);
