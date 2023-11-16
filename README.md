@@ -69,6 +69,7 @@ utils
 contracts — "Move modules"
 utils - "Typescript utilities to support Move modules"
 audits - "Audit reports"
+examples - "Unaudited implementations of SuiTears and other Move scraps"
 ```
 
 ## Contributing
