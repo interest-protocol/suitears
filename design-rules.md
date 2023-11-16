@@ -2,7 +2,7 @@
 
 ### Suitears💧follows [Sui's framework API](https://github.com/MystenLabs/sui/tree/main/crates/sui-framework/packages/sui-framework) to make it easier for developers.
 
-- **When applicable CRUD functions must be called:**
+- **When applicable, CRUD functions must be called:**
 
   - add
   - remove
