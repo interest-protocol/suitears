@@ -5,6 +5,7 @@ module suitears::dao {
   use std::vector;
   use std::option::{Self, Option};
 
+  use sui::vec_set;
   use sui::event::emit;
   use sui::coin::{Self, Coin};
   use sui::clock::{Self, Clock};
@@ -213,6 +214,21 @@ module suitears::dao {
     hash: vector<u8>,//
     ctx: &mut TxContext
   ): Proposal<DaoWitness, CoinType> {
+    
+    // @dev To make sure the tasks are unique
+    let num_of_tasks = vector::length(&tasks);
+    let index = 0;
+    let set = vec_set::empty();
+
+    
+    while (num_of_tasks > index) {
+      let task = vector::borrow(&tasks, index);
+
+      vec_set::insert(&mut set, atomic_quest::task_name(task));  
+
+      index = index + 1;
+    };
+
     propose(dao, c, tasks, action_delay, min_quorum_votes, hash, ctx)
   }
 
