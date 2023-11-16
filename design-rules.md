@@ -142,3 +142,13 @@
 
   }
   ```
+
+- **Entry like functions must pass the TxContext as last argument. Even if it is not used.**
+
+  ```Move
+  module suitears::farm {
+
+    public fun deposit(asset: Coin<SUI>, _ctx: &mut TxContext): u64 {}
+
+  }
+  ```
