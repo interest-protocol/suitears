@@ -18,6 +18,8 @@ module suitears::atomic_quest {
   const EWrongTasks: u64 = 0;
   const ETaskHasReward: u64 = 1;
   const ETaskHasNoReward: u64 = 2;
+  const EWrongTask: u64 = 3;
+  const ETaskHasAlreadyBeenAdded: u64 = 4;
 
   struct RewardKey has copy, drop, store { task: TypeName }
 
@@ -66,6 +68,14 @@ module suitears::atomic_quest {
   }
 
   public fun add_task<Witness: drop>(quest: &mut AtomicQuest<Witness>, task: Task) {
+    let length = vector::length(&quest.required_tasks);
+    let index = 0;
+
+    while (length > index) {
+      assert!(vector::borrow(&quest.required_tasks, index).name != task.name, ETaskHasAlreadyBeenAdded);
+      index = index + 1;
+    };
+
     vector::push_back(&mut quest.required_tasks, task);
   }
 
@@ -91,18 +101,24 @@ module suitears::atomic_quest {
   public fun complete_task<QuestWitness: drop, Task: drop>(_: Task, quest: &mut AtomicQuest<QuestWitness>) {
     let num_of_tasks = vector::length(&quest.required_tasks);
     let task = vector::borrow(&quest.required_tasks, num_of_tasks);
+    let completed_task_name = type_name::get<Task>();
 
+    assert!(task.name == completed_task_name, EWrongTask);
     assert!(!task.has_reward, ETaskHasReward);
-    vec_set::insert(&mut quest.completed_tasks, type_name::get<Task>());
+    vec_set::insert(&mut quest.completed_tasks, completed_task_name);
   }
 
   public fun complete_task_with_reward<QuestWitness: drop, Task: drop, Reward: store + key>(_: Task, quest: &mut AtomicQuest<QuestWitness>): Reward {
     let num_of_tasks = vector::length(&quest.required_tasks);
     let task = vector::borrow_mut(&mut quest.required_tasks, num_of_tasks);
-    let key = RewardKey { task: type_name::get<Task>() };
+    let completed_task_name = type_name::get<Task>();
+
+    assert!(task.name == completed_task_name, EWrongTask);
+
+    let key = RewardKey { task: completed_task_name };
     
     assert!(task.has_reward, ETaskHasNoReward);
-    vec_set::insert(&mut quest.completed_tasks, type_name::get<Task>());
+    vec_set::insert(&mut quest.completed_tasks, completed_task_name);
     dfo::remove(&mut task.id, key)
   }
 
