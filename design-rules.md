@@ -1,6 +1,6 @@
 # Design Rules
 
-### Suitears💧follows [Sui's framework API](https://github.com/MystenLabs/sui/tree/main/crates/sui-framework/packages/sui-framework) to make it easier for developers.
+### Suitears💧follows [Sui's framework API](https://github.com/MystenLabs/sui/tree/main/crates/sui-framework/packages/sui-framework) to facilitate integrations and contributions.
 
 - **When applicable, CRUD functions must be called:**
 
@@ -20,11 +20,11 @@
   ```Move
   module suitears::object {
 
-  struct Object has key, store {
-    id: UID
-   }
+      struct Object has key, store {
+          id: UID
+      }
 
-  public fun new(ctx:&mut TxContext): Object {}
+      public fun new(ctx:&mut TxContext): Object {}
 
   }
   ```
@@ -34,11 +34,11 @@
   ```Move
   module suitears::data_structure {
 
-  struct DataStructure has copy, drop, store {
-    bits: vector<u8>
-   }
+      struct DataStructure has copy, drop, store {
+          bits: vector<u8>
+       }
 
-  public fun empty(): DataStructure {}
+      public fun empty(): DataStructure {}
 
   }
   ```
@@ -48,15 +48,15 @@
 - **If a key only object is returned by a new function. A separate share function must be included. The share function must be named share_object_name.**
 
   ```Move
-  module suitera::profile {
+  module suitears::profile {
 
-  struct Profile has key {
-    id: UID
-   }
+      struct Profile has key {
+          id: UID
+      }
 
-  public fun new(ctx:&mut TxContext): Profile {}
+      public fun new(ctx:&mut TxContext): Profile {}
 
-  public fun share_profile(profile: Profile) {}
+      public fun share_profile(profile: Profile) {}
 
   }
   ```
@@ -66,15 +66,15 @@
   ```Move
   module suitears::profile {
 
-  struct Profile has key {
-    id: UID,
-    name: String,
-    age: u8
-   }
+      struct Profile has key {
+          id: UID,
+          name: String,
+          age: u8
+      }
 
-  public fun profile_name(self: &Profile): String {}
+      public fun profile_name(self: &Profile): String {}
 
-  public fun profile_age(self: &Profile): u8 {}
+      public fun profile_age(self: &Profile): u8 {}
 
   }
   ```
@@ -84,15 +84,15 @@
   ```Move
   module suitears::profile {
 
-  struct Profile has key {
-    id: UID,
-    name: String,
-    age: u8
-   }
+      struct Profile has key {
+          id: UID,
+          name: String,
+          age: u8
+      }
 
-  public fun borrow_profile_name(self: &Profile): &String {}
+      public fun borrow_profile_name(self: &Profile): &String {}
 
-  public fun borrow_mut_profile_age(self: &mut Profile): &mut u8 {}
+      public fun borrow_mut_profile_age(self: &mut Profile): &mut u8 {}
 
   }
   ```
@@ -101,17 +101,17 @@
 
   ```Move
   module suitears::wallet {
-   struct Wallet has key, store {
-     id: UID,
-     amount: u64
-    }
+      struct Wallet has key, store {
+          id: UID,
+          amount: u64
+      }
   }
 
   module suitears::claw_back_wallet {
-   struct Wallet has key {
-     id: UID,
-     amount: u64
-    }
+      struct Wallet has key {
+          id: UID,
+          amount: u64
+      }
   }
   ```
 
@@ -127,19 +127,19 @@
   ```Move
   module suitears::math {
 
-    /**
-    * @dev It divides `x` by `y` and rounds down
-    * @param x The numerator in the division
-    * @param y the denominator in the division
-    * @return u64 The result of dividing `x` by `y`
-    *
-    * @aborts-if
-    *   - `y` is zero
-    */
-    public fun div(x: u64, y: u64): u64 {
-      assert!(y != 0, 0);
-      x / y
-    }
+      /**
+      * @dev It divides `x` by `y` and rounds down
+      * @param x The numerator in the division
+      * @param y the denominator in the division
+      * @return u64 The result of dividing `x` by `y`
+      *
+      * @aborts-if
+      *   - `y` is zero
+      */
+      public fun div(x: u64, y: u64): u64 {
+          assert!(y != 0, 0);
+          x / y
+      }
 
   }
   ```
@@ -148,11 +148,11 @@
 
   ```Move
   module suitears::profile {
-    // Wrong
-    const INVALID_NAME: u64 = 0;
+      // Wrong
+      const INVALID_NAME: u64 = 0;
 
-    // Correct
-    const ENameHasMaxLengthOf64Chars: u64 = 0;
+      // Correct
+      const ENameHasMaxLengthOf64Chars: u64 = 0;
   }
   ```
 
@@ -160,13 +160,13 @@
 
   ```Move
   module suitears::profile {
-    struct Profile has key, store {
-      id: UID,
-      // The age of the user
-      age: u8,
-      // The first name of the user
-      name: String
-     }
+      struct Profile has key, store {
+          id: UID,
+          // The age of the user
+          age: u8,
+          // The first name of the user
+          name: String
+      }
   }
   ```
 
@@ -174,24 +174,14 @@
 
   ```Move
   module suitears::wallet {
-    // === Events ===
+      // === Events ===
 
-    // === Read-only: Profile ===
+      // === Read-only: Profile ===
 
-    // === Mutative: Profile ===
+      // === Mutative: Profile ===
 
-    // === AdminCap: Parameters Management ===
+      // === AdminCap: Parameters Management ===
 
-    // === Test Only Functions ===
-  }
-  ```
-
-- **Entry like functions must pass the TxContext as last argument. Even if it is not used.**
-
-  ```Move
-  module suitears::farm {
-
-    public fun deposit(asset: Coin<SUI>, _ctx: &mut TxContext): u64 {}
-
+      // === Test Only Functions ===
   }
   ```
