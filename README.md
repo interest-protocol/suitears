@@ -42,7 +42,7 @@ defi
 ├─ quadratic_vesting_wallet — "Wallet that allows withdrawals according to a quadratic vesting"
 governance
 ├─ dao — "Decentralized autonomous organization"
-├─ dao_action — "Hot potato library to execute DAO proposals"
+├─ dao_quest — "DAO module to create atomic quests"
 ├─ dao_treasury — "A treasury plugin for the DAO module"
 math
 ├─ fixed_point64 — "Fixed point math module for x << 64 numbers"
