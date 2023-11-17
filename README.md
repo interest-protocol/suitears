@@ -26,7 +26,9 @@ airdrop
 ├─ linear_vesting_airdrop — "An airdrop that distributes the tokens according to a linear vesting"
 ├─ quadratic_vesting_airdrop — "An airdrop that distributes the tokens according to a quadratic vesting"
 capabilities
+├─ atomic_quest — "A hot potato to ensure that a set of actions are completed to retrieve its payload"
 ├─ owner — "Owner capability to give access to multiple objects"
+├─ quest — "A wrapper that can only be unwrapped once a set of actions are completed"
 ├─ timelock — "Timelock capability to add a delay between actions"
 collections
 ├─ ac_collection — "Capability access wrapper for collections"
@@ -55,7 +57,6 @@ utils
 ├─ comparator — "Module to compare u8 vectors (bits)"
 ├─ merkle_proof — "Module to verify Merkle proofs"
 ├─ string — "A set of functions to operate on strings"
-├─ upgrade — "Module to add a timelock to contract upgrades"
 ├─ vectors — "Utility functions for vectors"
 ├─ whitelist — "A plugin to add whitelist functionalities to any object"
 ```
@@ -66,6 +67,7 @@ utils
 contracts — "Move modules"
 utils - "Typescript utilities to support Move modules"
 audits - "Audit reports"
+examples - "Unaudited implementations of SuiTears and other Move scraps"
 ```
 
 ## Contributing
