@@ -25,11 +25,6 @@ module suitears::farm {
 
   struct FarmWitness has drop {}
 
-  struct FarmCap has key, store {
-    id: UID,
-    cap: OwnerCap<FarmWitness>,
-  }
-
   struct Account<phantom Label, phantom StakeCoin, phantom RewardCoin> has key, store {
     id: UID,
     amount: u64,
@@ -104,11 +99,8 @@ module suitears::farm {
     sender: address
   }
 
-  public fun create_cap(ctx: &mut TxContext): FarmCap {
-    FarmCap {
-      id: object::new(ctx),
-      cap: owner::create(FarmWitness {}, vector[], ctx)
-    }
+  public fun create_cap(ctx: &mut TxContext): OwnerCap<FarmWitness> {
+    owner::create(FarmWitness {}, vector[], ctx)
   }
 
   public fun create_account<Label: drop, StakeCoin, RewardCoin>(_: Label, ctx: &mut TxContext): Account<Label, StakeCoin, RewardCoin> {
@@ -120,7 +112,7 @@ module suitears::farm {
   }
 
   public fun create_farm<Label: drop, StakeCoin, RewardCoin>(
-    cap: &mut FarmCap,
+    cap: &mut OwnerCap<FarmWitness>,
     stake_coin_metadata: &CoinMetadata<StakeCoin>,
     c: &Clock,
     reward_per_second: u64,
@@ -156,16 +148,16 @@ module suitears::farm {
 
     let farm_id = object::id(&farm);
 
-    owner::add( &mut cap.cap, farm_id);
+    owner::add(FarmWitness {},  cap, farm_id);
     
     emit(CreateFarm<Label, StakeCoin, RewardCoin>{ farm: farm_id, cap: cap_id, sender: tx_context::sender(ctx) });
     
     farm
   }
 
-  public fun add_reward<Label, StakeCoin, RewardCoin>(cap: &FarmCap, farm: &mut Farm<Label, StakeCoin, RewardCoin>, reward: Coin<RewardCoin>) {
+  public fun add_reward<Label, StakeCoin, RewardCoin>(cap: &OwnerCap<FarmWitness>, farm: &mut Farm<Label, StakeCoin, RewardCoin>, reward: Coin<RewardCoin>) {
     let farm_id = object::id(farm);
-    owner::assert_ownership(&cap.cap, farm_id);
+    owner::assert_ownership(cap, farm_id);
     emit(AddReward<Label, StakeCoin, RewardCoin> { farm: farm_id, cap: object::id(cap), value: coin::value(&reward) });
     balance::join(&mut farm.balance_reward_coin, coin::into_balance(reward));
   }
@@ -241,8 +233,8 @@ module suitears::farm {
     (stake_coin, reward_coin)
   }
 
-  public fun stop_reward<Label, StakeCoin, RewardCoin>(cap: &FarmCap, farm: &mut Farm<Label, StakeCoin, RewardCoin>, c:&Clock, ctx: &mut TxContext) {
-    owner::assert_ownership(&cap.cap, object::id(farm));
+  public fun stop_reward<Label, StakeCoin, RewardCoin>(cap: &OwnerCap<FarmWitness>, farm: &mut Farm<Label, StakeCoin, RewardCoin>, c:&Clock, ctx: &mut TxContext) {
+    owner::assert_ownership(cap, object::id(farm));
     
     let now = clock_timestamp_s(c);
     farm.end_timestamp = now;
@@ -250,13 +242,13 @@ module suitears::farm {
   }
 
   public fun update_farm_limit_per_user<Label, StakeCoin, RewardCoin>(
-    cap: &FarmCap, 
+    cap: &OwnerCap<FarmWitness>, 
     farm: &mut Farm<Label, StakeCoin, RewardCoin>, 
     c: &Clock, 
     new_farm_limit_per_user: u64,
     ctx: &mut TxContext
   ) {
-    owner::assert_ownership(&cap.cap, object::id(farm));
+    owner::assert_ownership(cap, object::id(farm));
     
     assert!(farm.seconds_for_user_limit > 0 && (farm.start_timestamp + farm.seconds_for_user_limit) > clock_timestamp_s(c), ENoLimitSet);
 
@@ -272,13 +264,13 @@ module suitears::farm {
   }
 
   public fun update_reward_per_second<Label, StakeCoin, RewardCoin>(
-    cap: &FarmCap, 
+    cap: &OwnerCap<FarmWitness>, 
     farm: &mut Farm<Label, StakeCoin, RewardCoin>, 
     c: &Clock, 
     new_reward_per_second: u64,
     ctx: &mut TxContext
   ) {
-    owner::assert_ownership(&cap.cap, object::id(farm));
+    owner::assert_ownership(cap, object::id(farm));
     assert!(farm.start_timestamp > clock_timestamp_s(c), EFarmAlreadyStarted);
 
     farm.reward_per_second = new_reward_per_second;
@@ -287,14 +279,14 @@ module suitears::farm {
   }
 
   public fun update_start_and_end_timestamp<Label, StakeCoin, RewardCoin>(
-    cap: &FarmCap, 
+    cap: &OwnerCap<FarmWitness>, 
     farm: &mut Farm<Label, StakeCoin, RewardCoin>, 
     c: &Clock, 
     start_timestamp: u64,
     end_timestamp: u64,
     ctx: &mut TxContext
   ) {
-    owner::assert_ownership(&cap.cap, object::id(farm));
+    owner::assert_ownership(cap, object::id(farm));
 
     let now = clock_timestamp_s(c);
     assert!(farm.start_timestamp > now, EFarmAlreadyStarted);
@@ -350,14 +342,8 @@ module suitears::farm {
     calculate_pending_rewards(account, farm.stake_coin_decimal_factor, account_token_per_share)
   }  
 
-  public fun destroy_cap(cap: FarmCap) {
-    let FarmCap { id, cap } = cap;
-    object::delete(id);
-    owner::destroy(cap);
-  }
-
-  public fun destroy_farm<Label, StakeCoin, RewardCoin>(cap: &FarmCap, farm: Farm<Label, StakeCoin, RewardCoin>) {
-    owner::assert_ownership(&cap.cap, object::id(&farm));
+  public fun destroy_farm<Label, StakeCoin, RewardCoin>(cap: &OwnerCap<FarmWitness>, farm: Farm<Label, StakeCoin, RewardCoin>) {
+    owner::assert_ownership(cap, object::id(&farm));
     let Farm {
       id, 
       balance_reward_coin, 
@@ -385,8 +371,8 @@ module suitears::farm {
   }
 
   // @dev Can attach the Account to the farm and other data
-  public fun borrow_mut_uid<Label, StakeCoin, RewardCoin>(cap: &FarmCap, self: &mut Farm<Label, StakeCoin, RewardCoin>): &mut UID {
-    owner::assert_ownership(&cap.cap, object::id(self));
+  public fun borrow_mut_uid<Label, StakeCoin, RewardCoin>(cap: &OwnerCap<FarmWitness>, self: &mut Farm<Label, StakeCoin, RewardCoin>): &mut UID {
+    owner::assert_ownership(cap, object::id(self));
     &mut self.id    
   }
 

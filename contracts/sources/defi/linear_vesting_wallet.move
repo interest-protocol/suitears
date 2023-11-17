@@ -22,11 +22,6 @@ module suitears::linear_vesting_wallet {
 
   struct WalletWitness has drop {}
 
-  struct WalletClawbackCap has key, store {
-    id: UID,
-    cap: OwnerCap<WalletWitness>
-  }
-
   public fun create<T>(token: Coin<T>, c: &Clock, start: u64, duration: u64, ctx: &mut TxContext): Wallet<T> {
     assert!(start >= clock::timestamp_ms(c), EInvalidStart);
     Wallet {
@@ -40,15 +35,12 @@ module suitears::linear_vesting_wallet {
     }
   }
 
-  public fun create_clawback_cap(ctx: &mut TxContext): WalletClawbackCap {
-    WalletClawbackCap {
-      id: object::new(ctx),
-      cap: owner::create(WalletWitness {}, vector[], ctx)
-    }
+  public fun create_clawback_cap(ctx: &mut TxContext): OwnerCap<WalletWitness> {
+    owner::create(WalletWitness {}, vector[], ctx)
   }
 
   public fun create_with_clawback<T>(
-    cap: &mut WalletClawbackCap,
+    cap: &mut OwnerCap<WalletWitness>,
     token: Coin<T>, 
     c: &Clock, 
     start: u64, 
@@ -67,7 +59,7 @@ module suitears::linear_vesting_wallet {
       recipient
     };
 
-    owner::add(&mut cap.cap, object::id(&wallet));
+    owner::add(WalletWitness {}, cap, object::id(&wallet));
 
     transfer::share_object(wallet);
   }
@@ -85,8 +77,8 @@ module suitears::linear_vesting_wallet {
     coin::split(&mut wallet.token, releasable, ctx)
   }
 
-  public fun clawback<T>(cap: &WalletClawbackCap, c: &Clock, wallet: &mut Wallet<T>, ctx: &mut TxContext): Coin<T> {
-    owner::assert_ownership(&cap.cap, object::id(wallet));
+  public fun clawback<T>(cap: &OwnerCap<WalletWitness>, c: &Clock, wallet: &mut Wallet<T>, ctx: &mut TxContext): Coin<T> {
+    owner::assert_ownership(cap, object::id(wallet));
 
     transfer::public_transfer(release(c, wallet, ctx), wallet.recipient);
 
@@ -109,14 +101,8 @@ module suitears::linear_vesting_wallet {
     (vested, vested - wallet.released)
   }
 
-  public fun destroy_cap(cap: WalletClawbackCap) {
-    let WalletClawbackCap { id, cap } = cap;
-    object::delete(id);
-    owner::destroy(cap);
-  }
-
-  public fun destroy_wallet<T>(cap: &WalletClawbackCap, self: Wallet<T>) {
-    owner::assert_ownership(&cap.cap, object::id(&self));
+  public fun destroy_wallet<T>(cap: &OwnerCap<WalletWitness>, self: Wallet<T>) {
+    owner::assert_ownership(cap, object::id(&self));
     let Wallet { id, start: _, duration: _, token, released: _, has_clawback: _, recipient: _} = self;
     object::delete(id);
     coin::destroy_zero(token);
