@@ -13,30 +13,25 @@ module suitears::ac_collection {
 
   struct AcCollectionWitness has drop {}
 
-  struct AcCollectionCap has key, store {
-    id: UID,
-    cap: OwnerCap<AcCollectionWitness>
-  }
-
-  public fun create<C: store>(collection: C, ctx: &mut TxContext): (AcCollectionCap, AcCollection<C>) {
+  public fun create<C: store>(collection: C, ctx: &mut TxContext): (OwnerCap<AcCollectionWitness>, AcCollection<C>) {
     let cap_collection = AcCollection<C> {
       id: object::new(ctx),
       collection
     };
 
     (
-      AcCollectionCap { id: object::new(ctx), cap: owner::create(AcCollectionWitness {}, vector[object::id(&cap_collection)], ctx) }, 
+      owner::create(AcCollectionWitness {}, vector[object::id(&cap_collection)], ctx), 
       cap_collection
     )
   }
 
-  public fun create_with_cap<C: store>(cap: &mut AcCollectionCap, collection: C, ctx: &mut TxContext): AcCollection<C> {
+  public fun create_with_cap<C: store>(cap: &mut OwnerCap<AcCollectionWitness>, collection: C, ctx: &mut TxContext): AcCollection<C> {
     let cap_collection = AcCollection<C> {
       id: object::new(ctx),
       collection
     };
 
-    owner::add( &mut cap.cap, object::id(&cap_collection));
+    owner::add(AcCollectionWitness {}, cap, object::id(&cap_collection));
 
     cap_collection
   }
@@ -45,23 +40,18 @@ module suitears::ac_collection {
     &self.collection
   }
 
-  public fun borrow_mut<C: store>(cap: &AcCollectionCap, self: &mut AcCollection<C>): &mut C {
-    owner::assert_ownership(&cap.cap, object::id(self));
+  public fun borrow_mut<C: store>(cap: &OwnerCap<AcCollectionWitness>, self: &mut AcCollection<C>): &mut C {
+    owner::assert_ownership(cap, object::id(self));
     &mut self.collection
   }
 
-  public fun borrow_mut_uid<C: store>(cap: &AcCollectionCap, self: &mut AcCollection<C>): &mut UID {
-    owner::assert_ownership(&cap.cap, object::id(self));
+  public fun borrow_mut_uid<C: store>(cap: &OwnerCap<AcCollectionWitness>, self: &mut AcCollection<C>): &mut UID {
+    owner::assert_ownership(cap, object::id(self));
     &mut self.id
   }
 
-  public fun destroy_cap(cap: AcCollectionCap) {
-    let AcCollectionCap { id, cap } = cap;
-    owner::destroy(cap);
-    object::delete(id);
-  }
-
-  public fun destroy_collection<C: store>(self: AcCollection<C>): C {
+  public fun destroy_collection<C: store>(cap: &OwnerCap<AcCollectionWitness>, self: AcCollection<C>): C {
+    owner::assert_ownership(cap, object::id(&self));
     let AcCollection { id, collection } = self;
     object::delete(id);
     collection
