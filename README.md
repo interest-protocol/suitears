@@ -51,9 +51,6 @@ math
 ├─ math64 — "Utility math functions for u64 numbers"
 ├─ math_fixed64 — "Utility math functions for x << 64 numbers"
 ├─ int — "Module to handle unsigned integer operations"
-sft
-├─ sft — "Semi Fungible Tokens"
-├─ sft_balance — "Balance for Semi Fungible Tokens"
 utils
 ├─ comparator — "Module to compare u8 vectors (bits)"
 ├─ merkle_proof — "Module to verify Merkle proofs"
