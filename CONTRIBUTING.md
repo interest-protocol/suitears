@@ -15,6 +15,10 @@ We particularly welcome support in the following areas:
 
 > If you are writing a new feature and/or a breaking change, please ensure that you include appropriate test cases.
 
+## 📜 Design Rules
+
+Please follow the recommended [design rules](./design-rules.md).
+
 ## 🙋‍♀️ Opening an Issue
 
 If you encounter a bug or want to suggest a feature, you are welcome to [open an issue](https://github.com/interest-protocol/suitears/issues/new). For serious bugs, please do **NOT** open an issue, but contact us via [telegram](https://t.me/josemvcerqueira).
