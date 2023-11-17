@@ -5,11 +5,13 @@
 - **When applicable, CRUD functions must be called:**
 
   - add
+  - new
+  - drop
+  - empty
   - remove
   - exists
   - contains
-  - new
-  - empty
+  - destroy_empty
   - to_object_name
   - from_object_name
   - object_name_property
