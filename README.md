@@ -32,7 +32,6 @@ collections
 ├─ ac_collection — "Capability access wrapper for collections"
 ├─ bitmap — "Bitmap implementation for sequential keys"
 ├─ coin_decimals — "A collection that stores Coin decimals"
-├─ list — "A scalable vector implementation using dynamic fields"
 ├─ wit_collection - "Witness access wrapper for collections"
 defi
 ├─ farm — "Farm module to reward coin holders over time"
