@@ -12,8 +12,9 @@
   - empty
   - to_object_name
   - from_object_name
-  - borrow_property_name
-  - borrow_mut_property_name
+  - object_name_property
+  - borrow_object_name_property_name
+  - borrow_mut_object_name_property_name
 
 - **Functions that create objects must be called new.**
 
@@ -45,7 +46,7 @@
 
 - **Do not emit events. Sui emits native events on object mutations.**
 
-- **If a key only object is returned by a new function. A separate share function must be included. The share function must be named share_object_name.**
+- **Shared objects must be created via a new function and be shared in a separate function. The share function must be named share_object_name.**
 
   ```Move
   module suitears::profile {
@@ -61,7 +62,7 @@
   }
   ```
 
-- **Getter and view functions must follow this format object_name_property_name and it has to return a copy of it.**
+- **Getter and view functions must follow this format object_name_property_name and it has to return a copy of the property.**
 
   ```Move
   module suitears::profile {
