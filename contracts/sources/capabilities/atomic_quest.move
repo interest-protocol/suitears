@@ -40,14 +40,6 @@ module suitears::atomic_quest {
     task.has_reward
   }
 
-  // @dev It allows the frontend to read the content of a Reward
-  public fun task_reward_id<Reward: store + key>(task: &Task): ID {
-    assert!(task.has_reward, ETaskHasNoReward);
-
-    let reward = dfo::borrow<RewardKey, Reward>(&task.id, RewardKey { task: task.name });
-    object::id(reward)
-  }
-
   public fun create<Witness: drop>(_: Witness): AtomicQuest<Witness> {
     AtomicQuest { required_tasks: vector[], completed_tasks: vec_set::empty()}
   }
@@ -134,5 +126,14 @@ module suitears::atomic_quest {
 
     vector::destroy_empty(required_tasks);
     vector::destroy_empty(completed_tasks);
+  }
+
+  // @dev It allows the frontend to read the content of a Reward with devInspectTransactionBlock
+  #[allow(unused_function)]
+  fun task_reward_id<Reward: store + key>(task: &Task): ID {
+    assert!(task.has_reward, ETaskHasNoReward);
+
+    let reward = dfo::borrow<RewardKey, Reward>(&task.id, RewardKey { task: task.name });
+    object::id(reward)
   }
 }
