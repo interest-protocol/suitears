@@ -454,9 +454,9 @@ module suitears::dao {
     }
   } 
 
-  public fun update_dao_config<DaoWitness: drop>(
-    dao: &mut Dao<DaoWitness>,
-    quest: AtomicQuest<DaoQuest<DaoWitness>>
+  public fun update_dao_config<DaoWitness: drop, CoinType>(
+    dao: &mut Dao<DaoWitness, CoinType>,
+    quest: AtomicQuest<DaoQuest<DaoWitness>, Config>
   ) {
     // @dev We can finish a quest instantly that has no tasks
     let Config { 
