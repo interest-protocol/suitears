@@ -42,7 +42,7 @@ module suitears::dao {
   const EEmptyHash: u64 = 14;
   const EProposalNotPassed: u64 = 15;
   const EInvalidCoinType: u64 = 16;
-
+  
   // Generic Struct represents null/undefined
   struct Nothing has drop, copy, store {}
 
@@ -90,7 +90,8 @@ module suitears::dao {
     voting_quorum_rate: u64, 
     tasks: Option<Tasks<T>>,
     hash: vector<u8>,
-    coin_type: TypeName
+    coin_type: TypeName,
+    execute_witness: TypeName
   }
 
   struct Vote<phantom DaoWitness: drop, phantom CoinType, phantom T> has  key, store {
@@ -216,7 +217,7 @@ module suitears::dao {
     (dao, treasury)
   }
 
-  public fun propose_with_action<DaoWitness: drop, T: store>(
+  public fun propose_with_action<DaoWitness: drop, T: store, ExecuteWitness: drop>(
     dao: &mut Dao<DaoWitness>,
     c: &Clock,
     tasks: Tasks<T>,
@@ -225,7 +226,7 @@ module suitears::dao {
     hash: vector<u8>,//
     ctx: &mut TxContext
   ): Proposal<DaoWitness, T> {
-    propose(dao, c, option::some(tasks), action_delay, min_quorum_votes, hash, ctx)
+    propose<DaoWitness, T, ExecuteWitness>(dao, c, option::some(tasks), action_delay, min_quorum_votes, hash, ctx)
   }
 
   public fun propose_without_action<DaoWitness: drop>(
@@ -236,7 +237,7 @@ module suitears::dao {
     hash: vector<u8>,//
     ctx: &mut TxContext
   ): Proposal<DaoWitness, Nothing> {
-    propose(dao, c, option::none(), action_delay, min_quorum_votes, hash, ctx)
+    propose<DaoWitness, Nothing, Nothing>(dao, c, option::none(), action_delay, min_quorum_votes, hash, ctx)
   }
 
   public fun create_tasks<T: store>(reward: T, ctx: &mut TxContext): Tasks<T> {
@@ -380,7 +381,7 @@ module suitears::dao {
     (object::id(proposal), proposal.proposer, proposal_state(proposal, c), proposal.start_time, proposal.end_time, proposal.for_votes, proposal.against_votes, proposal.eta, proposal.action_delay, proposal.quorum_votes, proposal.hash, &proposal.tasks, proposal.coin_type)
   }
 
-  fun propose<DaoWitness: drop, T: store>(
+  fun propose<DaoWitness: drop, T: store, ExecuteWitness: drop>(
     dao: &mut Dao<DaoWitness>,
     c: &Clock,
     tasks: Option<Tasks<T>>,
@@ -408,7 +409,8 @@ module suitears::dao {
       voting_quorum_rate: dao.voting_quorum_rate,
       hash,
       tasks,
-      coin_type: dao.coin_type
+      coin_type: dao.coin_type,
+      execute_witness: get<ExecuteWitness>()
     };
     
     emit(NewProposal<DaoWitness, T> { proposal_id: object::id(&proposal), proposer: proposal.proposer });
@@ -465,8 +467,8 @@ module suitears::dao {
     Config { voting_delay, voting_period, voting_quorum_rate, min_action_delay, min_quorum_votes }
   } 
 
-  public fun update_dao_config<DaoWitness: drop, CoinType>(
-    dao: &mut Dao<DaoWitness, CoinType>,
+  public fun update_dao_config<DaoWitness: drop>(
+    dao: &mut Dao<DaoWitness>,
     quest: AtomicQuest<DaoQuest<DaoWitness>, Config>
   ) {
     // @dev We can finish a quest instantly that has no tasks
@@ -481,7 +483,7 @@ module suitears::dao {
     assert!(100 * 1_000_000_000 >= dao.voting_quorum_rate && dao.voting_quorum_rate != 0, EInvalidQuorumRate);
 
     emit(
-      UpdateDao<DaoWitness, CoinType> {
+      UpdateDao<DaoWitness> {
         dao_id: object::id(dao),
         voting_delay: dao.voting_delay,
         voting_period: dao.voting_period,
