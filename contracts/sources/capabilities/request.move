@@ -77,7 +77,7 @@ module suitears::request {
     vector::push_back(&mut potato.required_requests, req);
   }
 
-  public fun potato_required_requests<Witness: drop>(potato: &RequestPotato<Witness>): vector<TypeName> {
+  public fun potato_required_requests_name<Witness: drop>(potato: &RequestPotato<Witness>): vector<TypeName> {
     let names = vector[];
     let length = vector::length(&potato.required_requests);
     let index = 0;
