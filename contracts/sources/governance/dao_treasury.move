@@ -1,5 +1,4 @@
 module suitears::dao_treasury { 
-  use std::option;
   use std::type_name::{TypeName, get};
 
   use sui::event::emit;
@@ -159,7 +158,7 @@ module suitears::dao_treasury {
       type: coin_typename, 
       publisher_id, 
       value
-    } = option::destroy_some(request::complete_request<DaoPotato<DaoWitness>, TransferTask, TransferPayload>(TransferTask {}, &mut potato));
+    } = request::complete_request_with_payload<DaoPotato<DaoWitness>, TransferTask, TransferPayload>(TransferTask {}, &mut potato);
 
     object::delete(id);
     
@@ -194,7 +193,7 @@ module suitears::dao_treasury {
       duration, 
       value, 
       type: coin_typename 
-    } = option::destroy_some(request::complete_request<DaoPotato<DaoWitness>, TransferTask, TransferVestingWalletPayload>(TransferTask {}, &mut potato));
+    } = request::complete_request_with_payload<DaoPotato<DaoWitness>, TransferTask, TransferVestingWalletPayload>(TransferTask {}, &mut potato);
 
     object::delete(id);
 
@@ -239,7 +238,7 @@ module suitears::dao_treasury {
       cliff,
       duration,
       value 
-    } = option::destroy_some(request::complete_request<DaoPotato<DaoWitness>, TransferTask, TransferQuadraticWalletPayload>(TransferTask {}, &mut potato));
+    } = request::complete_request_with_payload<DaoPotato<DaoWitness>, TransferTask, TransferQuadraticWalletPayload>(TransferTask {}, &mut potato);
    
     object::delete(id);
 

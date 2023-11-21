@@ -463,7 +463,7 @@ module suitears::dao {
       voting_quorum_rate, 
       min_action_delay, 
       min_quorum_votes  
-    } = option::destroy_some(request::complete_request<DaoPotato<DaoWitness>, ConfigTask, Config>(ConfigTask {}, &mut potato));
+    } = request::complete_request_with_payload<DaoPotato<DaoWitness>, ConfigTask, Config>(ConfigTask {}, &mut potato);
 
     object::delete(id);
     request::destroy_potato(potato);
