@@ -15,10 +15,10 @@ module suitears::dao {
   use sui::types::is_one_time_witness;
   use sui::tx_context::{Self, TxContext};
 
+  use suitears::dao_potato::{Self, DaoPotato};
   use suitears::dao_treasury::{Self, DaoTreasury};
   use suitears::fixed_point_roll::{roll_div_down};
-  use suitears::dao_quest::{create_quest, DaoQuest};
-  use suitears::atomic_quest::{Self, AtomicQuest, Task};
+  use suitears::request::{Self, RequestPotato, Request};
 
   /// Proposal state
   const PENDING: u8 = 1;
@@ -82,7 +82,7 @@ module suitears::dao {
     action_delay: u64, // after how long, the agreed proposal can be executed.
     quorum_votes: u64, // the number of votes to pass the proposal.
     voting_quorum_rate: u64, 
-    tasks: vector<Task>,
+    requests: vector<Request>,
     hash: vector<u8>,
     coin_type: TypeName
   }
@@ -213,7 +213,7 @@ module suitears::dao {
   public fun propose<DaoWitness: drop>(
     dao: &mut Dao<DaoWitness>,
     c: &Clock,
-    tasks: vector<Task>,
+    requests: vector<Request>,
     action_delay: u64,
     quorum_votes: u64,
     hash: vector<u8>,// hash proposal title/content
@@ -224,15 +224,15 @@ module suitears::dao {
     assert!(vector::length(&hash) != 0, EEmptyHash);
 
     // @dev To make sure the tasks are unique
-    let num_of_tasks = vector::length(&tasks);
+    let num_of_requests = vector::length(&requests);
     let index = 0;
     let set = vec_set::empty();
 
 
-    while (num_of_tasks > index) {
-      let task = vector::borrow(&tasks, index);
+    while (num_of_requests > index) {
+      let req = vector::borrow(&requests, index);
 
-      vec_set::insert(&mut set, atomic_quest::task_name(task));  
+      vec_set::insert(&mut set, request::request_name(req));  
 
       index = index + 1;
     };
@@ -251,7 +251,7 @@ module suitears::dao {
       quorum_votes,
       voting_quorum_rate: dao.voting_quorum_rate,
       hash,
-      tasks,
+      requests,
       coin_type: dao.coin_type
     };
     
@@ -359,25 +359,23 @@ module suitears::dao {
   public fun execute_proposal<DaoWitness: drop>(
     proposal: &mut Proposal<DaoWitness>, 
     c: &Clock
-  ): AtomicQuest<DaoQuest<DaoWitness>> {
+  ): RequestPotato<DaoPotato<DaoWitness>> {
     let now = clock::timestamp_ms(c);
     assert!(get_proposal_state(proposal, now) == EXECUTABLE, ECannotExecuteThisProposal);
     assert!(now >= proposal.end_time + proposal.action_delay, ETooEarlyToExecute);
 
-    let quest = create_quest<DaoWitness>();
+    let potato = dao_potato::new();
 
-    let num_of_tasks = vector::length(&proposal.tasks);
+    let num_of_requests = vector::length(&proposal.requests);
     let index = 0;
 
-    while (num_of_tasks > index) {
-      let task = vector::remove(&mut proposal.tasks, 0);
-
-      atomic_quest::add_task(&mut quest, task);
+    while (num_of_requests > index) {
+      request::add_request(&mut potato, vector::remove(&mut proposal.requests, 0));
 
       index = index + 1;
     };
 
-    quest
+    potato
   }
 
   public fun proposal_state<DaoWitness: drop>(proposal: &Proposal<DaoWitness>, c: &Clock): u8 {
@@ -393,8 +391,8 @@ module suitears::dao {
   public fun view_proposal<DaoWitness: drop>(
     proposal: &Proposal<DaoWitness>, 
     c: &Clock
-  ): (ID, address, u8, u64, u64, u64, u64, u64, u64, u64, vector<u8>, &vector<Task>, TypeName) {
-    (object::id(proposal), proposal.proposer, proposal_state(proposal, c), proposal.start_time, proposal.end_time, proposal.for_votes, proposal.against_votes, proposal.eta, proposal.action_delay, proposal.quorum_votes, proposal.hash, &proposal.tasks, proposal.coin_type)
+  ): (ID, address, u8, u64, u64, u64, u64, u64, u64, u64, vector<u8>, &vector<Request>, TypeName) {
+    (object::id(proposal), proposal.proposer, proposal_state(proposal, c), proposal.start_time, proposal.end_time, proposal.for_votes, proposal.against_votes, proposal.eta, proposal.action_delay, proposal.quorum_votes, proposal.hash, &proposal.requests, proposal.coin_type)
   }
 
   fun destroy_vote<DaoWitness: drop, CoinType>(vote: Vote<DaoWitness, CoinType>, ctx: &mut TxContext): Coin<CoinType> {
@@ -427,7 +425,7 @@ module suitears::dao {
     } else if (current_time < proposal.eta) {
       // Queued, waiting to execute
       QUEUED
-    } else if (!vector::is_empty(&proposal.tasks)) {
+    } else if (!vector::is_empty(&proposal.requests)) {
       EXECUTABLE
     } else {
       EXTRACTED
@@ -454,11 +452,10 @@ module suitears::dao {
     }
   } 
 
-  public fun update_dao_config<DaoWitness: drop, CoinType>(
-    dao: &mut Dao<DaoWitness, CoinType>,
-    quest: AtomicQuest<DaoQuest<DaoWitness>, Config>
+  public fun update_dao_config<DaoWitness: drop>(
+    dao: &mut Dao<DaoWitness>,
+    potato: RequestPotato<DaoPotato<DaoWitness>>
   ) {
-    // @dev We can finish a quest instantly that has no tasks
     let Config { 
       id,  
       voting_delay, 
@@ -466,10 +463,10 @@ module suitears::dao {
       voting_quorum_rate, 
       min_action_delay, 
       min_quorum_votes  
-    } = atomic_quest::complete_task_with_reward<DaoQuest<DaoWitness>, ConfigTask, Config>(ConfigTask {}, &mut quest);
+    } = request::complete_request_with_payload<DaoPotato<DaoWitness>, ConfigTask, Config>(ConfigTask {}, &mut potato);
 
     object::delete(id);
-    atomic_quest::finish_quest(quest);
+    request::destroy_potato(potato);
 
     dao.voting_delay = option::destroy_with_default(voting_delay, dao.voting_delay);
     dao.voting_period = option::destroy_with_default(voting_period, dao.voting_period);
