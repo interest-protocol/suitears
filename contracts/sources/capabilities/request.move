@@ -7,6 +7,7 @@
 */
 module suitears::request {
   use std::vector;
+  use std::option::{Self, Option};
   use std::type_name::{Self, TypeName};
 
   use sui::tx_context::TxContext;
@@ -15,11 +16,14 @@ module suitears::request {
   use sui::dynamic_object_field as dfo;
   
   const EWrongRequest: u64 = 0;
-  const ERequestHasPayload: u64 = 1;
   const ERequestHasNoPayload: u64 = 2;
   const ERequestHasAlreadyBeenAdded: u64 = 3;
 
   struct RequestKey has copy, drop, store { witness: TypeName }
+
+  // Type to ass to request::complete_request if there is no payload
+  #[allow(unused_field)]
+  struct NoPayload has key, store { id: UID } 
 
   struct Request has key, store {
     id: UID,
@@ -96,29 +100,15 @@ module suitears::request {
     *vec_set::keys(&potato.completed_requests)
   }
 
-  public fun complete_request<Witness: drop, Request: drop>(_: Request, potato: &mut RequestPotato<Witness>) {
-    let num_of_requests = vector::length(&potato.required_requests);
-    let req = vector::borrow(&potato.required_requests, num_of_requests);
-    let completed_req_name = type_name::get<Request>();
-
-    assert!(req.name == completed_req_name, EWrongRequest);
-    assert!(!req.has_payload, ERequestHasPayload);
-    vec_set::insert(&mut potato.completed_requests, completed_req_name);
-  }
-
-  public fun complete_request_with_payload<Witness: drop, Request: drop, Payload: store + key>(_: Request, potato: &mut RequestPotato<Witness>): Payload {
+  public fun complete_request<Witness: drop, Request: drop, Payload: key + store>(_: Request, potato: &mut RequestPotato<Witness>): Option<Payload> {
     let num_of_requests = vector::length(&potato.required_requests);
     let req = vector::borrow_mut(&mut potato.required_requests, num_of_requests);
     let completed_req_name = type_name::get<Request>();
 
     assert!(req.name == completed_req_name, EWrongRequest);
-
-    let key = RequestKey { witness: completed_req_name };
-    
-    assert!(req.has_payload, ERequestHasNoPayload);
-
     vec_set::insert(&mut potato.completed_requests, completed_req_name);
-    dfo::remove(&mut req.id, key)
+    if (req.has_payload) return option::some(dfo::remove(&mut req.id, RequestKey { witness: completed_req_name }));
+    option::none()
   }
 
   public fun destroy_potato<Witness: drop>(potato: RequestPotato<Witness>) {
