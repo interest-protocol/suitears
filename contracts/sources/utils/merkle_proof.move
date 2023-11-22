@@ -1,31 +1,27 @@
-// SPDX-License-Identifier: MIT
-// Based on: OpenZeppelin Contracts (last updated v4.7.0) (utils/cryptography/MerkleProof.sol)
-// Taken from https://github.com/pentagonxyz/movemate/blob/main/sui/sources/merkle_proof.move
-
-/// @title: merkle_proof
-/// @dev These functions deal with verification of Merkle Tree proofs.
-/// The proofs can be generated using the JavaScript library
-/// https://github.com/miguelmota/merkletreejs[merkletreejs].
-/// Note: the hashing algorithm should be sha256 and pair sorting should be enabled.
-/// Example code below:
-/// const { MerkleTree } = require('merkletreejs')
-/// const SHA256 = require('crypto-js/sha256')
-/// const leaves = ['a', 'b', 'c'].map(x => SHA256(x))
-/// const tree = new MerkleTree(leaves, SHA256, { sortPairs: true })
-/// const root = tree.getRoot().toString('hex')
-/// const leaf = SHA256('a')
-/// const proof = tree.getProof(leaf)
-/// console.log(tree.verify(proof, leaf, root)) // true
-/// TODO: Unit tests for multi-proof verification.
-/// Taken from https://github.com/pentagonxyz/movemate
+/**
+ * Source - https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/cryptography/MerkleProof.sol
+ * @dev These functions deal with verification of Merkle Tree proofs.
+ *
+ * The tree and the proofs can be generated using our
+ * https://github.com/OpenZeppelin/merkle-tree[JavaScript library].
+ * You will find a quickstart guide in the readme.
+ *
+ * WARNING: You should avoid using leaf values that are 64 bytes long prior to
+ * hashing, or use a hash function other than keccak256 for hashing leaves.
+ * This is because the concatenation of a sorted pair of internal nodes in
+ * the Merkle tree could be reinterpreted as a leaf value.
+ * OpenZeppelin's JavaScript library generates Merkle trees that are safe
+ * against this attack out of the box.
+ */
 module suitears::merkle_proof {
-    use std::hash;
     use std::vector;
+
+    use sui::hash;
 
     use suitears::vectors;
 
     /// @dev When an invalid multi-proof is supplied. Proof flags length must equal proof length + leaves length - 1.
-    const EINVALID_MULTI_PROOF: u64 = 0;
+    const EInvalidMultiProof: u64 = 0;
 
     /// @dev Returns true if a `leaf` can be proved to be a part of a Merkle tree
     /// defined by `root`. For this, a `proof` must be provided, containing
@@ -113,7 +109,7 @@ module suitears::merkle_proof {
         let total_hashes = vector::length(proof_flags);
 
         // Check proof validity.
-        assert!(leaves_len + vector::length(proof) - 1 == total_hashes, EINVALID_MULTI_PROOF);
+        assert!(leaves_len + vector::length(proof) - 1 == total_hashes, EInvalidMultiProof);
 
         // The xxxPos values are "pointers" to the next value to consume in each array. All accesses are done using
         // `xxx[xxxPos++]`, which return the current value and increment the pointer, thus mimicking a queue's "pop".
@@ -169,7 +165,7 @@ module suitears::merkle_proof {
 
     fun efficient_hash(a: vector<u8>, b: vector<u8>): vector<u8> {
         vector::append(&mut a, b);
-        hash::sha3_256(a)
+        hash::keccak256(&a)
     }
 
     #[test]
