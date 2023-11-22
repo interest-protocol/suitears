@@ -5,11 +5,13 @@
 - **When applicable, CRUD functions must be called:**
 
   - add
+  - new
+  - drop
+  - empty
   - remove
   - exists
   - contains
-  - new
-  - empty
+  - destroy_empty
   - to_object_name
   - from_object_name
   - object_name_property
@@ -184,5 +186,22 @@
       // === AdminCap: Parameters Management ===
 
       // === Test Only Functions ===
+  }
+  ```
+
+- **Provide functions to delete objects and structs. Empty objects must be destroyed with the function destroy_empty. The function drop must be used for objects that have types that can be dropped.**
+
+  ```Move
+  module suitears::wallet {
+      struct Wallet<Value> {
+          id: UID,
+          value: Value
+      }
+
+      // Value has drop
+      public fun drop<Value: drop>(wallet: &mut Wallet<Value>) {}
+
+      // Value doesn't have drop
+      public fun destroy_empty<Value>(wallet: &mut Wallet<Value>) {}
   }
   ```
