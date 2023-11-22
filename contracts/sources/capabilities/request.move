@@ -9,10 +9,10 @@ module suitears::request {
   use std::vector;
   use std::type_name::{Self, TypeName};
 
+  use sui::object::{Self, UID};
+  use sui::dynamic_field as df;
   use sui::tx_context::TxContext;
-  use sui::object::{Self, UID, ID};
   use sui::vec_set::{Self, VecSet};
-  use sui::dynamic_object_field as dfo;
 
   const EWrongRequest: u64 = 0;
   const ERequestHasPayload: u64 = 1;
@@ -52,7 +52,7 @@ module suitears::request {
     }
   }
 
-  public fun new_request_with_payload<RequestName: drop, Payload: store + key>(payload: Payload, ctx: &mut TxContext): Request {
+  public fun new_request_with_payload<RequestName: drop, Payload: store>(payload: Payload, ctx: &mut TxContext): Request {
     let name = type_name::get<RequestName>();
     let req = Request {
       id: object::new(ctx),
@@ -60,7 +60,7 @@ module suitears::request {
       has_payload: true
     };
 
-    dfo::add(&mut req.id, RequestKey { witness: name }, payload);
+    df::add(&mut req.id, RequestKey { witness: name }, payload);
 
     req
   }
@@ -106,7 +106,7 @@ module suitears::request {
     vec_set::insert(&mut potato.completed_requests, completed_req_name);
   }
 
-  public fun complete_request_with_payload<Witness: drop, Request: drop, Payload: store + key>(_: Request, potato: &mut RequestPotato<Witness>): Payload {
+  public fun complete_request_with_payload<Witness: drop, Request: drop, Payload: store>(_: Request, potato: &mut RequestPotato<Witness>): Payload {
     let num_of_requests = vector::length(&potato.required_requests);
     let req = vector::borrow_mut(&mut potato.required_requests, num_of_requests);
     let completed_req_name = type_name::get<Request>();
@@ -118,7 +118,7 @@ module suitears::request {
     assert!(req.has_payload, ERequestHasNoPayload);
 
     vec_set::insert(&mut potato.completed_requests, completed_req_name);
-    dfo::remove(&mut req.id, key)
+    df::remove(&mut req.id, key)
   }
 
   public fun destroy_potato<Witness: drop>(potato: RequestPotato<Witness>) {
@@ -145,10 +145,9 @@ module suitears::request {
 
   // @dev It allows the frontend to read the content of a Payload with devInspectTransactionBlock
   #[allow(unused_function)]
-  fun request_payload_id<Payload: store + key>(req: &Request): ID {
+  fun borrow_payload<Payload: store>(req: &Request): &Payload {
     assert!(req.has_payload, ERequestHasNoPayload);
 
-    let payload = dfo::borrow<RequestKey, Payload>(&req.id, RequestKey { witness: req.name });
-    object::id(payload)
+    df::borrow<RequestKey, Payload>(&req.id, RequestKey { witness: req.name })
   }
 }

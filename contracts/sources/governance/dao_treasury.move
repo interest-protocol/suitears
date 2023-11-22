@@ -27,15 +27,13 @@ module suitears::dao_treasury {
 
   struct TransferTask has drop {}
 
-  struct TransferPayload has key, store {
-    id: UID,
+  struct TransferPayload has store {
     type: TypeName,
     value: u64,
     publisher_id: ID
   }
 
-  struct TransferVestingWalletPayload has key, store {
-    id: UID,
+  struct TransferVestingWalletPayload has store {
     start: u64,
     duration: u64,
     type: TypeName,
@@ -43,8 +41,7 @@ module suitears::dao_treasury {
     publisher_id: ID
   }
 
-  struct TransferQuadraticWalletPayload has key, store {
-    id: UID,
+  struct TransferQuadraticWalletPayload has store {
     vesting_curve_a: u64,
     vesting_curve_b: u64,
     vesting_curve_c: u64,
@@ -154,13 +151,10 @@ module suitears::dao_treasury {
     ctx: &mut TxContext
   ): Coin<CoinType> {
     let TransferPayload { 
-      id,
       type: coin_typename, 
       publisher_id, 
       value
     } = request::complete_request_with_payload<DaoPotato<DaoWitness>, TransferTask, TransferPayload>(TransferTask {}, &mut potato);
-
-    object::delete(id);
     
     destroy_potato(potato);
 
@@ -187,15 +181,12 @@ module suitears::dao_treasury {
     ctx: &mut TxContext    
   ): LinearWallet<CoinType> {
     let TransferVestingWalletPayload { 
-      id,
       publisher_id, 
       start, 
       duration, 
       value, 
       type: coin_typename 
     } = request::complete_request_with_payload<DaoPotato<DaoWitness>, TransferTask, TransferVestingWalletPayload>(TransferTask {}, &mut potato);
-
-    object::delete(id);
 
     destroy_potato(potato);
 
@@ -228,7 +219,6 @@ module suitears::dao_treasury {
   ): QuadraticWallet<CoinType> {
     let TransferQuadraticWalletPayload 
     {
-      id, 
       type: coin_typename, 
       publisher_id,
       vesting_curve_a,
@@ -239,8 +229,6 @@ module suitears::dao_treasury {
       duration,
       value 
     } = request::complete_request_with_payload<DaoPotato<DaoWitness>, TransferTask, TransferQuadraticWalletPayload>(TransferTask {}, &mut potato);
-   
-    object::delete(id);
 
     destroy_potato(potato);
 
@@ -279,9 +267,8 @@ module suitears::dao_treasury {
   }
 
 
-  public fun create_transfer_payload<CoinType>(value: u64, publisher_id: ID, ctx: &mut TxContext): TransferPayload {
+  public fun create_transfer_payload<CoinType>(value: u64, publisher_id: ID): TransferPayload {
     TransferPayload {
-      id: object::new(ctx),
       type: get<CoinType>(),
       value,
       publisher_id
@@ -292,11 +279,9 @@ module suitears::dao_treasury {
     value: u64, 
     publisher_id: ID,
     start: u64, 
-    duration: u64,
-    ctx: &mut TxContext
+    duration: u64
   ): TransferVestingWalletPayload {
     TransferVestingWalletPayload {
-      id: object::new(ctx),
       type: get<CoinType>(),
       value,
       publisher_id,
@@ -313,11 +298,9 @@ module suitears::dao_treasury {
     vesting_curve_a: u64,
     vesting_curve_b: u64,
     vesting_curve_c: u64,
-    duration: u64,
-    ctx: &mut TxContext,
+    duration: u64
   ): TransferQuadraticWalletPayload {
     TransferQuadraticWalletPayload {
-      id: object::new(ctx),
       type: get<CoinType>(),
       value,
       publisher_id,

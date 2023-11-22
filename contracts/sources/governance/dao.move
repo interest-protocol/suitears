@@ -43,8 +43,7 @@ module suitears::dao {
   const EProposalNotPassed: u64 = 15;
   const EInvalidCoinType: u64 = 16;
 
-  struct Config has key, store {
-    id: UID,
+  struct Config has store {
     voting_delay: Option<u64>,
     voting_period: Option<u64>,
     voting_quorum_rate: Option<u64>,
@@ -439,11 +438,9 @@ module suitears::dao {
     voting_period: Option<u64>, 
     voting_quorum_rate: Option<u64>, 
     min_action_delay: Option<u64>, 
-    min_quorum_votes: Option<u64>,
-    ctx: &mut TxContext,
+    min_quorum_votes: Option<u64>
   ): Config {
     Config { 
-      id: object::new(ctx), 
       voting_delay, 
       voting_period, 
       voting_quorum_rate, 
@@ -457,7 +454,6 @@ module suitears::dao {
     potato: RequestPotato<DaoPotato<DaoWitness>>
   ) {
     let Config { 
-      id,  
       voting_delay, 
       voting_period, 
       voting_quorum_rate, 
@@ -465,7 +461,6 @@ module suitears::dao {
       min_quorum_votes  
     } = request::complete_request_with_payload<DaoPotato<DaoWitness>, ConfigTask, Config>(ConfigTask {}, &mut potato);
 
-    object::delete(id);
     request::destroy_potato(potato);
 
     dao.voting_delay = option::destroy_with_default(voting_delay, dao.voting_delay);
