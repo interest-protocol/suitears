@@ -103,11 +103,9 @@
     }
 
     public fun new(ctx:&mut TxContext): Object {}
+
+  }
   ```
-
-}
-
-````
 
 - **Functions that create data structures must be called empty.**
 
@@ -121,7 +119,7 @@
       public fun empty(): DataStructure {}
 
   }
-````
+  ```
 
 - **Do not emit events. Sui emits native events on object mutations.**
 
@@ -248,3 +246,7 @@
       public fun destroy_empty<Value>(wallet: &mut Wallet<Value>) {}
   }
   ```
+
+```
+
+```
