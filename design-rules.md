@@ -246,7 +246,3 @@
       public fun destroy_empty<Value>(wallet: &mut Wallet<Value>) {}
   }
   ```
-
-```
-
-```
