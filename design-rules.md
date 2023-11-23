@@ -44,7 +44,7 @@
   - borrow_property_name
   - borrow_mut_property_name
 
-  - **Do call structs as \*Potato. It is a pattern recognized by the lack of abilities:**
+- **Do call structs as \*Potato. It is a pattern recognized by the lack of abilities:**
 
   ```Move
   module suitears::request {
@@ -95,17 +95,19 @@
 
 - **Functions that create objects must be called new.**
 
-```Move
-module suitears::object {
+  ```Move
+  module suitears::object {
 
     struct Object has key, store {
         id: UID
     }
 
     public fun new(ctx:&mut TxContext): Object {}
+  ```
 
 }
-```
+
+````
 
 - **Functions that create data structures must be called empty.**
 
@@ -119,7 +121,7 @@ module suitears::object {
       public fun empty(): DataStructure {}
 
   }
-  ```
+````
 
 - **Do not emit events. Sui emits native events on object mutations.**
 
