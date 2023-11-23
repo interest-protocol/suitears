@@ -2,6 +2,32 @@
 
 ### Suitears💧follows [Sui's framework API](https://github.com/MystenLabs/sui/tree/main/crates/sui-framework/packages/sui-framework) to facilitate integrations and contributions.
 
+- **Comment the sections of your code in the order below.**
+
+  ```Move
+  module suitears::wallet {
+      // === Imports ===
+
+      // === Constants ===
+
+      // === Errors ===
+
+      // === Structs ===
+
+      // === Public-View Functions ===
+
+      // === Public-Mutative Functions ===
+
+      // === Public-Friend Functions ===
+
+      // === Admin Functions ===
+
+      // === Private Functions ===
+
+      // === Test Functions ===
+  }
+  ```
+
 - **When applicable, CRUD functions must be called:**
 
   - add
@@ -11,26 +37,75 @@
   - remove
   - exists
   - contains
+  - property_name
   - destroy_empty
   - to_object_name
   - from_object_name
-  - object_name_property
-  - borrow_object_name_property_name
-  - borrow_mut_object_name_property_name
+  - borrow_property_name
+  - borrow_mut_property_name
+
+  - **Do call structs as \*Potato. It is a pattern recognized by the lack of abilities:**
+
+  ```Move
+  module suitears::request {
+
+      // ✅ Right
+      struct Lock {}
+
+      // ❌ Wrong
+      struct RequestPotato {}
+  }
+  ```
+
+- **Be mindful of the dot syntax when naming functions. Avoid using the object name on function names.**
+
+  ```Move
+  module suitears::lib{
+
+
+      struct Profile {
+        age: u64
+      }
+
+      // ✅ Right
+      public fun age(self: &Profile):  u64 {
+        self.age
+      }
+
+      // ❌ Wrong
+      public fun profile_age(self: &Profile): u64 {
+        self.age
+      }
+
+  }
+
+  module amm::airdrop {
+    use suitears::lib::{Self, Profile};
+
+    public fun get_tokens(profile: &Profile) {
+
+      // ✅ Right
+      let name = profile.name();
+
+      // ❌ Wrong
+      let name2 = profile.profile_age();
+    }
+  }
+  ```
 
 - **Functions that create objects must be called new.**
 
-  ```Move
-  module suitears::object {
+```Move
+module suitears::object {
 
-      struct Object has key, store {
-          id: UID
-      }
+    struct Object has key, store {
+        id: UID
+    }
 
-      public fun new(ctx:&mut TxContext): Object {}
+    public fun new(ctx:&mut TxContext): Object {}
 
-  }
-  ```
+}
+```
 
 - **Functions that create data structures must be called empty.**
 
@@ -48,7 +123,7 @@
 
 - **Do not emit events. Sui emits native events on object mutations.**
 
-- **Shared objects must be created via a new function and be shared in a separate function. The share function must be named share_object_name.**
+- **Shared objects must be created via a new function and be shared in a separate function. The share function must be named share.**
 
   ```Move
   module suitears::profile {
@@ -59,12 +134,12 @@
 
       public fun new(ctx:&mut TxContext): Profile {}
 
-      public fun share_profile(profile: Profile) {}
+      public fun share(profile: Profile) {}
 
   }
   ```
 
-- **Getter and view functions must follow this format object_name_property_name and it has to return a copy of the property.**
+- **Functions that return a reference must be named borrow_property_name or borrow_mut_property_name.**
 
   ```Move
   module suitears::profile {
@@ -75,27 +150,9 @@
           age: u8
       }
 
-      public fun profile_name(self: &Profile): String {}
+      public fun borrow_name(self: &Profile): &String {}
 
-      public fun profile_age(self: &Profile): u8 {}
-
-  }
-  ```
-
-- **Functions that return a reference must be named borrow_object_name_property_name or borrow_mut_object_name_property_name.**
-
-  ```Move
-  module suitears::profile {
-
-      struct Profile has key {
-          id: UID,
-          name: String,
-          age: u8
-      }
-
-      public fun borrow_profile_name(self: &Profile): &String {}
-
-      public fun borrow_mut_profile_age(self: &mut Profile): &mut u8 {}
+      public fun borrow_mut_age(self: &mut Profile): &mut u8 {}
 
   }
   ```
@@ -151,11 +208,11 @@
 
   ```Move
   module suitears::profile {
-      // Wrong
-      const INVALID_NAME: u64 = 0;
-
-      // Correct
+      // ✅ Right
       const ENameHasMaxLengthOf64Chars: u64 = 0;
+
+      // ❌ Wrong
+      const INVALID_NAME: u64 = 0;
   }
   ```
 
@@ -170,22 +227,6 @@
           // The first name of the user
           name: String
       }
-  }
-  ```
-
-- **Comment the sections of your code.**
-
-  ```Move
-  module suitears::wallet {
-      // === Events ===
-
-      // === Read-only: Profile ===
-
-      // === Mutative: Profile ===
-
-      // === AdminCap: Parameters Management ===
-
-      // === Test Only Functions ===
   }
   ```
 
