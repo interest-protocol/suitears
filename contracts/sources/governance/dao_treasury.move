@@ -10,9 +10,9 @@ module suitears::dao_treasury {
   use sui::balance::{Self, Balance};
   use sui::tx_context::{Self, TxContext};
 
-  use suitears::dao_quest::DaoQuest;
+  use suitears::dao_potato::DaoPotato;
   use suitears::fixed_point_roll::roll_mul_up;
-  use suitears::atomic_quest::{finish_quest, AtomicQuest};
+  use suitears::request::{Self, destroy_potato, RequestPotato};
   use suitears::linear_vesting_wallet::{Self, Wallet as LinearWallet};
   use suitears::quadratic_vesting_wallet::{Self, Wallet as QuadraticWallet};
 
@@ -25,13 +25,15 @@ module suitears::dao_treasury {
   const EFlashloanNotAllowed: u64 = 2;
   const ERepayAmountTooLow: u64 = 3;
 
-  struct TransferPayload has store, drop, copy {
+  struct TransferTask has drop {}
+
+  struct TransferPayload has store {
     type: TypeName,
     value: u64,
     publisher_id: ID
   }
 
-  struct TransferVestingWalletPayload has store, drop, copy {
+  struct TransferVestingWalletPayload has store {
     start: u64,
     duration: u64,
     type: TypeName,
@@ -39,7 +41,7 @@ module suitears::dao_treasury {
     publisher_id: ID
   }
 
-  struct TransferQuadraticWalletPayload has store, drop, copy {
+  struct TransferQuadraticWalletPayload has store {
     vesting_curve_a: u64,
     vesting_curve_b: u64,
     vesting_curve_c: u64,
@@ -145,10 +147,16 @@ module suitears::dao_treasury {
   public fun transfer<DaoWitness: drop, CoinType>(
     treasury: &mut DaoTreasury<DaoWitness>,
     pub: &Publisher,
-    quest: AtomicQuest<DaoQuest<DaoWitness>, TransferPayload>, 
+    potato: RequestPotato<DaoPotato<DaoWitness>>, 
     ctx: &mut TxContext
   ): Coin<CoinType> {
-    let TransferPayload { type: coin_typename, publisher_id, value} = finish_quest(quest);
+    let TransferPayload { 
+      type: coin_typename, 
+      publisher_id, 
+      value
+    } = request::complete_request_with_payload<DaoPotato<DaoWitness>, TransferTask, TransferPayload>(TransferTask {}, &mut potato);
+    
+    destroy_potato(potato);
 
     assert!(get<CoinType>() == coin_typename, EMismatchCoinType);
     assert!(object::id(pub) == publisher_id, EInvalidPublisher);
@@ -169,10 +177,18 @@ module suitears::dao_treasury {
     treasury: &mut DaoTreasury<DaoWitness>,
     c: &Clock,
     pub: &Publisher,
-    quest: AtomicQuest<DaoQuest<DaoWitness>, TransferVestingWalletPayload>, 
+    potato: RequestPotato<DaoPotato<DaoWitness>>, 
     ctx: &mut TxContext    
   ): LinearWallet<CoinType> {
-    let TransferVestingWalletPayload { publisher_id, start, duration, value, type: coin_typename } = finish_quest(quest);
+    let TransferVestingWalletPayload { 
+      publisher_id, 
+      start, 
+      duration, 
+      value, 
+      type: coin_typename 
+    } = request::complete_request_with_payload<DaoPotato<DaoWitness>, TransferTask, TransferVestingWalletPayload>(TransferTask {}, &mut potato);
+
+    destroy_potato(potato);
 
     assert!(get<CoinType>() == coin_typename, EMismatchCoinType);
     assert!(object::id(pub) == publisher_id, EInvalidPublisher);
@@ -198,11 +214,11 @@ module suitears::dao_treasury {
     treasury: &mut DaoTreasury<DaoWitness>,
     c: &Clock,
     pub: &Publisher,
-    quest: AtomicQuest<DaoQuest<DaoWitness>, TransferQuadraticWalletPayload>, 
+    potato: RequestPotato<DaoPotato<DaoWitness>>, 
     ctx: &mut TxContext    
   ): QuadraticWallet<CoinType> {
     let TransferQuadraticWalletPayload 
-    { 
+    {
       type: coin_typename, 
       publisher_id,
       vesting_curve_a,
@@ -212,7 +228,9 @@ module suitears::dao_treasury {
       cliff,
       duration,
       value 
-    } = finish_quest(quest);
+    } = request::complete_request_with_payload<DaoPotato<DaoWitness>, TransferTask, TransferQuadraticWalletPayload>(TransferTask {}, &mut potato);
+
+    destroy_potato(potato);
 
     assert!(get<CoinType>() == coin_typename, EMismatchCoinType);
     assert!(object::id(pub) == publisher_id, EInvalidPublisher);
