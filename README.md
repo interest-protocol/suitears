@@ -26,9 +26,9 @@ airdrop
 ├─ linear_vesting_airdrop — "An airdrop that distributes the tokens according to a linear vesting"
 ├─ quadratic_vesting_airdrop — "An airdrop that distributes the tokens according to a quadratic vesting"
 capabilities
-├─ atomic_quest — "A hot potato to ensure that a set of actions are completed to retrieve its payload"
 ├─ owner — "Owner capability to give access to multiple objects"
 ├─ quest — "A wrapper that can only be unwrapped once a set of actions are completed"
+├─ request — "A hot potato to ensure that a set of requests are completed before destroying it"
 ├─ timelock — "Timelock capability to add a delay between actions"
 collections
 ├─ ac_collection — "Capability access wrapper for collections"
@@ -42,7 +42,7 @@ defi
 ├─ quadratic_vesting_wallet — "Wallet that allows withdrawals according to a quadratic vesting"
 governance
 ├─ dao — "Decentralized autonomous organization"
-├─ dao_quest — "DAO module to create atomic quests"
+├─ dao_potato — "DAO module to create a RequestPotato"
 ├─ dao_treasury — "A treasury plugin for the DAO module"
 math
 ├─ fixed_point64 — "Fixed point math module for x << 64 numbers"
