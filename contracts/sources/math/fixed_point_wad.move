@@ -76,16 +76,16 @@ module suitears::fixed_point_wad {
 
     let r = int::div(p, q);
 
-    int::from_u256((int::as_u256(r) * 3822833074963236453042738258902158003155416615667) >> (195 - int::as_u8(k)))
+    int::from_u256((int::to_u256(r) * 3822833074963236453042738258902158003155416615667) >> (195 - int::to_u8(k)))
   }
 
   public fun ln_wad(x: Int): Int {
     assert!(int::is_positive(x), EUndefined);
 
-    let k = int::sub(int::from_u8(log2_down(int::as_u256(x))), int::from_u256(96));
+    let k = int::sub(int::from_u8(log2_down(int::to_u256(x))), int::from_u256(96));
 
-    x = int::shl(x, (156 - int::as_u8(k)));
-    x = int::neg_from_u256(int::as_u256(x) >> 159);
+    x = int::shl(x, (156 - int::to_u8(k)));
+    x = int::neg_from_u256(int::to_u256(x) >> 159);
 
     let p = int::add(x, int::from_u256(3273285459638523848632254066296));
     p = int::add(int::shr(int::mul(p, x), 96), int::from_u256(24828157081833163892658089445524));

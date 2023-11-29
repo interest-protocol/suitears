@@ -291,7 +291,7 @@ module suitears::math256 {
   public(friend) fun wrap_number(n: Int, max: u256): u256 {
     let max = int::from_u256(max);
 
-    int::as_u256(
+    int::to_u256(
       if (int::is_neg(n))
         int::add(n, max)
       else 
