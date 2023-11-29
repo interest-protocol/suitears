@@ -131,7 +131,7 @@ module suitears::fixed_point64_tests {
     let result = fixed_point64::to_u128_down(x);
     assert_eq(result, 0); 
 
-    let x = fixed_point64::from_rational(7, 2); // 0.5
+    let x = fixed_point64::from_rational(7, 2); // 3.5
     let result = fixed_point64::to_u128_down(x);
     assert_eq(result, 3);  
   }
