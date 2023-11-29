@@ -169,6 +169,10 @@ public fun quick_sort(values: &mut vector<u128>, left: u64, right: u64) {
     }
 }
 
+spec quick_sort {
+    pragma opaque;
+}
+
 // @dev Quick Sort Partition
 // From SuiDouble
 fun partion(values: &mut vector<u128>, left: u64, right: u64): u64 {

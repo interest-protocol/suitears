@@ -13,16 +13,16 @@ module suitears::math_fixed64 {
 
         /// Square root of fixed point number
     public fun sqrt(x: FixedPoint64): FixedPoint64 {
-        let y = fixed_point64::get_raw_value(x);
+        let y = fixed_point64::value(x);
         let z = (math128::sqrt_down(y) << 32 as u256);
         z = (z + ((y as u256) << 64) / z) >> 1;
-        fixed_point64::create_from_raw_value((z as u128))
+        fixed_point64::from_raw_value((z as u128))
     }
 
     /// Exponent function with a precission of 9 digits.
     public fun exp(x: FixedPoint64): FixedPoint64 {
-        let raw_value = (fixed_point64::get_raw_value(x) as u256);
-        fixed_point64::create_from_raw_value((exp_raw(raw_value) as u128))
+        let raw_value = (fixed_point64::value(x) as u256);
+        fixed_point64::from_raw_value((exp_raw(raw_value) as u128))
     }
 
         // Return log2(x) as FixedPoint64
@@ -45,34 +45,34 @@ module suitears::math_fixed64 {
             if (x >= (2 << 63)) { frac = frac + delta; x = x >> 1; };
             delta = delta >> 1;
         };
-        fixed_point64::create_from_raw_value (((integer_part as u128) << 64) + frac)
+        fixed_point64::from_raw_value (((integer_part as u128) << 64) + frac)
     }
 
     /// Because log2 is negative for values < 1 we instead return log2(x) + 64 which
     /// is positive for all values of x.
     public fun log2_plus_64(x: FixedPoint64): FixedPoint64 {
-        let raw_value = (fixed_point64::get_raw_value(x) as u128);
+        let raw_value = (fixed_point64::value(x) as u128);
         log2(raw_value)
     }
 
     public fun ln_plus_32ln2(x: FixedPoint64): FixedPoint64 {
-        let raw_value = fixed_point64::get_raw_value(x);
-        let x = (fixed_point64::get_raw_value(log2(raw_value)) as u256);
-        fixed_point64::create_from_raw_value(((x * LN2) >> 64 as u128))
+        let raw_value = fixed_point64::value(x);
+        let x = (fixed_point64::value(log2(raw_value)) as u256);
+        fixed_point64::from_raw_value(((x * LN2) >> 64 as u128))
     }
 
     /// Integer power of a fixed point number
     public fun pow(x: FixedPoint64, n: u64): FixedPoint64 {
-        let raw_value = (fixed_point64::get_raw_value(x) as u256);
-        fixed_point64::create_from_raw_value((pow_raw(raw_value, (n as u128)) as u128))
+        let raw_value = (fixed_point64::value(x) as u256);
+        fixed_point64::from_raw_value((pow_raw(raw_value, (n as u128)) as u128))
     }
 
     /// Specialized function for x * y / z that omits intermediate shifting
     public fun mul_div(x: FixedPoint64, y: FixedPoint64, z: FixedPoint64): FixedPoint64 {
-        let a = fixed_point64::get_raw_value(x);
-        let b = fixed_point64::get_raw_value(y);
-        let c = fixed_point64::get_raw_value(z);
-        fixed_point64::create_from_raw_value (math128::mul_div_down(a, b, c))
+        let a = fixed_point64::value(x);
+        let b = fixed_point64::value(y);
+        let c = fixed_point64::value(z);
+        fixed_point64::from_raw_value (math128::mul_div_down(a, b, c))
     }
 
     // Calculate e^x where x and the result are fixed point numbers
