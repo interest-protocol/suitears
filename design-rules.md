@@ -187,7 +187,7 @@
   ```Move
   module suitears::math {
 
-      /**
+      /*
       * @dev It divides `x` by `y` and rounds down
       * @param x The numerator in the division
       * @param y the denominator in the division
