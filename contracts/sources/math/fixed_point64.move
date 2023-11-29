@@ -144,7 +144,7 @@ module suitears::fixed_point64 {
   * @param y A fixed-point value.   
   * @return bool if the values are equal
   */
-  public fun equal(x: FixedPoint64, y: FixedPoint64): bool {
+  public fun eq(x: FixedPoint64, y: FixedPoint64): bool {
     x.value == y.value
   } 
 
@@ -154,7 +154,7 @@ module suitears::fixed_point64 {
   * @param y A fixed-point value.   
   * @return bool if x is smaller than y
   */
-  public fun less(x: FixedPoint64, y: FixedPoint64): bool {
+  public fun lt(x: FixedPoint64, y: FixedPoint64): bool {
     x.value < y.value
   }
 
@@ -164,7 +164,7 @@ module suitears::fixed_point64 {
   * @param y A fixed-point value.   
   * @return bool if x is bigger than y
   */
-  public fun greater(x: FixedPoint64, y: FixedPoint64): bool {
+  public fun gt(x: FixedPoint64, y: FixedPoint64): bool {
     x.value > y.value
   }  
 
@@ -174,7 +174,7 @@ module suitears::fixed_point64 {
   * @param y A fixed-point value.   
   * @return bool if x is smaller or equal to y
   */
-  public fun less_or_equal(x: FixedPoint64, y: FixedPoint64): bool {
+  public fun lte(x: FixedPoint64, y: FixedPoint64): bool {
     x.value <= y.value
   }
 
@@ -184,7 +184,7 @@ module suitears::fixed_point64 {
   * @param y A fixed-point value.   
   * @return bool if x is bigger or equal to y
   */
-  public fun greater_or_equal(x: FixedPoint64, y: FixedPoint64): bool {
+  public fun gte(x: FixedPoint64, y: FixedPoint64): bool {
     x.value >= y.value
   } 
 
