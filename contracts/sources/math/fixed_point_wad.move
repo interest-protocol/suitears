@@ -56,9 +56,9 @@ module suitears::fixed_point_wad {
 
     assert!(int::lt(x, int::from_u256(135305999368893231589)), EOverflow);
 
-    let x =   int::div(int::shl(x, 78), int::from_u256(pow(5, 18)));
+    let x =   int::div_down(int::shl(x, 78), int::from_u256(pow(5, 18)));
 
-    let k = int::shr(int::add(int::div(int::shl(x, 96), int::from_u256(54916777467707473351141471128)), int::from_u256(pow(2, 95))), 96);
+    let k = int::shr(int::add(int::div_down(int::shl(x, 96), int::from_u256(54916777467707473351141471128)), int::from_u256(pow(2, 95))), 96);
     x = int::sub(x, k);
 
     let y = int::add(x, int::from_u256(1346386616545796478920950773328));
@@ -74,7 +74,7 @@ module suitears::fixed_point_wad {
     q = int::sub(int::shr(int::mul(q, x), 96), int::from_u256(14423608567350463180887372962807573));
     q = int::add(int::shr(int::mul(q, x), 96), int::from_u256(26449188498355588339934803723976023));
 
-    let r = int::div(p, q);
+    let r = int::div_down(p, q);
 
     int::from_u256((int::to_u256(r) * 3822833074963236453042738258902158003155416615667) >> (195 - int::to_u8(k)))
   }
@@ -103,7 +103,7 @@ module suitears::fixed_point_wad {
     q = int::add(int::shr(int::mul(q, x), 96), int::from_u256(31853899698501571402653359427138));
     q = int::add(int::shr(int::mul(q, x), 96), int::from_u256(909429971244387300277376558375));
 
-    let r = int::div(p, q);
+    let r = int::div_down(p, q);
 
     r = int::mul(r,int::from_u256(1677202110996718588342820967067443963516166));
     r = int::add(r, int::mul(int::from_u256(16597577552685614221487285958193947469193820559219878177908093499208371) , k));

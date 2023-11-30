@@ -6,7 +6,12 @@
 module suitears::int {
   // === Imports ===
 
-  use suitears::math256;    
+  use suitears::math256;  
+
+  // === Friend modules ===
+
+  friend suitears::math64;
+  friend suitears::math128;  
 
   // === Constants ===
   
@@ -284,12 +289,8 @@ module suitears::int {
   * @notice It unwraps the value inside Int and truncates it to u8.  
   * @param self The Int struct.  
   * @return u8. The inner value truncated to u8. 
-  *
-  * aborts-if 
-  *  - x.bits is negative
   */
   public fun truncate_to_u8(self: Int): u8 {
-    assert!(is_positive(self), EConversionUnderflow);
     ((self.bits & 0xFF) as u8)
   }
 
@@ -297,12 +298,8 @@ module suitears::int {
   * @notice It unwraps the value inside Int and truncates it to u16.  
   * @param self The Int struct.  
   * @return u16. The inner value truncated to u16. 
-  *
-  * aborts-if 
-  *  - x.bits is negative
   */
   public fun truncate_to_u16(self: Int): u16 {
-    assert!(is_positive(self), EConversionUnderflow);
     ((self.bits & 0xFFFF) as u16)
   }
 
@@ -310,12 +307,8 @@ module suitears::int {
   * @notice It unwraps the value inside Int and truncates it to u32.  
   * @param self The Int struct.  
   * @return u32. The inner value truncated to u32. 
-  *
-  * aborts-if 
-  *  - x.bits is negative
   */
   public fun truncate_to_u32(self: Int): u32 {
-    assert!(is_positive(self), EConversionUnderflow);
     ((self.bits & 0xFFFFFFFF) as u32)
   }
 
@@ -323,12 +316,8 @@ module suitears::int {
   * @notice It unwraps the value inside Int and truncates it to u64.  
   * @param self The Int struct.  
   * @return u64. The inner value truncated to u64. 
-  *
-  * aborts-if 
-  *  - x.bits is negative
   */
   public fun truncate_to_u64(self: Int): u64 {
-    assert!(is_positive(self), EConversionUnderflow);
     ((self.bits & 0xFFFFFFFFFFFFFFFF) as u64)
   }
 
@@ -336,12 +325,8 @@ module suitears::int {
   * @notice It unwraps the value inside Int and truncates it to u128.  
   * @param self The Int struct.  
   * @return u128. The inner value truncated to u128. 
-  *
-  * aborts-if 
-  *  - x.bits is negative
   */
   public fun truncate_to_u128(self: Int): u128 {
-    assert!(is_positive(self), EConversionUnderflow);
     ((self.bits & 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF) as u128)
   }
 
@@ -643,6 +628,8 @@ module suitears::int {
     if (is_neg(a) && result != 0)   neg_from_u256(result) else from_u256(result)
   }
 
+  // === Bitwise Operations ===  
+
   /*
   * @notice It performs self >> rhs.  
   * @param self An Int struct.  
@@ -695,4 +682,18 @@ module suitears::int {
       bits: a.bits & b.bits
     } 
   }
+
+  // === Friend only function ===  
+
+  /*
+  * @notice It wraps the self around the max value.  
+  * @param self An Int struct.  
+  * @param max The value that the self will wrap around. 
+  * @return u256. The result after wrapping around.
+  */
+  public(friend) fun wrap(self: Int, max: u256): u256 {
+    let max = from_u256(max);
+
+    to_u256(if (is_neg(self)) add(self, max) else sub(self, div_down(mul(max, self), max)))
+  }  
 }

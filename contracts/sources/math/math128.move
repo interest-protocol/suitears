@@ -10,21 +10,21 @@ module suitears::math128 {
   const WRAPPING_MAX: u256 = 340282366920938463463374607431768211455 + 1;
 
   public fun wrapping_add(x: u128, y: u128): u128 {
-    (math256::wrap_number(
+    (int::wrap(
       int::add(int::from_u128(x), int::from_u128(y)),
       WRAPPING_MAX
     ) as u128)
   }
 
   public fun wrapping_sub(x: u128, y: u128): u128 {
-    (math256::wrap_number(
+    (int::wrap(
       int::sub(int::from_u128(x), int::from_u128(y)),
       WRAPPING_MAX
     ) as u128)
   }
 
   public fun wrapping_mul(x: u128, y: u128): u128 {
-    (math256::wrap_number(
+    (int::wrap(
       int::mul(int::from_u128(x), int::from_u128(y)),
       WRAPPING_MAX
     ) as u128)

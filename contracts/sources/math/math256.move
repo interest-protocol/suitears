@@ -3,11 +3,6 @@ module suitears::math256 {
 
   const MAX_U256: u256 = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
 
-  use suitears::int::{Self, Int};
-
-  friend suitears::math64;
-  friend suitears::math128;
-
   public fun try_add(x: u256, y: u256): (bool, u256) {
     if (x == MAX_U256 && y != 0) return (false, 0);
 
@@ -286,19 +281,5 @@ module suitears::math256 {
   public fun log256_up(value: u256): u8 {
     let r = log256_down(value);
     r + if (1 << ((r << 3)) < value) 1 else 0
-  }
-
-  public(friend) fun wrap_number(n: Int, max: u256): u256 {
-    let max = int::from_u256(max);
-
-    int::to_u256(
-      if (int::is_neg(n))
-        int::add(n, max)
-      else 
-        int::sub(
-          n,
-          int::div(int::mul(max, n), max)
-        )
-    )
   }
 }
