@@ -23,7 +23,8 @@ module suitears::int_tests {
     is_positive, 
     neg_from_u256,    
     truncate_to_u8,
-    truncate_to_u16
+    truncate_to_u16,
+    truncate_to_u32
   };
 
   const EQUAL: u8 = 0;
@@ -55,6 +56,20 @@ module suitears::int_tests {
     assert_eq(truncate_to_u16(from_u256(32768)), 32768);
     assert_eq(truncate_to_u16(from_u256(50000)), 50000);
   }  
+
+  #[test]
+  fun test_truncate_to_u32() {
+    assert_eq(truncate_to_u32(neg_from_u256(2147483648)), 2147483648);
+    assert_eq(truncate_to_u32(from_u256(4294967295)), 4294967295);
+    assert_eq(truncate_to_u32(from_u256(4294967296)), 0);
+    assert_eq(truncate_to_u32(neg_from_u256(123456789)), 4171510507);
+    assert_eq(truncate_to_u32(from_u256(987654321)), 987654321);
+    assert_eq(truncate_to_u32(neg_from_u256(876543210)), 3418424086);
+    assert_eq(truncate_to_u32(from_u256(2147483648)), 2147483648);
+    assert_eq(truncate_to_u32(neg_from_u256(2147483648)), 2147483648);
+    assert_eq(truncate_to_u32(from_u256(1073741824)), 1073741824);
+    assert_eq(truncate_to_u32(from_u256(305419896)), 305419896);
+  }    
 
   #[test]
   fun test_compare() {
@@ -108,6 +123,18 @@ module suitears::int_tests {
     assert_eq(div_down(from_u256(28781), neg_from_u256(123)), neg_from_u256(233));
     assert_eq(div_down(neg_from_u256(28781), from_u256(123)), neg_from_u256(233));
     assert_eq(div_down(neg_from_u256(28781), neg_from_u256(123)), from_u256(233));
+  }
+
+  #[test]
+  fun test_div_up() {
+    assert_eq(div_up(from_u256(512), from_u256(256)), from_u256(2));
+    assert_eq(div_up(from_u256(768), from_u256(256)), from_u256(3));
+    assert_eq(div_up(neg_from_u256(512), from_u256(256)), neg_from_u256(2));
+    assert_eq(div_up(neg_from_u256(768), from_u256(256)), neg_from_u256(3));
+    assert_eq(div_up(from_u256(12345), from_u256(1)), from_u256(12345));
+    assert_eq(div_up(from_u256(0), from_u256(256)), from_u256(0));
+    assert_eq(div_up(from_u256(701), from_u256(200)), from_u256(4));
+    assert_eq(div_up(from_u256(701), neg_from_u256(200)), neg_from_u256(4));
   }
 
   #[test]
