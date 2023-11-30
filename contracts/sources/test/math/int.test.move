@@ -22,7 +22,8 @@ module suitears::int_tests {
     from_u256,      
     is_positive, 
     neg_from_u256,    
-    truncate_to_u8
+    truncate_to_u8,
+    truncate_to_u16
   };
 
   const EQUAL: u8 = 0;
@@ -40,6 +41,20 @@ module suitears::int_tests {
     assert_eq(truncate_to_u8(from_u256(511)), 255);
     assert_eq(truncate_to_u8(neg_from_u256(230)), 26);
   }
+
+  #[test]
+  fun test_truncate_to_u16() {
+    assert_eq(truncate_to_u16(from_u256(0)), 0);
+    assert_eq(truncate_to_u16(from_u256(65535)), 65535);
+    assert_eq(truncate_to_u16(from_u256(65536)), 0);
+    assert_eq(truncate_to_u16(neg_from_u256(32768)), 32768);
+    assert_eq(truncate_to_u16(from_u256(0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)), 65535);
+    assert_eq(truncate_to_u16(from_u256(12345)), 12345);
+    assert_eq(truncate_to_u16(neg_from_u256(9876)), 55660);
+    assert_eq(truncate_to_u16(from_u256(1766847064778384329583297500742918515827483896875618958121606201292619776)), 0);
+    assert_eq(truncate_to_u16(from_u256(32768)), 32768);
+    assert_eq(truncate_to_u16(from_u256(50000)), 50000);
+  }  
 
   #[test]
   fun test_compare() {
