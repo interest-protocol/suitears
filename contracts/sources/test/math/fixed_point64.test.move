@@ -144,22 +144,22 @@ module suitears::fixed_point64_tests {
 
     assert_eq(fixed_point64::is_zero(one), false);
 
-    assert_eq(fixed_point64::less(one, two), true);
-    assert_eq(fixed_point64::less(two, one), false);
+    assert_eq(fixed_point64::lt(one, two), true);
+    assert_eq(fixed_point64::lt(two, one), false);
     
-    assert_eq(fixed_point64::less_or_equal(one, two), true);
-    assert_eq(fixed_point64::less_or_equal(two, two), true);
-    assert_eq(fixed_point64::less_or_equal(three, two), false);
+    assert_eq(fixed_point64::lte(one, two), true);
+    assert_eq(fixed_point64::lte(two, two), true);
+    assert_eq(fixed_point64::lte(three, two), false);
 
-    assert_eq(fixed_point64::equal(one, one), true);
-    assert_eq(fixed_point64::equal(two, one), false);
+    assert_eq(fixed_point64::eq(one, one), true);
+    assert_eq(fixed_point64::eq(two, one), false);
 
-    assert_eq(fixed_point64::greater(one, one), false);
-    assert_eq(fixed_point64::greater(two, one), true);
+    assert_eq(fixed_point64::gt(one, one), false);
+    assert_eq(fixed_point64::gt(two, one), true);
 
-    assert_eq(fixed_point64::greater_or_equal(two, two), true);
-    assert_eq(fixed_point64::greater(two, one), true);
-    assert_eq(fixed_point64::greater(two, three), false);
+    assert_eq(fixed_point64::gte(two, two), true);
+    assert_eq(fixed_point64::gt(two, one), true);
+    assert_eq(fixed_point64::gt(two, three), false);
   }
 
   #[test]
