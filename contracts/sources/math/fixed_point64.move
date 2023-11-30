@@ -1,6 +1,6 @@
 /*
-* @title Fixed Point 64: A library to perform math operations over an unsigned integer with 64 bits precision.
-* @dev Any operation that results in a number larger than the maximum unsigned 128 bit, it will be considered an overflow and throw.  
+* @title Fixed Point 64: A library to perform math operations over an unsigned integer with 64-bit precision.
+* @dev Any operation that results in a number larger than the maximum unsigned 128 bit, will be considered an overflow and throw.  
 * @dev All credits to Aptos - https://github.com/aptos-labs/aptos-core/blob/main/aptos-move/framework/aptos-stdlib/sources/fixed_point64.move
 */
 module suitears::fixed_point64 {  
@@ -15,15 +15,15 @@ module suitears::fixed_point64 {
 
   // === Errors ===
 
-  // @dev It is thrown if an operation results into a negative number. 
+  // @dev It is thrown if an operation results in a negative number. 
   const ENegativeResult: u64 = 0;
   // @dev It is thrown if an operation results in a value outside of 2^-64 .. 2^64-1.
   const EOutOfRange: u64 = 1;
-  // @dev It is thrown if a multiplication operation results into a number larger or equal than `MAX_U128`. 
+  // @dev It is thrown if a multiplication operation results in a number larger or equal to `MAX_U128`. 
   const EMultiplicationOverflow: u64 = 2;
   // @dev It is thrown if one tries to divide by zero. 
   const EZeroDivision: u64 = 3;
-  // @dev If the result of a division operation results into a number larger or equal than `MAX_U128`.
+  // @dev If the result of a division operation results in a number larger or equal to `MAX_U128`.
   const EDivisionOverflow: u64 = 4;
 
   // === Structs ===
@@ -48,7 +48,7 @@ module suitears::fixed_point64 {
   * @notice Creates a fixed-point value from a u128 number.  
   * @dev It scales the number.
   * @param value A u128 number 
-  * @return A fixed-point value from the (value << 64).
+  * @return FixedPoint64. A fixed-point value calculated by right shifting (value << 64).
   */
   public fun from(value: u128): FixedPoint64 {
     let scaled_value = (value as u256) << 64;
@@ -59,24 +59,24 @@ module suitears::fixed_point64 {
   }
 
   /*
-  * @notice Creates a fixed-point value from a raw u128 number.  
+  * @notice Creates a fixed-point value from a u128 number.  
   * @dev It does not scale the number.
   * @param value A u128 number 
-  * @return A fixed-point value from the u128 argument.
+  * @return FixedPoint64. It wraps the u128.
   */
   public fun from_raw_value(value: u128): FixedPoint64 {
     FixedPoint64 { value }
   }
 
   /*
-  * @notice Create a fixed-point value from a rational number specified by a numerator and denominator.  
+  * @notice Creates a fixed-point value from a rational number specified by a numerator and denominator.  
   * @dev 0.0125 will round down to 0.012 instead of up to 0.013.
   * @param numerator The numerator of the rational number. 
   * @param denominator The denominator of the rational number. 
-  * @return A fixed-point value from (numerator << 64) / denominator
+  * @return FixedPoint64. A fixed-point value from (numerator << 64) / denominator
   *
   * @aborts-if 
-  *   - if denominator is zero
+  *   - if the denominator is zero
   *   - if the numerator / denominator is zero 
   *   - if the numerator is nonzero and the ratio is not in the range 2^-64 .. 2^64-1
   */
@@ -90,9 +90,9 @@ module suitears::fixed_point64 {
   }
 
   /*
-  * @notice Converts a fixed-point value into a u128 number to the closest interger.  
-  * @param value A fixed-point value. 
-  * @return A u128 number.
+  * @notice Converts a fixed-point value into a u128 number to the closest integer.  
+  * @param self A fixed-point value. 
+  * @return u128.
   */
   public fun to_u128(self: FixedPoint64): u128 {
     let floored_num = to_u128_down(self) << 64;
@@ -106,8 +106,8 @@ module suitears::fixed_point64 {
 
   /*
   * @notice Converts a fixed-point value into a u128 number rounding down.  
-  * @param value A fixed-point value. 
-  * @return A u128 number.
+  * @param self A fixed-point value. 
+  * @return u128.
   */
   public fun to_u128_down(self: FixedPoint64): u128 {
     self.value >> 64
@@ -115,8 +115,8 @@ module suitears::fixed_point64 {
 
   /*
   * @notice Converts a fixed-point value into a u128 number rounding up.  
-  * @param value A fixed-point value. 
-  * @return A u128 number.
+  * @param self A fixed-point value. 
+  * @return u128.
   */
   public fun to_u128_up(self: FixedPoint64): u128 {
     let floored_num = to_u128_down(self) << 64;
@@ -132,7 +132,7 @@ module suitears::fixed_point64 {
   /*
   * @notice Checks if self is zero.  
   * @param self A fixed-point value. 
-  * @return bool if the value is zero
+  * @return bool. If the value is zero.
   */
   public fun is_zero(self: FixedPoint64): bool {
     self.value == 0
@@ -142,7 +142,7 @@ module suitears::fixed_point64 {
   * @notice Checks if x is equal to y.  
   * @param x A fixed-point value. 
   * @param y A fixed-point value.   
-  * @return bool if the values are equal
+  * @return bool. If the values are equal
   */
   public fun eq(x: FixedPoint64, y: FixedPoint64): bool {
     x.value == y.value
@@ -152,7 +152,7 @@ module suitears::fixed_point64 {
   * @notice Checks if x is smaller than y.  
   * @param x A fixed-point value. 
   * @param y A fixed-point value.   
-  * @return bool if x is smaller than y
+  * @return bool. If x is smaller than y.
   */
   public fun lt(x: FixedPoint64, y: FixedPoint64): bool {
     x.value < y.value
@@ -162,7 +162,7 @@ module suitears::fixed_point64 {
   * @notice Checks if x is bigger than y.  
   * @param x A fixed-point value. 
   * @param y A fixed-point value.   
-  * @return bool if x is bigger than y
+  * @return bool. If x is bigger than y.
   */
   public fun gt(x: FixedPoint64, y: FixedPoint64): bool {
     x.value > y.value
@@ -172,7 +172,7 @@ module suitears::fixed_point64 {
   * @notice Checks if x is smaller or equal to y.  
   * @param x A fixed-point value. 
   * @param y A fixed-point value.   
-  * @return bool if x is smaller or equal to y
+  * @return bool. If x is smaller or equal to y.
   */
   public fun lte(x: FixedPoint64, y: FixedPoint64): bool {
     x.value <= y.value
@@ -182,7 +182,7 @@ module suitears::fixed_point64 {
   * @notice Checks if x is bigger or equal to y.  
   * @param x A fixed-point value. 
   * @param y A fixed-point value.   
-  * @return bool if x is bigger or equal to y
+  * @return bool. If x is bigger or equal to y.
   */
   public fun gte(x: FixedPoint64, y: FixedPoint64): bool {
     x.value >= y.value
@@ -192,7 +192,7 @@ module suitears::fixed_point64 {
   * @notice It returns the larger of the two arguments.     
   * @param x The first operand. 
   * @param y The second operand. 
-   * @return fixed-point value The larger of x or y. 
+  * @return FixedPoint64. The larger argument. 
   */
   public fun max(x: FixedPoint64, y: FixedPoint64): FixedPoint64 {
     if (x.value > y.value) x else y
@@ -202,7 +202,7 @@ module suitears::fixed_point64 {
   * @notice It returns the smaller of the two arguments.     
   * @param x The first operand. 
   * @param y The second operand. 
-  * @return fixed-point value The smaller of x or y. 
+  * @return FixedPoint64. The smaller argument. 
   */
   public fun min(x: FixedPoint64, y: FixedPoint64): FixedPoint64 {
     if (x.value < y.value) x else y
@@ -214,7 +214,7 @@ module suitears::fixed_point64 {
   * @notice It returns x - y.     
   * @param x The first operand. 
   * @param y The second operand. 
-  * @return fixed-point value. The result of x - y. 
+  * @return FixedPoint64. The result of x - y. 
   *
   * @aborts-if 
   *   - y > x
@@ -230,11 +230,11 @@ module suitears::fixed_point64 {
   * @notice It returns x + y.     
   * @param x The first operand. 
   * @param y The second operand. 
-  * @return fixed-point value. The result of x + y. 
+  * @return FixedPoint64. The result of x + y. 
   *
   * @aborts-if 
   *   - y + x >= `MAX_U128`
-   */
+  */
   public fun add(x: FixedPoint64, y: FixedPoint64): FixedPoint64 {
     let x_raw = x.value;
     let y_raw = y.value;
@@ -249,7 +249,7 @@ module suitears::fixed_point64 {
   * @dev It truncates the fractional part of the product. E.g. - 9 * 0.333 = 2.  
   * @param x The first operand, a u128 number. . 
   * @param y The second operand, a fixed-point value. 
-  * @return u128 The result of x * y without the 64 bit precision. 
+  * @return u128. The result of x * y without the 64 bit precision. 
   *
   * @aborts-if 
   *   - if the result is larger or equal than `MAX_U128`.
@@ -262,37 +262,37 @@ module suitears::fixed_point64 {
   }
 
   /*
-  * @notice It returns x / y rounded up.   
+  * @notice It returns numerator/denominator rounded up.   
   * @notice It divides a u128 number by a fixed-point value.
-  * @param self The first operand, a u128 number. 
-  * @param val The second operand, a fixed-point value. 
-  * @return u128 The result of self / val without the 64 bit precision. 
+  * @param numerator The first operand, a u128 number. 
+  * @param denominator The second operand, a fixed-point value. 
+  * @return u128. The result of numerator/denominator without the 64-bit precision. 
   *
   * @aborts-if 
-  *   - if the result is larger or equal than `MAX_U128`.
+  *   - if the result is larger or equal to `MAX_U128`.
   */
-  public fun div_up_u128(val: u128, divisor: FixedPoint64): u128 {
-    assert!(divisor.value != 0, EZeroDivision);
-    let scaled_value = (val as u256) << 64;
-    let quotient = math256::div_up( scaled_value, (divisor.value as u256));
+  public fun div_up_u128(numerator: u128, denominator: FixedPoint64): u128 {
+    assert!(denominator.value != 0, EZeroDivision);
+    let scaled_value = (numerator as u256) << 64;
+    let quotient = math256::div_up( scaled_value, (denominator.value as u256));
     assert!(quotient <= MAX_U128, EDivisionOverflow);
     (quotient as u128)
   }
 
   /*
-  * @notice It returns x / y rounded down.   
+  * @notice It returns numerator/denominator rounded down.   
   * @notice It divides a fixed-point value by a u128 number.
-  * @param self The first operand, a u128 number. 
-  * @param val The second operand, a fixed-point value. 
-  * @return u128 The result of self / val without the 64 bit precision. 
+  * @param numerator The first operand, a u128 number. 
+  * @param denominator The second operand, a fixed-point value. 
+  * @return u128. The result of numerator/denominator without the 64-bit precision. 
   *
   * @aborts-if 
-  *   - if the result is larger or equal than `MAX_U128`.
+  *   - if the result is larger or equal to `MAX_U128`.
   */
-  public fun div_down_u128(val: u128, divisor: FixedPoint64): u128 {
-    assert!(divisor.value != 0, EZeroDivision);
-    let scaled_value = (val as u256) << 64;
-    let quotient = math256::div_down( scaled_value, (divisor.value as u256));
+  public fun div_down_u128(numerator: u128, denominator: FixedPoint64): u128 {
+    assert!(denominator.value != 0, EZeroDivision);
+    let scaled_value = (numerator as u256) << 64;
+    let quotient = math256::div_down( scaled_value, (denominator.value as u256));
     assert!(quotient <= MAX_U128, EDivisionOverflow);
     (quotient as u128)
   }    
