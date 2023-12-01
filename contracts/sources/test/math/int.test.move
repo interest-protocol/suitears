@@ -24,7 +24,9 @@ module suitears::int_tests {
     neg_from_u256,    
     truncate_to_u8,
     truncate_to_u16,
-    truncate_to_u32
+    truncate_to_u32,
+    truncate_to_u64,
+    truncate_to_u128
   };
 
   const EQUAL: u8 = 0;
@@ -69,6 +71,33 @@ module suitears::int_tests {
     assert_eq(truncate_to_u32(neg_from_u256(2147483648)), 2147483648);
     assert_eq(truncate_to_u32(from_u256(1073741824)), 1073741824);
     assert_eq(truncate_to_u32(from_u256(305419896)), 305419896);
+  }
+
+  #[test]
+  fun test_truncate_to_u64() {
+    assert_eq(truncate_to_u64(from_u256(0xFFFFFFFFFFFFFFFF)), 18446744073709551615); 
+    assert_eq(truncate_to_u64(from_u256(0x00000000FFFFFFFF)), 4294967295); 
+    assert_eq(truncate_to_u64(from_u256(0xFFFFFFFF00000000)), 18446744069414584320); 
+    assert_eq(truncate_to_u64(from_u256(0xAAAAAAAAAAAAAAAA)), 12297829382473034410); 
+    assert_eq(truncate_to_u64(from_u256(0x0000000000000000)), 0x00000000);
+    assert_eq(truncate_to_u64(from_u256(18446744073709551615)), 18446744073709551615);  
+    assert_eq(truncate_to_u64(from_u256(18446744073709551616)), 0); 
+    assert_eq(truncate_to_u64(from_u256(12345678901234567890)), 12345678901234567890); 
+    assert_eq(truncate_to_u64(neg_from_u256(789012)), 18446744073708762604); 
+    assert_eq(truncate_to_u64(neg_from_u256(9223372036854775808)), 9223372036854775808);  
+    assert_eq(truncate_to_u64(neg_from_u256(9223372036854775807)), 9223372036854775809); 
+    assert_eq(truncate_to_u64(neg_from_u256(123456789)), 18446744073586094827);  
+  }    
+
+  #[test]
+  fun test_truncate_to_u128() {
+    assert_eq(truncate_to_u128(from_u256(123456789012345678901234567890)), 123456789012345678901234567890); 
+    assert_eq(truncate_to_u128(neg_from_u256(987654321098765432109876543210)), 340282365933284142364609175321891668246);  
+    assert_eq(truncate_to_u128(from_u256(0)), 0); 
+    assert_eq(truncate_to_u128(from_u256(170141183460469231731687303715884105727)), 170141183460469231731687303715884105727); 
+    assert_eq(truncate_to_u128(from_u256(987654321098765432109876543210)), 987654321098765432109876543210); 
+    assert_eq(truncate_to_u128(neg_from_u256(123456789012345678901234567890)), 340282366797481674451028928530533643566);
+    assert_eq(truncate_to_u128(neg_from_u256(170141183460469231731687303715884105728)), 170141183460469231731687303715884105728);
   }    
 
   #[test]
