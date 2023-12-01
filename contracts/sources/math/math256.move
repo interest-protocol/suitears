@@ -1,3 +1,7 @@
+/*
+* @title Math u256: A set of functions to operate over u256 numbers.
+* @dev Beware that some operations throw on overflow and underflows.  
+*/
 module suitears::math256 {
   use std::vector;
 
