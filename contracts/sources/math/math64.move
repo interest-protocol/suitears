@@ -162,7 +162,7 @@ module suitears::math64 {
     math256::log2_down((value as u256))
   }
 
-  public fun log2_up(value: u64): u8 {
+  public fun log2_up(value: u64): u16 {
     math256::log2_up((value as u256))
   }
 

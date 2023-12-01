@@ -17,6 +17,7 @@ module suitears::math256 {
   }
 
   public fun try_mul(x: u256, y: u256): (bool, u256) {
+    if (y == 0) return (true, 0);
     if (x > MAX_U256 / y) (false, 0) else (true, x * y)
   }
 
@@ -116,21 +117,24 @@ module suitears::math256 {
   }
 
   /// calculate sum of nums
-  public fun sum(nums: &vector<u256>): u256 {
-    let len = vector::length(nums);
+  public fun sum(nums: vector<u256>): u256 {
+    let len = vector::length(&nums);
     let i = 0;
     let sum = 0;
     
     while (i < len){
-      sum = sum + *vector::borrow(nums, i);
+      sum = sum + *vector::borrow(&nums, i);
       i = i + 1;
     };
     
     sum
   }
 
-  public fun avg(nums: &vector<u256>): u256{
-    let len = vector::length(nums);
+  public fun average_vector(nums: vector<u256>): u256{
+    let len = vector::length(&nums);
+
+    if (len == 0) return 0;
+
     let sum = sum(nums);
     
     sum / (len as u256)
@@ -209,9 +213,9 @@ module suitears::math256 {
        result
     }
 
-  public fun log2_up(value: u256): u8 {
-    let r = log10_down(value);
-    r + if (1 << (r as u8) < value) 1 else 0
+  public fun log2_up(value: u256): u16 {
+    let r = log2_down(value);
+    (r as u16) + if (1 << (r as u8) < value) 1 else 0
   } 
 
   public fun log10_down(value: u256): u8 {
@@ -271,6 +275,11 @@ module suitears::math256 {
       value = value >> 32;
       result = result + 4;
     };
+
+    if (value >> 16 > 0) {
+      value = value >> 16;
+      result = result + 2;
+    };    
 
     if (value >> 8 > 0)
       result = result + 1;
