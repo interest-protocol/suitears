@@ -3,7 +3,13 @@ module suitears::int_tests {
   use sui::test_utils::assert_eq;
   
   use suitears::int::{
-    or,     
+    or,
+    eq,
+    lt,
+    gt,
+    lte,
+    gte,
+    one,     
     mul, 
     shl, 
     shr, 
@@ -16,7 +22,8 @@ module suitears::int_tests {
     bits,  
     flip,
     div_up,    
-    is_neg,        
+    is_neg,
+    is_zero,        
     compare,
     div_down, 
     from_u256,      
@@ -34,6 +41,45 @@ module suitears::int_tests {
   const LESS_THAN: u8 = 1;
 
   const GREATER_THAN: u8 = 2;
+
+  #[test]
+  fun test_simple_functions() {
+    assert_eq(bits(one()), 1);
+    assert_eq(is_zero(zero()), true);
+    assert_eq(is_zero(one()), false);
+     assert_eq(is_zero(neg_from_u256(1)), false);
+  }
+
+  #[test]
+  fun test_compare_functions() {
+    assert_eq(eq(zero(), zero()), true);
+    assert_eq(eq(zero(), one()), false);
+    assert_eq(eq(neg_from_u256(2), from_u256(2)), false);
+
+    assert_eq(lt(neg_from_u256(2), neg_from_u256(1)), true);
+    assert_eq(lt(neg_from_u256(1), neg_from_u256(2)), false);
+    assert_eq(lt(from_u256(2), from_u256(1)), false);
+    assert_eq(lt(from_u256(1), from_u256(2)), true);
+    assert_eq(lt(from_u256(2), from_u256(2)), false);
+
+    assert_eq(lte(neg_from_u256(2), neg_from_u256(1)), true);
+    assert_eq(lte(neg_from_u256(1), neg_from_u256(2)), false);
+    assert_eq(lte(from_u256(2), from_u256(1)), false);
+    assert_eq(lte(from_u256(1), from_u256(2)), true);
+    assert_eq(lte(from_u256(2), from_u256(2)), true);
+
+    assert_eq(gt(neg_from_u256(2), neg_from_u256(1)), false);
+    assert_eq(gt(neg_from_u256(1), neg_from_u256(2)), true);
+    assert_eq(gt(from_u256(2), from_u256(1)), true);
+    assert_eq(gt(from_u256(1), from_u256(2)), false);
+    assert_eq(gt(from_u256(2), from_u256(2)), false);
+
+    assert_eq(gte(neg_from_u256(2), neg_from_u256(1)), false);
+    assert_eq(gte(neg_from_u256(1), neg_from_u256(2)), true);
+    assert_eq(gte(from_u256(2), from_u256(1)), true);
+    assert_eq(gte(from_u256(1), from_u256(2)), false);
+    assert_eq(gte(from_u256(2), from_u256(2)), true);
+  }
 
   #[test]
   fun test_truncate_to_u8() {

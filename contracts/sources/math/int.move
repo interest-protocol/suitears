@@ -366,7 +366,7 @@ module suitears::int {
   * @param self The Int struct.  
   * @return bool.  
   */
-  public fun is_zero(self: &Int): bool {
+  public fun is_zero(self: Int): bool {
     self.bits == 0
   }
 
