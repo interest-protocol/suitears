@@ -1,14 +1,33 @@
-// * Make sure the results are within u128 range
+/*
+* @title Math u128: A set of functions to operate over u128 numbers.
+* @notice Many functions are implementations of https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/math/Math.sol
+* @dev Beware that some operations throw on overflow and underflows.  
+*/
 module suitears::math128 {
+  // === Imports ===
+
   use std::vector;
 
   use suitears::int;
   use suitears::math256;
 
+  // === Constants ===
+  
+  // @dev The maximum u128 number.
   const MAX_U128: u256 = 340282366920938463463374607431768211455;
 
-  const WRAPPING_MAX: u256 = 340282366920938463463374607431768211455 + 1;
+  // @dev The MAX_U128 + 1.
+  const WRAPPING_MAX: u256 = 340282366920938463463374607431768211456;
+  
+  // === Wrapping Functions will wrap around the Max value. Still throw on zero division. ===
 
+  /*
+  * @notice It performs x + y. 
+  * @dev It will overflow around. 
+  * @param x The first operand. 
+  * @param y The second operand. 
+  * @return u128. The result of x + y. 
+  */
   public fun wrapping_add(x: u128, y: u128): u128 {
     (int::wrap(
       int::add(int::from_u128(x), int::from_u128(y)),
@@ -16,6 +35,14 @@ module suitears::math128 {
     ) as u128)
   }
 
+  /*
+  * @notice It performs x - y. 
+  * @dev It will underflow around. 
+  * @dev Throws if y > x.
+  * @param x The first operand. 
+  * @param y The second operand. 
+  * @return u128. The result of x - y. 
+  */
   public fun wrapping_sub(x: u128, y: u128): u128 {
     (int::wrap(
       int::sub(int::from_u128(x), int::from_u128(y)),
@@ -23,6 +50,13 @@ module suitears::math128 {
     ) as u128)
   }
 
+  /*
+  * @notice It performs x * y. 
+  * @dev It will overflow around. 
+  * @param x The first operand. 
+  * @param y The second operand. 
+  * @return u128. The result of x * y. 
+  */
   public fun wrapping_mul(x: u128, y: u128): u128 {
     (int::wrap(
       int::mul(int::from_u128(x), int::from_u128(y)),
@@ -30,41 +64,126 @@ module suitears::math128 {
     ) as u128)
   }
 
+  // === Try Functions do not throw ===  
+
+  /*
+  * @notice It tries to perform x + y. 
+  * @dev Checks for overflow. 
+  * @param x The first operand. 
+  * @param y The second operand. 
+  * @return bool. If the operation was successful.
+  * @return u128. The result of x + y. If it fails, it will be 0. 
+  */
   public fun try_add(x: u128, y: u128): (bool, u128) {
     let c = (x as u256) + (y as u256);
     if (MAX_U128 > c) (false, 0) else (true, (c as u128))
   }
 
+  /*
+  * @notice It tries to perform x - y. 
+  * @dev Checks for underflow. 
+  * @param x The first operand. 
+  * @param y The second operand. 
+  * @return bool. If the operation was successful.
+  * @return u128. The result of x - y. If it fails, it will be 0. 
+  */
   public fun try_sub(x: u128, y: u128): (bool, u128) {
     if (y > x) (false, 0) else (true, x - y)
   }
 
+  /*
+  * @notice It tries to perform x * y. 
+  * @dev Checks for overflow. 
+  * @param x The first operand. 
+  * @param y The second operand. 
+  * @return bool. If the operation was successful.
+  * @return u128. The result of x * y. If it fails, it will be 0. 
+  */
   public fun try_mul(x: u128, y: u128): (bool, u128) {
     let (pred, c) = math256::try_mul((x as u256), (y as u256));
     if (!pred || MAX_U128 > c) (false, 0) else (true, (c as u128))
   }
 
+  /*
+  * @notice It tries to perform x / y rounding down. 
+  * @dev Checks for zero division. 
+  * @param x The first operand. 
+  * @param y The second operand. 
+  * @return bool. If the operation was successful.
+  * @return u128. The result of x / y. If it fails, it will be 0. 
+  */
   public fun try_div_down(x: u128, y: u128): (bool, u128) {
     if (y == 0) (false, 0) else (true, div_down(x, y))
   }
 
+  /*
+  * @notice It tries to perform x / y rounding up. 
+  * @dev Checks for zero division. 
+  * @param x The first operand. 
+  * @param y The second operand. 
+  * @return bool. If the operation was successful.
+  * @return u128. The result of x / y. If it fails, it will be 0. 
+  */
   public fun try_div_up(x: u128, y: u128): (bool, u128) {
     if (y == 0) (false, 0) else (true, div_up(x, y))
   }
 
+  /*
+  * @notice It tries to perform x * y / z rounding down. 
+  * @dev Checks for zero division. 
+  * @dev Checks for overflow. 
+  * @param x The first operand. 
+  * @param y The second operand. 
+  * @param z The divisor. 
+  * @return bool. If the operation was successful.
+  * @return u128. The result of x * y / z. If it fails, it will be 0. 
+  */
   public fun try_mul_div_down(x: u128, y: u128, z: u128): (bool, u128) {
     let (pred, r) = math256::try_mul_div_down((x as u256), (y as u256), (z as u256));
     if (!pred || MAX_U128 > r) (false, 0) else (true, (r as u128))
   }
 
+  /*
+  * @notice It tries to perform x * y / z rounding up. 
+  * @dev Checks for zero division. 
+  * @dev Checks for overflow. 
+  * @param x The first operand. 
+  * @param y The second operand. 
+  * @param z The divisor. 
+  * @return bool. If the operation was successful.
+  * @return u128. The result of x * y / z. If it fails, it will be 0. 
+  */
   public fun try_mul_div_up(x: u128, y: u128, z: u128): (bool, u128) {
     let (pred, r) = math256::try_mul_div_up((x as u256), (y as u256), (z as u256));
     if (!pred || MAX_U128 > r) (false, 0) else (true, (r as u128))
   }
 
+  /*
+  * @notice It tries to perform x % y. 
+  * @dev Checks for zero division. 
+  * @param x The first operand. 
+  * @param y The second operand. 
+  * @return bool. If the operation was successful.
+  * @return u128. The result of x % y. If it fails, it will be 0. 
+  */
   public fun try_mod(x: u128, y: u128): (bool, u128) {
     if (y == 0) (false, 0) else (true, x % y)
   }
+
+  // === These functions will throw on overflow/underflow/zero division ===  
+
+  public fun mul(x: u128, y: u128): u128 {
+    x * y
+  }
+
+  public fun div_down(x: u128, y: u128): u128 {
+    x / y
+  }
+
+  public fun div_up(a: u128, b: u128): u128 {
+    // (a + b - 1) / b can overflow on addition, so we distribute.
+    if (a == 0) 0 else 1 + (a - 1) / b
+  }  
 
   public fun mul_div_down(x: u128, y: u128, z: u128): u128 {
     (math256::mul_div_down((x as u256), (y as u256), (z as u256)) as u128)
@@ -79,10 +198,9 @@ module suitears::math128 {
     if (a < b) a else b
   }
 
-  /// Return x clamped to the interval [lower, upper].
-  public fun clamp(x: u128, lower: u128, upper: u128): u128 {
-    min(upper, max(lower, x))
-  }
+  public fun max(x: u128, y: u128): u128 {
+    if (x >= y) x else y
+  }  
 
   /// https://github.com/pentagonxyz/movemate
   /// @dev Returns the average of two numbers. The result is rounded towards zero.
@@ -90,15 +208,11 @@ module suitears::math128 {
     // (a + b) / 2 can overflow.
     (a & b) + (a ^ b) / 2
   }
-  
-  public fun div_down(x: u128, y: u128): u128 {
-    x / y
-  }
 
-  public fun div_up(a: u128, b: u128): u128 {
-    // (a + b - 1) / b can overflow on addition, so we distribute.
-    if (a == 0) 0 else 1 + (a - 1) / b
-  }
+  /// Return x clamped to the interval [lower, upper].
+  public fun clamp(x: u128, lower: u128, upper: u128): u128 {
+    min(upper, max(lower, x))
+  }  
 
   /// https://github.com/pentagonxyz/movemate
   /// Return the absolute value of x - y
@@ -115,8 +229,6 @@ module suitears::math128 {
     (math256::pow((a as u256), (b as u256)) as u128)
   }
 
-
-
   /// calculate sum of nums
   public fun sum(nums: &vector<u128>): u128 {
     let len = vector::length(nums);
@@ -131,18 +243,13 @@ module suitears::math128 {
     sum
   }
 
-  public fun avg(nums: &vector<u128>): u128{
+  public fun average_vector(nums: &vector<u128>): u128{
     let len = vector::length(nums);
     let sum = sum(nums);
     
     sum / (len as u128)
   }
-
-  public fun max(x: u128, y: u128): u128 {
-    if (x >= y) x else y
-  }
   
-
   public fun sqrt_down(a: u128): u128 {
     (math256::sqrt_down((a as u256)) as u128)
   }
@@ -167,4 +274,12 @@ module suitears::math128 {
   public fun log10_up(x: u128): u8 {
     math256::log10_up((x as u256))
   }
+
+  public fun log256_down(x: u128): u8 {
+    math256::log256_down((x as u256))
+  }
+
+  public fun log256_up(x: u128): u8 {
+    math256::log256_up((x as u256))
+  }  
 }
