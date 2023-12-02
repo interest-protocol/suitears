@@ -23,10 +23,12 @@ module suitears::math256_tests {
     sqrt_down,
     log2_down,
     log256_up,
+    mul_div_up,
     log10_down,
     try_div_up,
     log256_down,
     try_div_down,
+    mul_div_down,
     try_mul_div_up,
     average_vector,
     try_mul_div_down
@@ -148,6 +150,18 @@ module suitears::math256_tests {
     assert_eq(pred, true);
     assert_eq(result, 4); 
   }   
+
+  #[test]
+  fun test_mul_div_down() {
+    assert_eq(mul_div_down(10, 2, 4), 5);
+    assert_eq(mul_div_down(1, 7, 2), 3);
+  }
+
+  #[test]
+  fun test_mul_div_up() {
+    assert_eq(mul_div_up(10, 2, 4), 5);
+    assert_eq(mul_div_up(1, 7, 2), 4);
+  }  
 
   #[test]
   fun test_try_mod() {
