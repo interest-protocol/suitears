@@ -420,7 +420,6 @@ module suitears::fixed_point64 {
     from_raw_value((exp_raw(raw_value) as u128))
   }
 
-
   /*
   * @notice Calculates the log base 2 for x + 64.
   * @dev Because log2 is negative for values < 1 we instead return log2(x) + 64 which is positive for all values of x.   
