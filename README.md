@@ -51,7 +51,6 @@ math
 ├─ math128 — "Utility math functions for u128 numbers"
 ├─ math256 — "Utility math functions for u256 numbers"
 ├─ math64 — "Utility math functions for u64 numbers"
-├─ math_fixed64 — "Utility math functions for x << 64 numbers"
 ├─ int — "Module to handle unsigned integer operations"
 utils
 ├─ comparator — "Module to compare u8 vectors (bits)"

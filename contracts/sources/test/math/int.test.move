@@ -7,6 +7,7 @@ module suitears::int_tests {
     eq,
     lt,
     gt,
+    pow,
     lte,
     gte,
     one,     
@@ -19,7 +20,7 @@ module suitears::int_tests {
     sub, 
     and, 
     zero,  
-    bits,  
+    value,  
     flip,
     div_up,    
     is_neg,
@@ -44,7 +45,7 @@ module suitears::int_tests {
 
   #[test]
   fun test_simple_functions() {
-    assert_eq(bits(one()), 1);
+    assert_eq(value(one()), 1);
     assert_eq(is_zero(zero()), true);
     assert_eq(is_zero(one()), false);
      assert_eq(is_zero(neg_from_u256(1)), false);
@@ -226,17 +227,31 @@ module suitears::int_tests {
 
   #[test]
   fun test_abs() {
-    assert_eq(bits(from_u256(10)), bits(abs(neg_from_u256(10))));
-    assert_eq(bits(from_u256(12826189)), bits(abs(neg_from_u256(12826189))));
-    assert_eq(bits(from_u256(10)), bits(abs(from_u256(10))));
-    assert_eq(bits(from_u256(12826189)), bits(abs(from_u256(12826189))));
-    assert_eq(bits(from_u256(0)), bits(abs(from_u256(0))));
+    assert_eq(value(from_u256(10)), value(abs(neg_from_u256(10))));
+    assert_eq(value(from_u256(12826189)), value(abs(neg_from_u256(12826189))));
+    assert_eq(value(from_u256(10)), value(abs(from_u256(10))));
+    assert_eq(value(from_u256(12826189)), value(abs(from_u256(12826189))));
+    assert_eq(value(from_u256(0)), value(abs(from_u256(0))));
+  }
+
+  #[test]
+  fun test_pow() {
+    assert_eq(pow(from_u256(0), 0), one());
+    assert_eq(pow(from_u256(0), 1), zero());
+    assert_eq(pow(from_u256(0), 112345), zero());
+    assert_eq(pow(from_u256(1), 112345), one());
+    assert_eq(pow(from_u256(1), 0), one());
+    assert_eq(pow(from_u256(12345), 1), from_u256(12345));
+    assert_eq(pow(from_u256(2), 3), from_u256(8));
+    assert_eq(pow(neg_from_u256(2), 3), neg_from_u256(8));
+    assert_eq(pow(from_u256(2), 4), from_u256(16));
+    assert_eq(pow(neg_from_u256(2), 4), from_u256(16));    
   }
 
   #[test]
   fun test_neg_from() {
-    assert_eq(bits(neg_from_u256(10)), 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF6);
-    assert_eq(bits(neg_from_u256(100)), 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF9C);
+    assert_eq(value(neg_from_u256(10)), 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF6);
+    assert_eq(value(neg_from_u256(100)), 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF9C);
   }
 
   #[test]
