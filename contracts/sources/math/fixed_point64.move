@@ -384,17 +384,17 @@ module suitears::fixed_point64 {
   }  
 
   /*
-  * @notice It returns x**n.     
-  * @param x The base. 
-  * @param n The exponent. 
-  * @return FixedPoint64. The result of x**n. 
+  * @notice It returns base ** exponent.     
+  * @param base The base. 
+  * @param exponent The exponent. 
+  * @return FixedPoint64. The result of base ** exponent. 
   *
   * @aborts-if 
   *   - aborts if the end result is higher than `MAX_U128`.
   */
-  public fun pow(x: FixedPoint64, n: u64): FixedPoint64 {
-    let raw_value = (x.value as u256);
-    from_raw_value((pow_raw(raw_value, (n as u128)) as u128))
+  public fun pow(base: FixedPoint64, exponent: u64): FixedPoint64 {
+    let raw_value = (base.value as u256);
+    from_raw_value((pow_raw(raw_value, (exponent as u128)) as u128))
   }
 
   /*
