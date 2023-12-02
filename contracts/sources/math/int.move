@@ -628,6 +628,20 @@ module suitears::int {
     if (is_neg(a) && result != 0)   neg_from_u256(result) else from_u256(result)
   }
 
+  /*
+  * @notice It performs base ** exponent.  
+  * @param base An Int struct.  
+  * @param exponent The exponent. 
+  * @return Int. The result of base ** exponent.  
+  */
+  public fun pow(base: Int, exponent: u256): Int {
+    let raw_value = math256::pow(abs(base).bits, exponent);
+    assert!(raw_value <= MAX_I256_AS_U256, EConversionFromU256Overflow);    
+    let result = Int { bits: raw_value };
+    
+    if (is_neg(base) && exponent % 2 != 0) flip(result) else result
+  }
+
   // === Bitwise Operations ===  
 
   /*
