@@ -28,7 +28,7 @@ module suitears::fixed_point64 {
   const EZeroDivision: u64 = 3;
   // @dev If the result of a division operation results in a number larger or equal to `MAX_U128`.
   const EDivisionOverflow: u64 = 4;
-  // Abort code on overflow
+  // @dev Abort code on overflow
   const EOverflowExp: u64 = 5;
 
   // === Structs ===
@@ -228,7 +228,9 @@ module suitears::fixed_point64 {
     let x_raw = x.value;
     let y_raw = y.value;
     assert!(x_raw >= y_raw, ENegativeResult);
-    from_raw_value(x_raw - y_raw)
+    FixedPoint64 {
+      value: x_raw - y_raw
+    }
   }
 
   /*
@@ -245,7 +247,9 @@ module suitears::fixed_point64 {
     let y_raw = y.value;
     let result = (x_raw as u256) + (y_raw as u256);
     assert!(result <= MAX_U128, EOutOfRange);
-    from_raw_value((result as u128))
+    FixedPoint64 {
+      value: (result as u128)
+    }
   }
 
   /*
@@ -394,7 +398,9 @@ module suitears::fixed_point64 {
   */
   public fun pow(base: FixedPoint64, exponent: u64): FixedPoint64 {
     let raw_value = (base.value as u256);
-    from_raw_value((pow_raw(raw_value, (exponent as u128)) as u128))
+    FixedPoint64 {
+      value: (pow_raw(raw_value, (exponent as u128)) as u128)
+    }
   }
 
   /*
@@ -406,7 +412,9 @@ module suitears::fixed_point64 {
     let y = x.value;
     let z = (math128::sqrt_down(y) << 32 as u256);
     z = (z + ((y as u256) << 64) / z) >> 1;
-    from_raw_value((z as u128))
+    FixedPoint64 {
+      value: (z as u128)
+    }
   }
 
   /*
@@ -417,7 +425,9 @@ module suitears::fixed_point64 {
   */    
   public fun exp(x: FixedPoint64): FixedPoint64 {
     let raw_value = (x.value as u256);
-    from_raw_value((exp_raw(raw_value) as u128))
+    FixedPoint64 {
+      value: (exp_raw(raw_value) as u128)
+    }
   }
 
   /*
