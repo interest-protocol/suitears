@@ -281,7 +281,24 @@ module suitears::fixed_point64 {
     FixedPoint64 {
       value: ( math256::div_down((x.value as u256) << 64, (y.value as u256)) as u128)
     }
-  }  
+  } 
+
+  /*
+  * @notice Specialized function for x * y / z that omits intermediate shifting.     
+  * @param x The first operand. 
+  * @param y The second operand. 
+  * @param z The third operand.   
+  * @return FixedPoint64. The result of x * y / z. 
+  *
+  * @aborts-if 
+  *   - aborts z is zero.
+  */
+  public fun mul_div(x: FixedPoint64, y: FixedPoint64, z: FixedPoint64): FixedPoint64 {
+    assert!(z.value != 0, EZeroDivision);
+    FixedPoint64 {
+      value: math128::mul_div_down(x.value, y.value, z.value)
+    }
+  }     
 
   /*
   * @notice It returns x * y.   
@@ -300,23 +317,6 @@ module suitears::fixed_point64 {
     assert!(MAX_U128 >= product, EMultiplicationOverflow);
     (product as u128)
   }
-
-  /*
-  * @notice Specialized function for x * y / z that omits intermediate shifting.     
-  * @param x The first operand. 
-  * @param y The second operand. 
-  * @param z The third operand.   
-  * @return FixedPoint64. The result of x * y / z. 
-  *
-  * @aborts-if 
-  *   - aborts z is zero.
-  */
-  public fun mul_div(x: FixedPoint64, y: FixedPoint64, z: FixedPoint64): FixedPoint64 {
-    assert!(z.value != 0, EZeroDivision);
-    FixedPoint64 {
-      value: math128::mul_div_down(x.value, y.value, z.value)
-    }
-  }  
 
   /*
   * @notice It returns numerator/denominator rounded down.   
