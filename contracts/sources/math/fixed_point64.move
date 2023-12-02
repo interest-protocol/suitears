@@ -59,7 +59,7 @@ module suitears::fixed_point64 {
     let scaled_value = (value as u256) << 64;
     assert!(scaled_value <= MAX_U128, EOutOfRange);
     FixedPoint64 {
-      value: (value as u128)
+      value: (scaled_value as u128)
     }
   }
 
@@ -268,36 +268,20 @@ module suitears::fixed_point64 {
   }
 
   /*
-  * @notice It returns x / y rounding down.     
+  * @notice It returns x / y.     
   * @param x The first operand. 
   * @param y The second operand. 
-  * @return FixedPoint64. The result of x / y rounding down. 
+  * @return FixedPoint64. The result of x / y. 
   *
   * @aborts-if 
   *   - aborts if y is zero
   */
-  public fun div_down(x: FixedPoint64, y: FixedPoint64): FixedPoint64 {
+  public fun div(x: FixedPoint64, y: FixedPoint64): FixedPoint64 {
     assert!(y.value != 0, EZeroDivision);
     FixedPoint64 {
       value: ( math256::div_down((x.value as u256) << 64, (y.value as u256)) as u128)
     }
   }  
-
-  /*
-  * @notice It returns x / y rounding up.     
-  * @param x The first operand. 
-  * @param y The second operand. 
-  * @return FixedPoint64. The result of x / y rounding up. 
-  *
-  * @aborts-if 
-  *   - aborts if y is zero
-  */
-  public fun div_up(x: FixedPoint64, y: FixedPoint64): FixedPoint64 {
-    assert!(y.value != 0, EZeroDivision);
-    FixedPoint64 {
-      value: ( math256::div_up((x.value as u256) << 64, (y.value as u256)) as u128)
-    }
-  } 
 
   /*
   * @notice It returns x * y.   
@@ -316,6 +300,23 @@ module suitears::fixed_point64 {
     assert!(MAX_U128 >= product, EMultiplicationOverflow);
     (product as u128)
   }
+
+  /*
+  * @notice Specialized function for x * y / z that omits intermediate shifting.     
+  * @param x The first operand. 
+  * @param y The second operand. 
+  * @param z The third operand.   
+  * @return FixedPoint64. The result of x * y / z. 
+  *
+  * @aborts-if 
+  *   - aborts z is zero.
+  */
+  public fun mul_div(x: FixedPoint64, y: FixedPoint64, z: FixedPoint64): FixedPoint64 {
+    assert!(z.value != 0, EZeroDivision);
+    FixedPoint64 {
+      value: math128::mul_div_down(x.value, y.value, z.value)
+    }
+  }  
 
   /*
   * @notice It returns numerator/denominator rounded down.   
@@ -351,40 +352,6 @@ module suitears::fixed_point64 {
     let quotient = math256::div_up( scaled_value, (denominator.value as u256));
     assert!(quotient <= MAX_U128, EDivisionOverflow);
     (quotient as u128)
-  }  
-
-  /*
-  * @notice Specialized function for x * y / z that omits intermediate shifting.     
-  * @param x The first operand. 
-  * @param y The second operand. 
-  * @param z The third operand.   
-  * @return FixedPoint64. The result of x * y / z rounding down. 
-  *
-  * @aborts-if 
-  *   - aborts z is zero.
-  */
-  public fun mul_div_down(x: FixedPoint64, y: FixedPoint64, z: FixedPoint64): FixedPoint64 {
-    assert!(z.value != 0, EZeroDivision);
-    FixedPoint64 {
-      value: math128::mul_div_up(x.value, y.value, z.value)
-    }
-  }
-
-  /*
-  * @notice Specialized function for x * y / z that omits intermediate shifting.     
-  * @param x The first operand. 
-  * @param y The second operand. 
-  * @param z The third operand.   
-  * @return FixedPoint64. The result of x * y / z rounding up. 
-  *
-  * @aborts-if 
-  *   - aborts z is zero.
-  */
-  public fun mul_div_up(x: FixedPoint64, y: FixedPoint64, z: FixedPoint64): FixedPoint64 {
-    assert!(z.value != 0, EZeroDivision);
-    FixedPoint64 {
-      value: math128::mul_div_up(x.value, y.value, z.value)
-    }
   }  
 
   /*
@@ -428,29 +395,7 @@ module suitears::fixed_point64 {
     FixedPoint64 {
       value: (exp_raw(raw_value) as u128)
     }
-  }
-
-  /*
-  * @notice Calculates the log base 2 for x + 64.
-  * @dev Because log2 is negative for values < 1 we instead return log2(x) + 64 which is positive for all values of x.   
-  * @param x The operand. 
-  * @return FixedPoint64. 
-  */  
-  public fun ln_plus_64(x: FixedPoint64): FixedPoint64 {
-    log2(x.value)
-  }   
-
-  /*
-  * @notice Calculates the log base 2 for x + 32 * ln2.  
-  * @param x The operand. 
-  * @return FixedPoint64. 
-  */  
-  public fun ln_plus_32ln2(x: FixedPoint64): FixedPoint64 {
-    let x = (log2(x.value).value as u256);
-    FixedPoint64 {
-      value: ((x * LN2) >> 64 as u128)
-    }
-  }    
+  }  
 
   // === Private Functions ===
 
@@ -503,34 +448,5 @@ module suitears::fixed_point64 {
       x = (x * x) >> 64;
     };
     res
-  }  
-
-  /*
-  * @notice Calculates the log base 2 for x + 64.  
-  * @param x The operand. 
-  * @return FixedPoint64. 
-  */  
-  fun log2(x: u128): FixedPoint64 {
-    let integer_part = (math128::log2_down(x) as u8);
-    // Normalize x to [1, 2) in fixed point 63. To ensure x is smaller then 1<<64
-    if (x >= 1 << 63) {
-      x = x >> (integer_part - 63);
-    } else {
-      x = x << (63 - integer_part);
-    };
-    let frac = 0;
-    let delta = 1 << 63;
-    while (delta != 0) {
-      // log x = 1/2 log x^2
-      // x in [1, 2)
-      x = (x * x) >> 63;
-      // x is now in [1, 4)
-      // if x in [2, 4) then log x = 1 + log (x / 2)
-      if (x >= (2 << 63)) { frac = frac + delta; x = x >> 1; };
-      delta = delta >> 1;
-    };
-    FixedPoint64 {
-      value: ((integer_part as u128) << 64) + frac
-    }
-  }    
+  }     
 }
