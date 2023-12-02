@@ -43,7 +43,7 @@ module suitears::int {
   
   // @dev A wrapper to represent unsigned integers.
   struct Int has copy, drop, store {
-    bits: u256
+    value: u256
   }
 
   // === Public View Function ===  
@@ -51,10 +51,10 @@ module suitears::int {
   /*
   * @notice It returns the inner value inside Int.
   * @param self The Int struct.  
-  * @return u256. The inner bits.
+  * @return u256. The inner value.
   */
-  public fun bits(self: Int): u256 {
-    self.bits
+  public fun value(self: Int): u256 {
+    self.value
   }
 
   // === Public Create Functions ===   
@@ -64,7 +64,7 @@ module suitears::int {
   * @return Int. The wrapped value.
   */
   public fun zero(): Int {
-    Int { bits: 0 }
+    Int { value: 0 }
   }
 
   /*
@@ -72,7 +72,7 @@ module suitears::int {
   * @return Int. The wrapped value.
   */
   public fun one(): Int {
-    Int { bits: 1 }
+    Int { value: 1 }
   } 
 
   /*
@@ -80,7 +80,7 @@ module suitears::int {
   * @return Int. The wrapped value.
   */
   public fun max(): Int {
-    Int { bits: MAX_I256_AS_U256 }
+    Int { value: MAX_I256_AS_U256 }
   }
 
   /*
@@ -89,7 +89,7 @@ module suitears::int {
   * @return Int. The wrapped value.
   */
   public fun from_u8(value: u8): Int {
-    Int { bits: (value as u256) }
+    Int { value: (value as u256) }
   }
 
   /*
@@ -98,7 +98,7 @@ module suitears::int {
   * @return Int. The wrapped value.
   */
   public fun from_u16(value: u16): Int {
-    Int { bits: (value as u256) }
+    Int { value: (value as u256) }
   }
 
   /*
@@ -107,7 +107,7 @@ module suitears::int {
   * @return Int. The wrapped value.
   */
   public fun from_u32(value: u32): Int {
-    Int { bits: (value as u256) }
+    Int { value: (value as u256) }
   }
 
   /*
@@ -116,7 +116,7 @@ module suitears::int {
   * @return Int. The wrapped value.
   */
   public fun from_u64(value: u64): Int {
-    Int { bits: (value as u256) }
+    Int { value: (value as u256) }
   }
 
   /*
@@ -125,7 +125,7 @@ module suitears::int {
   * @return Int. The wrapped value.
   */
   public fun from_u128(value: u128): Int {
-    Int { bits: (value as u256) }
+    Int { value: (value as u256) }
   }
 
   /*
@@ -138,7 +138,7 @@ module suitears::int {
   */
   public fun from_u256(value: u256): Int {
     assert!(value <= MAX_I256_AS_U256, EConversionFromU256Overflow);
-    Int { bits: value }
+    Int { value: value }
   }
 
   /*
@@ -148,7 +148,7 @@ module suitears::int {
   */
   public fun neg_from_u8(value: u8): Int {
     let ret = from_u8(value);
-    if (ret.bits > 0) *&mut ret.bits = MAX_U256 - ret.bits + 1;
+    if (ret.value > 0) *&mut ret.value = MAX_U256 - ret.value + 1;
     ret
   }
 
@@ -159,7 +159,7 @@ module suitears::int {
   */
   public fun neg_from_u16(value: u16): Int {
     let ret = from_u16(value);
-    if (ret.bits > 0) *&mut ret.bits = MAX_U256 - ret.bits + 1;
+    if (ret.value > 0) *&mut ret.value = MAX_U256 - ret.value + 1;
     ret
   }
 
@@ -170,7 +170,7 @@ module suitears::int {
   */
   public fun neg_from_u32(value: u32): Int {
     let ret = from_u32(value);
-    if (ret.bits > 0) *&mut ret.bits = MAX_U256 - ret.bits + 1;
+    if (ret.value > 0) *&mut ret.value = MAX_U256 - ret.value + 1;
     ret
   }
 
@@ -181,7 +181,7 @@ module suitears::int {
   */
   public fun neg_from_u64(value: u64): Int {
     let ret = from_u64(value);
-    if (ret.bits > 0) *&mut ret.bits = MAX_U256 - ret.bits + 1;
+    if (ret.value > 0) *&mut ret.value = MAX_U256 - ret.value + 1;
     ret
   }
 
@@ -192,7 +192,7 @@ module suitears::int {
   */
   public fun neg_from_u128(value: u128): Int {
     let ret = from_u128(value);
-    if (ret.bits > 0) *&mut ret.bits = MAX_U256 - ret.bits + 1;
+    if (ret.value > 0) *&mut ret.value = MAX_U256 - ret.value + 1;
     ret
   }
 
@@ -203,7 +203,7 @@ module suitears::int {
   */
   public fun neg_from_u256(value: u256): Int {
     let ret = from_u256(value);
-    if (ret.bits > 0) *&mut ret.bits = MAX_U256 - ret.bits + 1;
+    if (ret.value > 0) *&mut ret.value = MAX_U256 - ret.value + 1;
     ret
   }
 
@@ -213,11 +213,11 @@ module suitears::int {
   * @return u8. The inner value cast to u8. 
   *
   * aborts-if 
-  *  - x.bits is negative
+  *  - x.value is negative
   */
   public fun to_u8(self: Int): u8 {
     assert!(is_positive(self), EConversionUnderflow);
-    (self.bits as u8)
+    (self.value as u8)
   }
 
   /*
@@ -226,11 +226,11 @@ module suitears::int {
   * @return u16. The inner value cast to u16. 
   *
   * aborts-if 
-  *  - x.bits is negative
+  *  - x.value is negative
   */
   public fun to_u16(self: Int): u16 {
     assert!(is_positive(self), EConversionUnderflow);
-    (self.bits as u16)
+    (self.value as u16)
   }
 
   /*
@@ -239,11 +239,11 @@ module suitears::int {
   * @return u32. The inner value cast to u32. 
   *
   * aborts-if 
-  *  - x.bits is negative
+  *  - x.value is negative
   */
   public fun to_u32(self: Int): u32 {
     assert!(is_positive(self), EConversionUnderflow);
-    (self.bits as u32)
+    (self.value as u32)
   }
 
   /*
@@ -252,11 +252,11 @@ module suitears::int {
   * @return u64. The inner value cast to u64. 
   *
   * aborts-if 
-  *  - x.bits is negative
+  *  - x.value is negative
   */
   public fun to_u64(self: Int): u64 {
     assert!(is_positive(self), EConversionUnderflow);
-    (self.bits as u64)
+    (self.value as u64)
   }
 
   /*
@@ -265,11 +265,11 @@ module suitears::int {
   * @return u128. The inner value cast to u128. 
   *
   * aborts-if 
-  *  - x.bits is negative
+  *  - x.value is negative
   */
   public fun to_u128(self: Int): u128 {
     assert!(is_positive(self), EConversionUnderflow);
-    (self.bits as u128)
+    (self.value as u128)
   }
 
   /*
@@ -278,11 +278,11 @@ module suitears::int {
   * @return u256. The inner value cast to u256. 
   *
   * aborts-if 
-  *  - x.bits is negative
+  *  - x.value is negative
   */
   public fun to_u256(self: Int): u256 {
     assert!(is_positive(self), EConversionUnderflow);
-    self.bits
+    self.value
   }
 
   /*
@@ -291,7 +291,7 @@ module suitears::int {
   * @return u8. The inner value truncated to u8. 
   */
   public fun truncate_to_u8(self: Int): u8 {
-    ((self.bits & 0xFF) as u8)
+    ((self.value & 0xFF) as u8)
   }
 
   /*
@@ -300,7 +300,7 @@ module suitears::int {
   * @return u16. The inner value truncated to u16. 
   */
   public fun truncate_to_u16(self: Int): u16 {
-    ((self.bits & 0xFFFF) as u16)
+    ((self.value & 0xFFFF) as u16)
   }
 
   /*
@@ -309,7 +309,7 @@ module suitears::int {
   * @return u32. The inner value truncated to u32. 
   */
   public fun truncate_to_u32(self: Int): u32 {
-    ((self.bits & 0xFFFFFFFF) as u32)
+    ((self.value & 0xFFFFFFFF) as u32)
   }
 
   /*
@@ -318,7 +318,7 @@ module suitears::int {
   * @return u64. The inner value truncated to u64. 
   */
   public fun truncate_to_u64(self: Int): u64 {
-    ((self.bits & 0xFFFFFFFFFFFFFFFF) as u64)
+    ((self.value & 0xFFFFFFFFFFFFFFFF) as u64)
   }
 
   /*
@@ -327,7 +327,7 @@ module suitears::int {
   * @return u128. The inner value truncated to u128. 
   */
   public fun truncate_to_u128(self: Int): u128 {
-    ((self.bits & 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF) as u128)
+    ((self.value & 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF) as u128)
   }
 
   // === Public Utility Functions ===   
@@ -338,7 +338,7 @@ module suitears::int {
   * @return Int. The returned Int will have its signed flipped.  
   */
   public fun flip(self: Int): Int {
-    if (is_neg(self)) { abs(self) } else { neg_from_u256(self.bits) } 
+    if (is_neg(self)) { abs(self) } else { neg_from_u256(self.value) } 
   }
 
   /*
@@ -347,7 +347,7 @@ module suitears::int {
   * @return Int. The absolute.  
   */
   public fun abs(self: Int): Int {
-    if (is_neg(self)) from_u256((self.bits ^ MAX_U256) + 1) else self
+    if (is_neg(self)) from_u256((self.value ^ MAX_U256) + 1) else self
   }
 
   // === Public Predicate Functions ===   
@@ -358,7 +358,7 @@ module suitears::int {
   * @return bool.  
   */
   public fun is_neg(self: Int): bool {
-    (self.bits & U256_WITH_FIRST_BIT_SET) != 0
+    (self.value & U256_WITH_FIRST_BIT_SET) != 0
   }
 
   /*
@@ -367,7 +367,7 @@ module suitears::int {
   * @return bool.  
   */
   public fun is_zero(self: Int): bool {
-    self.bits == 0
+    self.value == 0
   }
 
   /*
@@ -376,7 +376,7 @@ module suitears::int {
   * @return bool.  
   */
   public fun is_positive(self: Int): bool {
-    U256_WITH_FIRST_BIT_SET > self.bits
+    U256_WITH_FIRST_BIT_SET > self.value
   }
 
 
@@ -389,12 +389,12 @@ module suitears::int {
   * @return 2. a > b.    
   */
   public fun compare(a: Int, b: Int): u8 {
-    if (a.bits == b.bits) return EQUAL;
+    if (a.value == b.value) return EQUAL;
     if (is_positive(a)) {
       // A is positive
       if (is_positive(b)) {
       // A and B are positive
-        return if (a.bits > b.bits) GREATER_THAN else LESS_THAN
+        return if (a.value > b.value) GREATER_THAN else LESS_THAN
       } else {
       // B is negative
         return GREATER_THAN
@@ -406,7 +406,7 @@ module suitears::int {
         return LESS_THAN
       } else {
       // A is negative and B is negative
-        return if (abs(a).bits > abs(b).bits) LESS_THAN else GREATER_THAN
+        return if (abs(a).value > abs(b).value) LESS_THAN else GREATER_THAN
       }
     }
   }
@@ -476,23 +476,23 @@ module suitears::int {
     // A is posiyive
       if (is_positive(b)) {
       // A and B are posistive;
-        from_u256(a.bits + b.bits)
+        from_u256(a.value + b.value)
       } else {
       // A is positive but B is negative
         let b_abs = abs(b);
-        if (a.bits >= b_abs.bits) return from_u256(a.bits - b_abs.bits);
-        return neg_from_u256(b_abs.bits - a.bits)
+        if (a.value >= b_abs.value) return from_u256(a.value - b_abs.value);
+        return neg_from_u256(b_abs.value - a.value)
       }
     } else {
     // A is negative
       if (is_positive(b)) {
       // A is negative and B is positive
         let a_abs = abs(a);
-        if (b.bits >= a_abs.bits) return from_u256(b.bits - a_abs.bits);
-        return neg_from_u256(a_abs.bits - b.bits)
+        if (b.value >= a_abs.value) return from_u256(b.value - a_abs.value);
+        return neg_from_u256(a_abs.value - b.value)
       } else {
       // A and B are negative
-        neg_from_u256(abs(a).bits + abs(b).bits)
+        neg_from_u256(abs(a).value + abs(b).value)
       }
     }
   }
@@ -508,23 +508,23 @@ module suitears::int {
       // A is positive
       if (is_positive(b)) {
       // B is positive
-        if (a.bits >= b.bits) return from_u256(a.bits - b.bits); // Return positive
-          return neg_from_u256(b.bits - a.bits) // Return negative
+        if (a.value >= b.value) return from_u256(a.value - b.value); // Return positive
+          return neg_from_u256(b.value - a.value) // Return negative
       } else {
       // B is negative
-        return from_u256(a.bits + abs(b).bits) // Return positive
+        return from_u256(a.value + abs(b).value) // Return positive
       }
     } else {
     // A is negative
       if (is_positive(b)) {
         // B is positive
-        return neg_from_u256(abs(a).bits + b.bits) // Return negative
+        return neg_from_u256(abs(a).value + b.value) // Return negative
       } else {
         // B is negative
         let a_abs = abs(a);
         let b_abs = abs(b);
-        if (b_abs.bits >= a_abs.bits) return from_u256(b_abs.bits - a_abs.bits); // Return positive
-        return neg_from_u256(a_abs.bits - b_abs.bits) // Return negative
+        if (b_abs.value >= a_abs.value) return from_u256(b_abs.value - a_abs.value); // Return positive
+        return neg_from_u256(a_abs.value - b_abs.value) // Return negative
       }
     }
   }
@@ -540,19 +540,19 @@ module suitears::int {
       // A is positive
       if (is_positive(b)) {
         // B is positive
-        return from_u256(a.bits * b.bits)// Return positive
+        return from_u256(a.value * b.value)// Return positive
       } else {
         // B is negative
-        return neg_from_u256(a.bits * abs(b).bits) // Return negative
+        return neg_from_u256(a.value * abs(b).value) // Return negative
       }
     } else {
       // A is negative
       if (is_positive(b)) {
         // B is positive
-         return neg_from_u256(abs(a).bits * b.bits) // Return negative
+         return neg_from_u256(abs(a).value * b.value) // Return negative
       } else {
       // B is negative
-        return from_u256(abs(a).bits * abs(b).bits ) // Return positive
+        return from_u256(abs(a).value * abs(b).value ) // Return positive
       }
     }
   }
@@ -568,19 +568,19 @@ module suitears::int {
       // A is positive
       if (is_positive(b)) {
         // B is positive
-        return from_u256(math256::div_down(a.bits, b.bits)) // Return positive
+        return from_u256(math256::div_down(a.value, b.value)) // Return positive
       } else {
         // B is negative
-        return neg_from_u256(math256::div_down(a.bits, abs(b).bits)) // Return negative
+        return neg_from_u256(math256::div_down(a.value, abs(b).value)) // Return negative
       }
     } else {
       // A is negative
       if (is_positive(b)) {
         // B is positive
-        return neg_from_u256(math256::div_down(abs(a).bits, b.bits)) // Return negative
+        return neg_from_u256(math256::div_down(abs(a).value, b.value)) // Return negative
       } else {
         // B is negative
-        return from_u256(math256::div_down(abs(a).bits, abs(b).bits)) // Return positive
+        return from_u256(math256::div_down(abs(a).value, abs(b).value)) // Return positive
       }
     }    
   }
@@ -596,19 +596,19 @@ module suitears::int {
       // A is positive
       if (is_positive(b)) {
         // B is positive
-        return from_u256(math256::div_up(a.bits, b.bits)) // Return positive
+        return from_u256(math256::div_up(a.value, b.value)) // Return positive
       } else {
         // B is negative
-        return neg_from_u256(math256::div_up(a.bits, abs(b).bits)) // Return negative
+        return neg_from_u256(math256::div_up(a.value, abs(b).value)) // Return negative
       }
     } else {
       // A is negative
       if (is_positive(b)) {
         // B is positive
-        return neg_from_u256(math256::div_up(abs(a).bits, b.bits)) // Return negative
+        return neg_from_u256(math256::div_up(abs(a).value, b.value)) // Return negative
       } else {
         // B is negative
-        return from_u256(math256::div_up(abs(a).bits, abs(b).bits)) // Return positive
+        return from_u256(math256::div_up(abs(a).value, abs(b).value)) // Return positive
       }
     }    
   }  
@@ -623,7 +623,7 @@ module suitears::int {
     let a_abs = abs(a);
     let b_abs = abs(b);
 
-    let result = a_abs.bits % b_abs.bits;
+    let result = a_abs.value % b_abs.value;
 
     if (is_neg(a) && result != 0)   neg_from_u256(result) else from_u256(result)
   }
@@ -635,9 +635,9 @@ module suitears::int {
   * @return Int. The result of base ** exponent.  
   */
   public fun pow(base: Int, exponent: u256): Int {
-    let raw_value = math256::pow(abs(base).bits, exponent);
+    let raw_value = math256::pow(abs(base).value, exponent);
     assert!(raw_value <= MAX_I256_AS_U256, EConversionFromU256Overflow);    
-    let result = Int { bits: raw_value };
+    let result = Int { value: raw_value };
     
     if (is_neg(base) && exponent % 2 != 0) flip(result) else result
   }
@@ -647,16 +647,16 @@ module suitears::int {
   /*
   * @notice It performs self >> rhs.  
   * @param self An Int struct.  
-  * @param rhs The bits to right-hand shift. 
+  * @param rhs The value to right-hand shift. 
   * @return Int. The result of self >> rhs.  
   */
   public fun shr(self: Int, rhs: u8): Int { 
     Int {
-      bits: if (is_positive(self)) {
-        self.bits >> rhs
+      value: if (is_positive(self)) {
+        self.value >> rhs
       } else {
         let mask = (1 << ((256 - (rhs as u16)) as u8)) - 1;
-        (self.bits >> rhs) | (mask << ((256 - (rhs as u16)) as u8))
+        (self.value >> rhs) | (mask << ((256 - (rhs as u16)) as u8))
       }
     } 
   }     
@@ -664,36 +664,36 @@ module suitears::int {
   /*
   * @notice It performs self >> lhs.  
   * @param self An Int struct.  
-  * @param lhs The bits to right-hand shift. 
+  * @param lhs The value to right-hand shift. 
   * @return Int. The result of self >> lhs.  
   */
   public fun shl(self: Int, lhs: u8): Int {
     Int {
-      bits: self.bits << lhs
+      value: self.value << lhs
     } 
   }
 
   /*
   * @notice It performs a | b.  
   * @param self An Int struct.  
-  * @param lhs The bits to right-hand shift. 
+  * @param lhs The value to right-hand shift. 
   * @return Int. The result of a | b.  
   */
   public fun or(a: Int, b: Int): Int {
     Int {
-      bits: a.bits | b.bits
+      value: a.value | b.value
     } 
   }
 
   /*
   * @notice It performs a & b.  
   * @param self An Int struct.  
-  * @param lhs The bits to right-hand shift. 
+  * @param lhs The value to right-hand shift. 
   * @return Int. The result of a & b.  
   */
   public fun and(a: Int, b: Int): Int {
     Int {
-      bits: a.bits & b.bits
+      value: a.value & b.value
     } 
   }
 
