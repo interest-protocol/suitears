@@ -11,7 +11,6 @@ module suitears::int {
   // === Friend modules ===
 
   friend suitears::math64;
-  friend suitears::math128;  
 
   // === Constants ===
   
@@ -708,6 +707,6 @@ module suitears::int {
   public(friend) fun wrap(self: Int, max: u256): u256 {
     let max = from_u256(max);
 
-    to_u256(if (is_neg(self)) add(self, max) else sub(self, div_down(mul(max, self), max)))
+    to_u256(if (is_neg(self)) add(self, max) else sub(self, mul(max, div_down(self, max))))
   }  
 }

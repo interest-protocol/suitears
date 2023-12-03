@@ -170,6 +170,7 @@ module suitears::math256 {
   * @dev It will throw on zero division. 
   * @param x The first operand. 
   * @param y The second operand. 
+  * @param z The divisor.  
   * @return u256. The result of x * y / z. 
   */
   public fun mul_div_down(x: u256, y: u256, z: u256): u256 {
@@ -181,6 +182,7 @@ module suitears::math256 {
   * @dev It will throw on zero division. 
   * @param x The first operand. 
   * @param y The second operand. 
+  * @param z The divisor.  
   * @return u256. The result of x * y / z. 
   */
   public fun mul_div_up(x: u256, y: u256, z: u256): u256 {
@@ -209,17 +211,7 @@ module suitears::math256 {
   }  
 
   /*
-  * @notice It returns the average between two numbers (a + b) / 2. 
-  * @param x The first operand. 
-  * @param y The second operand. 
-  * @return u256. (a + b) / 2. 
-  */
-  public fun average(x: u256, y: u256): u256 {
-    (x & y) + (x ^ y) / 2
-  }
-
-  /*
-  * @notice Claims x between the range of [lower, upper].
+  * @notice Clamps x between the range of [lower, upper].
   * @param x The operand. 
   * @param lower The lower bound of the range. 
   * @param upper The upper bound of the range.   
@@ -281,6 +273,17 @@ module suitears::math256 {
     };
     
     sum
+  }
+
+  /*
+  * @notice It returns the average between two numbers (a + b) / 2. 
+  * @dev It does not overflow.  
+  * @param x The first operand. 
+  * @param y The second operand. 
+  * @return u256. (a + b) / 2. 
+  */
+  public fun average(x: u256, y: u256): u256 {
+    (x & y) + (x ^ y) / 2
   }
 
   /*
@@ -401,6 +404,11 @@ module suitears::math256 {
       x = x / 10000000000000000000000000000000000000000000000000000000000000000;
       result = result + 64;
     };
+
+    if (x >= 100000000000000000000000000000000) {
+      x = x / 100000000000000000000000000000000;
+      result = result + 32;
+    };    
         
     if (x >= 100000000000000000000000000000000) {
       x = x / 100000000000000000000000000000000;

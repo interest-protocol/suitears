@@ -8,6 +8,7 @@ module suitears::math64 {
   const QUADRATIC_SCALAR: u64 = 1 << 16;
 
   const MAX_U64: u256 = 18446744073709551615;
+  
   const WRAPPING_MAX: u256 = 18446744073709551616; // MAX_U64 + 1
 
   public fun wrapping_add(x: u64, y: u64): u64 {
