@@ -9,7 +9,7 @@ module suitears::quadratic_vesting_wallet {
 
   
   use suitears::owner::{Self, OwnerCap};
-  use suitears::fixed_point_roll::roll_mul_down;
+  use suitears::fixed_point_roll::mul_down;
 
   const ROLL: u64 = 1_000_000_000; // 1e9
 
@@ -180,6 +180,6 @@ module suitears::quadratic_vesting_wallet {
     }
 
     fun quadratic(x: u64, a: u64, b: u64, c: u64): u64 {
-      ((roll_mul_down((math::pow(x, 2) as u128), (a as u128)) + roll_mul_down((b as u128), (x as u128)) + (c as u128)) as u64)
+      mul_down(math::pow(x, 2), a + mul_down(b, x) + c)
     }
 }

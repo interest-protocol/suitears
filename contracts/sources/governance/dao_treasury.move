@@ -11,14 +11,14 @@ module suitears::dao_treasury {
   use sui::tx_context::{Self, TxContext};
 
   use suitears::dao_potato::DaoPotato;
-  use suitears::fixed_point_roll::roll_mul_up;
+  use suitears::fixed_point_roll::mul_up;
   use suitears::request::{Self, destroy_potato, RequestPotato};
   use suitears::linear_vesting_wallet::{Self, Wallet as LinearWallet};
   use suitears::quadratic_vesting_wallet::{Self, Wallet as QuadraticWallet};
 
   friend suitears::dao;
 
-  const FLASH_LOAN_FEE: u128 = 5000000; // 0.5%
+  const FLASH_LOAN_FEE: u64 = 5000000; // 0.5%
 
   const EMismatchCoinType: u64 = 0;
   const EInvalidPublisher: u64 = 1;
@@ -329,7 +329,7 @@ module suitears::dao_treasury {
 
     (
       coin::take<CoinType>(bag::borrow_mut(&mut treasury.coins, type), value, ctx),
-      FlashLoan { initial_balance , type, fee: (roll_mul_up((value as u128), FLASH_LOAN_FEE) as u64) }
+      FlashLoan { initial_balance , type, fee: mul_up(value, FLASH_LOAN_FEE) }
     )
   }
 
