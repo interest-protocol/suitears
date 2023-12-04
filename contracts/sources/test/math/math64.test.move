@@ -87,6 +87,15 @@ module suitears::math64_tests {
   }
 
   #[test]
+  fun test_wrapping_sub() {
+    assert_eq(wrapping_sub(0, 0), 0);
+    assert_eq(wrapping_sub(0, 1), MAX_U64);
+    assert_eq(wrapping_sub(0, MAX_U64), 1);
+    assert_eq(wrapping_sub(3, 1), 2);
+    assert_eq(wrapping_sub(3, MAX_U64), 4);
+  }
+
+  #[test]
   fun test_try_add() {
     let (pred, result) = try_add(5678, 1234);
     assert_eq(pred, true);
