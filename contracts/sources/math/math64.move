@@ -292,13 +292,13 @@ module suitears::math64 {
   * @param nums A vector of numbers.  
   * @return u256. The sum. 
   */
-  public fun sum(nums: &vector<u64>): u64 {
-    let len = vector::length(nums);
+  public fun sum(nums: vector<u64>): u64 {
+    let len = vector::length(&nums);
     let i = 0;
     let sum = 0;
     
     while (i < len){
-      sum = sum + *vector::borrow(nums, i);
+      sum = sum + *vector::borrow(&nums, i);
       i = i + 1;
     };
     
@@ -322,8 +322,8 @@ module suitears::math64 {
   * @param nums A vector of numbers.  
   * @return u64. The average. 
   */
-  public fun average_vector(nums: &vector<u64>): u64{
-    let len = vector::length(nums);
+  public fun average_vector(nums: vector<u64>): u64{
+    let len = vector::length(&nums);
     let sum = sum(nums);
 
     if (len == 0) return 0;
