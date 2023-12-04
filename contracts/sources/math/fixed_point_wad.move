@@ -137,7 +137,7 @@ module suitears::fixed_point_wad {
   * @dev All credits to Remco Bloemen and more information here: https://xn--2-umb.com/22/exp-ln/ 
   * @return Int. The result of x**e. 
   */
-  public fun exp_wad(x: Int): Int {
+  public fun exp(x: Int): Int {
     if (int::lte(x, int::neg_from_u256(42139678854452767551))) return int::zero();
 
     assert!(int::lt(x, int::from_u256(135305999368893231589)), EOverflow);
@@ -145,7 +145,8 @@ module suitears::fixed_point_wad {
     let x =   int::div_down(int::shl(x, 78), int::from_u256(pow(5, 18)));
 
     let k = int::shr(int::add(int::div_down(int::shl(x, 96), int::from_u256(54916777467707473351141471128)), int::from_u256(pow(2, 95))), 96);
-    x = int::sub(x, k);
+
+    x = int::sub(x, int::mul(k, int::from_u256(54916777467707473351141471128)));
 
     let y = int::add(x, int::from_u256(1346386616545796478920950773328));
     y = int::add(int::shr(int::mul(y, x), 96), int::from_u256(57155421227552351082224309758442));
@@ -155,6 +156,7 @@ module suitears::fixed_point_wad {
 
     let q = int::sub(x, int::from_u256(2855989394907223263936484059900));
     q = int::add(int::shr(int::mul(q, x), 96), int::from_u256(50020603652535783019961831881945));
+
     q = int::sub(int::shr(int::mul(q, x), 96), int::from_u256(533845033583426703283633433725380));
     q = int::add(int::shr(int::mul(q, x), 96), int::from_u256(3604857256930695427073651918091429));
     q = int::sub(int::shr(int::mul(q, x), 96), int::from_u256(14423608567350463180887372962807573));
@@ -162,7 +164,7 @@ module suitears::fixed_point_wad {
 
     let r = int::div_down(p, q);
 
-    int::from_u256((int::to_u256(r) * 3822833074963236453042738258902158003155416615667) >> (195 - int::to_u8(k)))
+    int::from_u256((int::to_u256(r) * 3822833074963236453042738258902158003155416615667) >> int::to_u8(int::sub(int::from_u8(195), k)))
   }
 
   /*
@@ -170,13 +172,13 @@ module suitears::fixed_point_wad {
   * @dev All credits to Remco Bloemen and more information here: https://xn--2-umb.com/22/exp-ln/ 
   * @return Int. The result of x**e. 
   */
-  public fun ln_wad(x: Int): Int {
-    assert!(int::is_positive(x), EUndefined);
+  public fun ln(x: Int): Int {
+    assert!(int::is_positive(x) && !int::is_zero(x), EUndefined);
 
     let k = int::sub(int::from_u8(log2_down(int::to_u256(x))), int::from_u256(96));
 
-    x = int::shl(x, (156 - int::to_u8(k)));
-    x = int::neg_from_u256(int::to_u256(x) >> 159);
+    x = int::shl(x, int::to_u8(int::sub(int::from_u8(159), k)));    
+    x = int::from_u256(int::value(x) >> 159);
 
     let p = int::add(x, int::from_u256(3273285459638523848632254066296));
     p = int::add(int::shr(int::mul(p, x), 96), int::from_u256(24828157081833163892658089445524));
@@ -195,9 +197,8 @@ module suitears::fixed_point_wad {
     q = int::add(int::shr(int::mul(q, x), 96), int::from_u256(909429971244387300277376558375));
 
     let r = int::div_down(p, q);
-
     r = int::mul(r,int::from_u256(1677202110996718588342820967067443963516166));
-    r = int::add(r, int::mul(int::from_u256(16597577552685614221487285958193947469193820559219878177908093499208371) , k));
+    r = int::add(r, int::mul(int::from_u256(16597577552685614221487285958193947469193820559219878177908093499208371) , k));           
     r = int::add(r, int::from_u256(600920179829731861736702779321621459595472258049074101567377883020018308));
 
     int::shr(r, 174)

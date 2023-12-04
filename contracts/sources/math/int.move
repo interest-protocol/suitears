@@ -654,8 +654,7 @@ module suitears::int {
       value: if (is_positive(self)) {
         self.value >> rhs
       } else {
-        let mask = (1 << ((256 - (rhs as u16)) as u8)) - 1;
-        (self.value >> rhs) | (mask << ((256 - (rhs as u16)) as u8))
+        (self.value >> rhs) | (MAX_I256_AS_U256 << ((256 - (rhs as u16)) as u8))
       }
     } 
   }     
