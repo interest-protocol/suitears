@@ -29,6 +29,7 @@ module suitears::fixed_point_roll {
   * @dev It returns zero instead of throwing an overflow error. 
   * @param x The first operand. 
   * @param y The second operand. 
+  * @param bool. If the operation was sucessful or not.
   * @return u64. The result of x * y / ROLL. 
   */
   public fun try_mul_down(x: u64, y: u64): (bool, u64) {
@@ -40,6 +41,7 @@ module suitears::fixed_point_roll {
   * @dev It returns zero instead of throwing an overflow error. 
   * @param x The first operand. 
   * @param y The second operand. 
+  * @param bool. If the operation was sucessful or not.
   * @return u64. The result of x * y / ROLL. 
   */
   public fun try_mul_up(x: u64, y: u64): (bool, u64) {
@@ -52,6 +54,7 @@ module suitears::fixed_point_roll {
   * @dev It returns zero instead of throwing an overflow error. 
   * @param x The first operand. 
   * @param y The second operand. 
+  * @param bool. If the operation was sucessful or not.
   * @return u64. The result of x * ROLL / y. 
   */
   public fun try_div_down(x: u64, y: u64): (bool, u64) {
@@ -64,6 +67,7 @@ module suitears::fixed_point_roll {
   * @dev It returns zero instead of throwing an overflow error. 
   * @param x The first operand. 
   * @param y The second operand. 
+  * @param bool. If the operation was sucessful or not.
   * @return u64. The result of x * ROLL / y. 
   */
   public fun try_div_up(x: u64, y: u64): (bool, u64) {
