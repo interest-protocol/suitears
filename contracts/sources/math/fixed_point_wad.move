@@ -1,5 +1,3 @@
-// Fixed Point Math without a Type guard/wrapper  
-// Wad has a higher accurate and assumes values have 18 decimals
 /*
 * @title Fixed Point Roll: A set of functions to operate over u256 numbers with 1e18 precision.
 * @dev It emulates the decimal precison of ERC20 to port some of their advanced math operations such as exp and {exp_wad} and {ln_wad}. 
