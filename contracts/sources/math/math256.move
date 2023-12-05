@@ -16,12 +16,12 @@ module suitears::math256 {
   // === Try Functions do not throw ===
 
   /*
-  * @notice It tries to perform x + y. 
+  * @notice It tries to perform `x` + `y`. 
   * @dev Checks for overflow. 
   * @param x The first operand. 
   * @param y The second operand. 
   * @return bool. If the operation was successful.
-  * @return u256. The result of x + y. If it fails, it will be 0. 
+  * @return u256. The result of `x` + `y`. If it fails, it will be 0. 
   */
   public fun try_add(x: u256, y: u256): (bool, u256) {
     if (x == MAX_U256 && y != 0) return (false, 0);
@@ -33,24 +33,24 @@ module suitears::math256 {
   }
 
   /*
-  * @notice It tries to perform x - y. 
+  * @notice It tries to perform `x` - `y`. 
   * @dev Checks for underflow. 
   * @param x The first operand. 
   * @param y The second operand. 
   * @return bool. If the operation was successful.
-  * @return u256. The result of x - y. If it fails, it will be 0. 
+  * @return u256. The result of `x` - `y`. If it fails, it will be 0. 
   */
   public fun try_sub(x: u256, y: u256): (bool, u256) {
     if (y > x) (false, 0) else (true, x - y)
   }
 
   /*
-  * @notice It tries to perform x * y. 
+  * @notice It tries to perform `x` * `y`. 
   * @dev Checks for overflow. 
   * @param x The first operand. 
   * @param y The second operand. 
   * @return bool. If the operation was successful.
-  * @return u256. The result of x * y. If it fails, it will be 0. 
+  * @return u256. The result of `x` * `y`. If it fails, it will be 0. 
   */
   public fun try_mul(x: u256, y: u256): (bool, u256) {
     if (y == 0) return (true, 0);
@@ -58,7 +58,7 @@ module suitears::math256 {
   }
 
   /*
-  * @notice It tries to perform x / y rounding down. 
+  * @notice It tries to perform `x` / `y rounding down. 
   * @dev Checks for zero division. 
   * @param x The first operand. 
   * @param y The second operand. 
@@ -70,26 +70,26 @@ module suitears::math256 {
   }
 
   /*
-  * @notice It tries to perform x / y rounding up. 
+  * @notice It tries to perform `x` / `y` rounding up. 
   * @dev Checks for zero division. 
   * @param x The first operand. 
   * @param y The second operand. 
   * @return bool. If the operation was successful.
-  * @return u256. The result of x / y. If it fails, it will be 0. 
+  * @return u256. The result of `x` / `y`. If it fails, it will be 0. 
   */
   public fun try_div_up(x: u256, y: u256): (bool, u256) {
     if (y == 0) (false, 0) else (true, div_up(x, y))
   }
 
   /*
-  * @notice It tries to perform x * y / z rounding down. 
+  * @notice It tries to perform `x` * `y` / `z` rounding down. 
   * @dev Checks for zero division. 
   * @dev Checks for overflow. 
   * @param x The first operand. 
   * @param y The second operand. 
   * @param z The divisor. 
   * @return bool. If the operation was successful.
-  * @return u256. The result of x * y / z. If it fails, it will be 0. 
+  * @return u256. The result of `x` * `y` / `z`. If it fails, it will be 0. 
   */
   public fun try_mul_div_down(x: u256, y: u256, z: u256): (bool, u256) {
     if (z == 0) return (false, 0);
@@ -100,14 +100,14 @@ module suitears::math256 {
   }
 
   /*
-  * @notice It tries to perform x * y / z rounding up. 
+  * @notice It tries to perform `x` * `y` / `z` rounding up. 
   * @dev Checks for zero division. 
   * @dev Checks for overflow. 
   * @param x The first operand. 
   * @param y The second operand. 
   * @param z The divisor. 
   * @return bool. If the operation was successful.
-  * @return u256. The result of x * y / z. If it fails, it will be 0. 
+  * @return u256. The result of `x` * `y` / `z`. If it fails, it will be 0. 
   */
   public fun try_mul_div_up(x: u256, y: u256, z: u256): (bool, u256) {
     if (z == 0) return (false, 0);
@@ -118,12 +118,12 @@ module suitears::math256 {
   }
 
   /*
-  * @notice It tries to perform x % y. 
+  * @notice It tries to perform `x` % `y`. 
   * @dev Checks for zero division. 
   * @param x The first operand. 
   * @param y The second operand. 
   * @return bool. If the operation was successful.
-  * @return u256. The result of x % y. If it fails, it will be 0. 
+  * @return u128. The result of `x` % `y`. If it fails, it will be 0. 
   */
   public fun try_mod(x: u256, y: u256): (bool, u256) {
     if (y == 0) (false, 0) else (true, x % y)
@@ -132,58 +132,58 @@ module suitears::math256 {
   // === These functions will throw on overflow/underflow/zero division ===  
 
   /*
-  * @notice It performs x * y. 
+  * @notice It performs `x` * `y`. 
   * @dev It will throw on overflow. 
   * @param x The first operand. 
   * @param y The second operand. 
-  * @return u256. The result of x * y. 
+  * @return u256. The result of `x` * `y`. 
   */
   public fun mul(x: u256, y: u256): u256 {
     x * y
   }
 
   /*
-  * @notice It performs x / y rounding down. 
+  * @notice It performs `x` / `y` rounding down. 
   * @dev It will throw on zero division. 
   * @param x The first operand. 
   * @param y The second operand. 
-  * @return u256. The result of x / y. 
+  * @return u256. The result of `x` / `y`. 
   */  
   public fun div_down(x: u256, y: u256): u256 {
     x / y
   }
 
   /*
-  * @notice It performs x / y rounding up. 
+  * @notice It performs `x` / `y` rounding up. 
   * @dev It will throw on zero division. 
   * @dev It does not overflow. 
   * @param x The first operand. 
   * @param y The second operand. 
-  * @return u256. The result of x / y. 
+  * @return u256. The result of `x` / `y`. 
   */  
   public fun div_up(x: u256, y: u256): u256 {
     if (x == 0) 0 else 1 + (x - 1) / y
   }  
 
   /*
-  * @notice It performs x * y / z rounding down. 
+  * @notice It performs `x` * `y` / `z` rounding down. 
   * @dev It will throw on zero division. 
   * @param x The first operand. 
-  * @param y The second operand. 
-  * @param z The divisor.  
-  * @return u256. The result of x * y / z. 
+  * @param y The second operand.  
+  * @param z The divisor.
+  * @return u256. The result of `x` * `y` / `z`. 
   */
   public fun mul_div_down(x: u256, y: u256, z: u256): u256 {
     x * y / z
   }
 
   /*
-  * @notice It performs x * y / z rounding up. 
+  * @notice It performs `x` * `y` / `z` rounding up. 
   * @dev It will throw on zero division. 
   * @param x The first operand. 
   * @param y The second operand. 
   * @param z The divisor.  
-  * @return u256. The result of x * y / z. 
+  * @return u256. The result of `x` * `y` / `z`. 
   */
   public fun mul_div_up(x: u256, y: u256, z: u256): u256 {
     let r = mul_div_down(x, y, z);
@@ -211,7 +211,7 @@ module suitears::math256 {
   }  
 
   /*
-  * @notice Clamps x between the range of [lower, upper].
+  * @notice Clamps `x` between the range of [lower, upper].
   * @param x The operand. 
   * @param lower The lower bound of the range. 
   * @param upper The upper bound of the range.   
@@ -236,10 +236,10 @@ module suitears::math256 {
   }
 
   /*
-  * @notice Performs n**e.
+  * @notice Performs n^e.
   * @param n The base. 
   * @param e The exponent.  
-  * @return u256. The result of n**e. 
+  * @return u256. The result of n^e. 
   */
   public fun pow(n: u256, e: u256): u256 {
       if (e == 0) {
@@ -276,18 +276,20 @@ module suitears::math256 {
   }
 
   /*
-  * @notice It returns the average between two numbers (a + b) / 2. 
-  * @dev It does not overflow.  
+  * @notice It returns the average between two numbers (`x` + `y`) / 2.
+  * @dev It does not overflow.
   * @param x The first operand. 
   * @param y The second operand. 
-  * @return u256. (a + b) / 2. 
+  * @return u256. (`x` + `y`) / 2. 
   */
   public fun average(x: u256, y: u256): u256 {
     (x & y) + (x ^ y) / 2
   }
 
+
+
   /*
-  * @notice Calculates the average of vector of numbers sum of vector / lengh of vector.
+  * @notice Calculates the average of the vector of numbers sum of vector/length of vector.
   * @param nums A vector of numbers.  
   * @return u256. The average. 
   */
@@ -324,7 +326,7 @@ module suitears::math256 {
   }
 
   /*
-  * @notice Returns the square root of a number. If the number is not a perfect square, the x is rounded up.
+  * @notice Returns the square root of `x` number. If the number is not a perfect square, the `x` is rounded up.
   * @dev Inspired by Henry S. Warren, Jr.'s "Hacker's Delight" (Chapter 11).
   * @param x The operand.  
   * @return u256. The square root of x rounding up. 
