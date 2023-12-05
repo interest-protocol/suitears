@@ -133,9 +133,9 @@ module suitears::fixed_point_wad {
   }
 
   /*
-  * @notice x**e. 
+  * @notice e^x. 
   * @dev All credits to Remco Bloemen and more information here: https://xn--2-umb.com/22/exp-ln/ 
-  * @return Int. The result of x**e. 
+  * @return Int. The result of e^x`. 
   *
   * aborts-if
   *   - `x` is larger than 135305999368893231589. 
