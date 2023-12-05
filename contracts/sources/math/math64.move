@@ -21,12 +21,12 @@ module suitears::math64 {
   // === Wrap Functions overflow and underflow without throwing. ===  
 
   /*
-  * @notice It performs x + y. 
-  * @dev It will wrap around the MAX_U64. 
-  * @dev MAX_U64 + 1 = 0.
+  * @notice It performs `x` + `y`. 
+  * @dev It will wrap around the `MAX_U64`. 
+  * @dev `MAX_U64` + 1 = 0.
   * @param x The first operand. 
   * @param y The second operand. 
-  * @return u64. The result of x + y. 
+  * @return u64. The result of `x` + `y`. 
   */
   public fun wrapping_add(x: u64, y: u64): u64 {
     (int::wrap(
@@ -36,12 +36,12 @@ module suitears::math64 {
   }
 
   /*
-  * @notice It performs x - y. 
+  * @notice It performs `x` - `y`. 
   * @dev It will wrap around zero.
-  * @dev 0 - 1 = MAX_U64
+  * @dev 0 - 1 = `MAX_U64`
   * @param x The first operand. 
   * @param y The second operand. 
-  * @return u64. The result of x - y. 
+  * @return u64. The result of `x` - `y`. 
   */
   public fun wrapping_sub(x: u64, y: u64): u64 {
     (int::wrap(
@@ -51,12 +51,12 @@ module suitears::math64 {
   }
 
   /*
-  * @notice It performs x * y. 
+  * @notice It performs `x` * `y`. 
   * @dev It will wrap around. 
-  * @dev MAX_U64 * MAX_U64 = 0;
+  * @dev `MAX_U64` * `MAX_U64` = 0;
   * @param x The first operand. 
   * @param y The second operand. 
-  * @return u64. The result of x * y. 
+  * @return u64. The result of `x` * `y`. 
   */
   public fun wrapping_mul(x: u64, y: u64): u64 {
     (int::wrap(
@@ -68,12 +68,12 @@ module suitears::math64 {
   // === Try Functions do not throw ===    
 
   /*
-  * @notice It tries to perform x + y. 
+  * @notice It tries to perform `x` + `y`. 
   * @dev Checks for overflow. 
   * @param x The first operand. 
   * @param y The second operand. 
   * @return bool. If the operation was successful.
-  * @return u64. The result of x + y. If it fails, it will be 0. 
+  * @return u64. The result of `x` + `y`. If it fails, it will be 0. 
   */
   public fun try_add(x: u64, y: u64): (bool, u64) {
     let r = (x as u256) + (y as u256);
@@ -81,24 +81,24 @@ module suitears::math64 {
   }
 
   /*
-  * @notice It tries to perform x - y. 
+  * @notice It tries to perform `x` - `y`. 
   * @dev Checks for underflow. 
   * @param x The first operand. 
   * @param y The second operand. 
   * @return bool. If the operation was successful.
-  * @return u64. The result of x - y. If it fails, it will be 0. 
+  * @return u64. The result of `x` - `y`. If it fails, it will be 0. 
   */
   public fun try_sub(x: u64, y: u64): (bool, u64) {
     if (y > x) (false, 0) else (true, x - y)
   }
 
   /*
-  * @notice It tries to perform x * y. 
+  * @notice It tries to perform `x` * `y`. 
   * @dev Checks for overflow. 
   * @param x The first operand. 
   * @param y The second operand. 
   * @return bool. If the operation was successful.
-  * @return u64. The result of x * y. If it fails, it will be 0. 
+  * @return u64. The result of `x` * `y`. If it fails, it will be 0. 
   */
   public fun try_mul(x: u64, y: u64): (bool, u64) {
     let (pred, r) = math256::try_mul((x as u256), (y as u256));
@@ -106,7 +106,7 @@ module suitears::math64 {
   }
 
   /*
-  * @notice It tries to perform x / y rounding down. 
+  * @notice It tries to perform `x` / `y rounding down. 
   * @dev Checks for zero division. 
   * @param x The first operand. 
   * @param y The second operand. 
@@ -118,26 +118,26 @@ module suitears::math64 {
   }
 
   /*
-  * @notice It tries to perform x / y rounding up. 
+  * @notice It tries to perform `x` / `y` rounding up. 
   * @dev Checks for zero division. 
   * @param x The first operand. 
   * @param y The second operand. 
   * @return bool. If the operation was successful.
-  * @return u64. The result of x / y. If it fails, it will be 0. 
+  * @return u64. The result of `x` / `y`. If it fails, it will be 0. 
   */
   public fun try_div_up(x: u64, y: u64): (bool, u64) {
     if (y == 0) (false, 0) else (true, div_up(x, y))
   }
 
   /*
-  * @notice It tries to perform x * y / z rounding down. 
+  * @notice It tries to perform `x` * `y` / `z` rounding down. 
   * @dev Checks for zero division. 
   * @dev Checks for overflow. 
   * @param x The first operand. 
   * @param y The second operand. 
   * @param z The divisor. 
   * @return bool. If the operation was successful.
-  * @return u64. The result of x * y / z. If it fails, it will be 0. 
+  * @return u64. The result of `x` * `y` / `z`. If it fails, it will be 0. 
   */
   public fun try_mul_div_down(x: u64, y: u64, z: u64): (bool, u64) {
     let (pred, r) = math256::try_mul_div_down((x as u256), (y as u256), (z as u256));
@@ -145,14 +145,14 @@ module suitears::math64 {
   }
 
   /*
-  * @notice It tries to perform x * y / z rounding up. 
+  * @notice It tries to perform `x` * `y` / `z` rounding up. 
   * @dev Checks for zero division. 
   * @dev Checks for overflow. 
   * @param x The first operand. 
   * @param y The second operand. 
   * @param z The divisor. 
   * @return bool. If the operation was successful.
-  * @return u64. The result of x * y / z. If it fails, it will be 0. 
+  * @return u64. The result of `x` * `y` / `z`. If it fails, it will be 0. 
   */
   public fun try_mul_div_up(x: u64, y: u64, z: u64): (bool, u64) {
     let (pred, r) = math256::try_mul_div_up((x as u256), (y as u256), (z as u256));
@@ -160,12 +160,12 @@ module suitears::math64 {
   }
 
   /*
-  * @notice It tries to perform x % y. 
+  * @notice It tries to perform `x` % `y`. 
   * @dev Checks for zero division. 
   * @param x The first operand. 
   * @param y The second operand. 
   * @return bool. If the operation was successful.
-  * @return u128. The result of x % y. If it fails, it will be 0. 
+  * @return u128. The result of `x` % `y`. If it fails, it will be 0. 
   */
   public fun try_mod(x: u64, y: u64): (bool, u64) {
     if (y == 0) (false, 0) else (true, x % y)
@@ -174,34 +174,34 @@ module suitears::math64 {
   // === These functions will throw on overflow/underflow/zero division ===  
 
   /*
-  * @notice It performs x * y. 
+  * @notice It performs `x` * `y`. 
   * @dev It will throw on overflow. 
   * @param x The first operand. 
   * @param y The second operand. 
-  * @return u64. The result of x * y. 
+  * @return u64. The result of `x` * `y`. 
   */
   public fun mul(x: u64, y: u64): u64 {
     x * y
   }
 
   /*
-  * @notice It performs x / y rounding down. 
+  * @notice It performs `x` / `y` rounding down. 
   * @dev It will throw on zero division. 
   * @param x The first operand. 
   * @param y The second operand. 
-  * @return u64. The result of x / y. 
+  * @return u64. The result of `x` / `y`. 
   */ 
   public fun div_down(x: u64, y: u64): u64 {
     x / y
   }
 
   /*
-  * @notice It performs x / y rounding up. 
+  * @notice It performs `x` / `y` rounding up. 
   * @dev It will throw on zero division. 
   * @dev It does not overflow. 
   * @param x The first operand. 
   * @param y The second operand. 
-  * @return u64. The result of x / y. 
+  * @return u64. The result of `x` / `y`. 
   */  
   public fun div_up(a: u64, b: u64): u64 {
     // (a + b - 1) / b can overflow on addition, so we distribute.
@@ -209,24 +209,24 @@ module suitears::math64 {
   }  
 
   /*
-  * @notice It performs x * y / z rounding down. 
+  * @notice It performs `x` * `y` / `z` rounding down. 
   * @dev It will throw on zero division. 
   * @param x The first operand. 
   * @param y The second operand.  
   * @param z The divisor.
-  * @return u64. The result of x * y / z. 
+  * @return u64. The result of `x` * `y` / `z`. 
   */
   public fun mul_div_down(x: u64, y: u64, z: u64): u64 {
     (math256::mul_div_down((x as u256), (y as u256), (z as u256)) as u64)
   }
 
   /*
-  * @notice It performs x * y / z rounding up. 
+  * @notice It performs `x` * `y` / `z` rounding up. 
   * @dev It will throw on zero division. 
   * @param x The first operand. 
   * @param y The second operand. 
   * @param z The divisor.  
-  * @return u64. The result of x * y / z. 
+  * @return u64. The result of `x` * `y` / `z`. 
   */
   public fun mul_div_up(x: u64, y: u64, z: u64): u64 {
     (math256::mul_div_up((x as u256), (y as u256), (z as u256)) as u64)
@@ -253,7 +253,7 @@ module suitears::math64 {
   }
 
   /*
-  * @notice Clamps x between the range of [lower, upper].
+  * @notice Clamps `x` between the range of [lower, upper].
   * @param x The operand. 
   * @param lower The lower bound of the range. 
   * @param upper The upper bound of the range.   
@@ -278,17 +278,17 @@ module suitears::math64 {
   }  
 
   /*
-  * @notice Performs n**e.
+  * @notice Performs n^e.
   * @param n The base. 
   * @param e The exponent.  
-  * @return u64. The result of n**e. 
+  * @return u64. The result of n^e. 
   */
   public fun pow(x: u64, n: u64): u64 {
     (math256::pow((x as u256), (n as u256)) as u64)
   }
 
   /*
-  * @notice Adds all xs in a vector.
+  * @notice Adds all x in `nums` in a vector.
   * @param nums A vector of numbers.  
   * @return u256. The sum. 
   */
@@ -306,11 +306,11 @@ module suitears::math64 {
   }
 
   /*
-  * @notice It returns the average between two numbers (a + b) / 2.
+  * @notice It returns the average between two numbers (`x` + `y`) / 2.
   * @dev It does not overflow.
   * @param x The first operand. 
   * @param y The second operand. 
-  * @return u64. (a + b) / 2. 
+  * @return u64. (`x` + `y`) / 2. 
   */
   public fun average(x: u64, y: u64): u64 {
     // (a + b) / 2 can overflow.
@@ -318,7 +318,7 @@ module suitears::math64 {
   }
 
   /*
-  * @notice Calculates the average of vector of numbers sum of vector / lengh of vector.
+  * @notice Calculates the average of the vector of numbers sum of vector/length of vector.
   * @param nums A vector of numbers.  
   * @return u64. The average. 
   */
@@ -332,17 +332,17 @@ module suitears::math64 {
   }
   
   /*
-  * @notice Returns the square root of a number. If the number is not a perfect square, the x is rounded down.
+  * @notice Returns the square root of `x` number. If the number is not a perfect square, the x is rounded down.
   * @dev Inspired by Henry S. Warren, Jr.'s "Hacker's Delight" (Chapter 11).
   * @param x The operand.  
   * @return u64. The square root of x rounding down. 
   */    
-  public fun sqrt_down(a: u64): u64 {
-    (math256::sqrt_down((a as u256)) as u64)
+  public fun sqrt_down(x: u64): u64 {
+    (math256::sqrt_down((x as u256)) as u64)
   }
 
   /*
-  * @notice Returns the square root of a number. If the number is not a perfect square, the x is rounded up.
+  * @notice Returns the square root of `x` number. If the number is not a perfect square, the `x` is rounded up.
   * @dev Inspired by Henry S. Warren, Jr.'s "Hacker's Delight" (Chapter 11).
   * @param x The operand.  
   * @return u64. The square root of x rounding up. 
