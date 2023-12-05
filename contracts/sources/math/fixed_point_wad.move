@@ -1,6 +1,6 @@
 /*
-* @title Fixed Point Roll: A set of functions to operate over u256 numbers with 1e18 precision.
-* @dev It emulates the decimal precison of ERC20 to port some of their advanced math operations such as exp and {exp_wad} and {ln_wad}. 
+* @title Fixed Point WAD: A set of functions to operate over u256 numbers with 1e18 precision.
+* @dev It emulates the decimal precision of ERC20 to port some of their advanced math operations such as exp and {exp} and {ln}. 
 */
 module suitears::fixed_point_wad {
   // === Imports ===  
@@ -15,7 +15,7 @@ module suitears::fixed_point_wad {
 
   // === Errors ===
 
-  // @dev if a x value would overflow in the exp - E.g. x**e
+  // @dev It is thrown in values that would overflow in the {exp} function.
   const EOverflow: u64 = 0;
   // @dev when the natural log function receives a negative value
   const EUndefined: u64 = 1;
@@ -33,100 +33,100 @@ module suitears::fixed_point_wad {
   // === Try Functions ===    
 
   /*
-  * @notice It tries to x * y / WAD rounding down.
+  * @notice It tries to `x` * `y` / `WAD` rounding down.
   * @dev It returns zero instead of throwing an overflow error. 
   * @param x The first operand. 
   * @param y The second operand. 
-  * @param bool. If the operation was sucessful or not.
-  * @return u256. The result of x * y / WAD. 
+  * @param bool. If the operation was successful or not.
+  * @return u256. The result of `x` * `y` / `WAD`. 
   */
   public fun try_mul_down(x: u256, y: u256): (bool, u256)  {
     math256::try_mul_div_down(x, y, WAD)
   }
 
   /*
-  * @notice It tries to x * y / WAD rounding up.
+  * @notice It tries to `x` * `y` / `WAD` rounding up.
   * @dev It returns zero instead of throwing an overflow error. 
   * @param x The first operand. 
   * @param y The second operand. 
-  * @param bool. If the operation was sucessful or not.
-  * @return u256. The result of x * y / WAD. 
+  * @param bool. If the operation was successful or not.
+  * @return u256. The result of `x` * `y` / `WAD`. 
   */
   public fun try_mul_up(x: u256, y: u256): (bool, u256)  {
     math256::try_mul_div_up(x, y, WAD) 
   }
 
   /*
-  * @notice It tries to x * WAD / y rounding down.
-  * @dev It will return 0 if y is zero.
+  * @notice It tries to `x` * `WAD` / `y` rounding down.
+  * @dev It will return 0 if `y` is zero.
   * @dev It returns zero instead of throwing an overflow error. 
   * @param x The first operand. 
   * @param y The second operand. 
-  * @param bool. If the operation was sucessful or not.
-  * @return u256. The result of x * WAD / y. 
+  * @param bool. If the operation was successful or not.
+  * @return u256. The result of `x` * `WAD` / `y`. 
   */
   public fun try_div_down(x: u256, y: u256): (bool, u256)  {
     math256::try_mul_div_down(x, WAD, y)
   }
 
   /*
-  * @notice It tries to x * WAD / y rounding up.
-  * @dev It will return 0 if y is zero.
+  * @notice It tries to `x` * `WAD` / `y` rounding up.
+  * @dev It will return 0 if `y` is zero.
   * @dev It returns zero instead of throwing an overflow error. 
   * @param x The first operand. 
   * @param y The second operand. 
-  * @param bool. If the operation was sucessful or not.
-  * @return u256. The result of x * WAD / y. 
+  * @param bool. If the operation was successful or not.
+  * @return u256. The result of `x` * `WAD` / `y`. 
   */
   public fun try_div_up(x: u256, y: u256): (bool, u256) {
     math256::try_mul_div_up(x, WAD, y)
   }
 
   /*
-  * @notice x * y / WAD rounding down.
+  * @notice `x` * `y` / `WAD` rounding down.
   * @param x The first operand. 
   * @param y The second operand. 
-  * @return u256. The result of x * y / WAD. 
+  * @return u256. The result of `x` * `y` / `WAD`. 
   */
   public fun mul_down(x: u256, y: u256): u256 {
     math256::mul_div_down(x, y, WAD)
   }
 
   /*
-  * @notice x * y / WAD rounding up.
+  * @notice `x` * `y` / `WAD` rounding up.
   * @param x The first operand. 
   * @param y The second operand. 
-  * @return u256. The result of x * y / WAD. 
+  * @return u256. The result of `x` * `y` / `WAD`. 
   */
   public fun mul_up(x: u256, y: u256): u256 {
     math256::mul_div_up(x, y, WAD) 
   }
 
   /*
-  * @notice x * WAD / y rounding down.
+  * @notice `x` * `WAD` / `y` rounding down.
   * @param x The first operand. 
   * @param y The second operand. 
-  * @return u256. The result of x * WAD / y. 
+  * @return u256. The result of `x` * `WAD` / `y`. 
   */
   public fun div_down(x: u256, y: u256): u256 {
     math256::mul_div_down(x, WAD, y)
   }
 
   /*
-  * @notice x * WAD / y rounding up.
+  * @notice `x` * `WAD` / `y` rounding up.
   * @param x The first operand. 
   * @param y The second operand. 
-  * @return u256. The result of x * WAD / y. 
+  * @return u256. The result of `x` * `WAD` / `y`. 
   */
   public fun div_up(x: u256, y: u256): u256 {
     math256::mul_div_up(x, WAD, y)
   }
 
   /*
-  * @notice It converts a value to a WAD, a number with a precision of 1e18.
+  * @notice It converts `x` precision to a `WAD`, a number with a precision of 1e9.
   * @param x The value to be converted. 
   * @param y The current decimal scalar of the x. 
-  * @return u256. The result of x * WAD / decimal_factor. 
+  * @return u256. The result of `x` * `WAD` / `decimal_factor`. 
   */
   public fun to_wad(x: u256, decimal_factor: u256): u256 {
     math256::mul_div_down(x, WAD, (decimal_factor as u256))
@@ -136,6 +136,9 @@ module suitears::fixed_point_wad {
   * @notice x**e. 
   * @dev All credits to Remco Bloemen and more information here: https://xn--2-umb.com/22/exp-ln/ 
   * @return Int. The result of x**e. 
+  *
+  * aborts-if
+  *   - `x` is larger than 135305999368893231589. 
   */
   public fun exp(x: Int): Int {
     if (int::lte(x, int::neg_from_u256(42139678854452767551))) return int::zero();
@@ -170,7 +173,10 @@ module suitears::fixed_point_wad {
   /*
   * @notice ln(x). 
   * @dev All credits to Remco Bloemen and more information here: https://xn--2-umb.com/22/exp-ln/ 
-  * @return Int. The result of x**e. 
+  * @return Int. The result of ln(x). 
+  *
+  * aborts-if
+  *   - `x` is negative or zero. 
   */
   public fun ln(x: Int): Int {
     assert!(int::is_positive(x) && !int::is_zero(x), EUndefined);
