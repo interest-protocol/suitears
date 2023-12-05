@@ -18,12 +18,12 @@ module suitears::math128 {
   // === Try Functions do not throw ===  
 
   /*
-  * @notice It tries to perform x + y. 
+  * @notice It tries to perform `x` + `y`. 
   * @dev Checks for overflow. 
   * @param x The first operand. 
   * @param y The second operand. 
   * @return bool. If the operation was successful.
-  * @return u128. The result of x + y. If it fails, it will be 0. 
+  * @return u128. The result of `x` + `y`. If it fails, it will be 0. 
   */
   public fun try_add(x: u128, y: u128): (bool, u128) {
     let c = (x as u256) + (y as u256);
@@ -31,24 +31,24 @@ module suitears::math128 {
   }
 
   /*
-  * @notice It tries to perform x - y. 
+  * @notice It tries to perform `x` - `y`. 
   * @dev Checks for underflow. 
   * @param x The first operand. 
   * @param y The second operand. 
   * @return bool. If the operation was successful.
-  * @return u128. The result of x - y. If it fails, it will be 0. 
+  * @return u128. The result of `x` - `y`. If it fails, it will be 0. 
   */
   public fun try_sub(x: u128, y: u128): (bool, u128) {
     if (y > x) (false, 0) else (true, x - y)
   }
 
   /*
-  * @notice It tries to perform x * y. 
+  * @notice It tries to perform `x` * `y`. 
   * @dev Checks for overflow. 
   * @param x The first operand. 
   * @param y The second operand. 
   * @return bool. If the operation was successful.
-  * @return u128. The result of x * y. If it fails, it will be 0. 
+  * @return u128. The result of `x` * `y`. If it fails, it will be 0. 
   */
   public fun try_mul(x: u128, y: u128): (bool, u128) {
     let (pred, c) = math256::try_mul((x as u256), (y as u256));
@@ -56,7 +56,7 @@ module suitears::math128 {
   }
 
   /*
-  * @notice It tries to perform x / y rounding down. 
+  * @notice It tries to perform `x` / `y rounding down. 
   * @dev Checks for zero division. 
   * @param x The first operand. 
   * @param y The second operand. 
@@ -68,26 +68,26 @@ module suitears::math128 {
   }
 
   /*
-  * @notice It tries to perform x / y rounding up. 
+  * @notice It tries to perform `x` / `y` rounding up. 
   * @dev Checks for zero division. 
   * @param x The first operand. 
   * @param y The second operand. 
   * @return bool. If the operation was successful.
-  * @return u128. The result of x / y. If it fails, it will be 0. 
+  * @return u128. The result of `x` / `y`. If it fails, it will be 0. 
   */
   public fun try_div_up(x: u128, y: u128): (bool, u128) {
     if (y == 0) (false, 0) else (true, div_up(x, y))
   }
 
   /*
-  * @notice It tries to perform x * y / z rounding down. 
+  * @notice It tries to perform `x` * `y` / `z` rounding down. 
   * @dev Checks for zero division. 
   * @dev Checks for overflow. 
   * @param x The first operand. 
   * @param y The second operand. 
   * @param z The divisor. 
   * @return bool. If the operation was successful.
-  * @return u128. The result of x * y / z. If it fails, it will be 0. 
+  * @return u128. The result of `x` * `y` / `z`. If it fails, it will be 0. 
   */
   public fun try_mul_div_down(x: u128, y: u128, z: u128): (bool, u128) {
     let (pred, r) = math256::try_mul_div_down((x as u256), (y as u256), (z as u256));
@@ -95,14 +95,14 @@ module suitears::math128 {
   }
 
   /*
-  * @notice It tries to perform x * y / z rounding up. 
+  * @notice It tries to perform `x` * `y` / `z` rounding up. 
   * @dev Checks for zero division. 
   * @dev Checks for overflow. 
   * @param x The first operand. 
   * @param y The second operand. 
   * @param z The divisor. 
   * @return bool. If the operation was successful.
-  * @return u128. The result of x * y / z. If it fails, it will be 0. 
+  * @return u128. The result of `x` * `y` / `z`. If it fails, it will be 0. 
   */
   public fun try_mul_div_up(x: u128, y: u128, z: u128): (bool, u128) {
     let (pred, r) = math256::try_mul_div_up((x as u256), (y as u256), (z as u256));
@@ -110,12 +110,12 @@ module suitears::math128 {
   }
 
   /*
-  * @notice It tries to perform x % y. 
+  * @notice It tries to perform `x` % `y`. 
   * @dev Checks for zero division. 
   * @param x The first operand. 
   * @param y The second operand. 
   * @return bool. If the operation was successful.
-  * @return u128. The result of x % y. If it fails, it will be 0. 
+  * @return u128. The result of `x` % `y`. If it fails, it will be 0. 
   */
   public fun try_mod(x: u128, y: u128): (bool, u128) {
     if (y == 0) (false, 0) else (true, x % y)
@@ -124,34 +124,34 @@ module suitears::math128 {
   // === These functions will throw on overflow/underflow/zero division ===  
 
   /*
-  * @notice It performs x * y. 
+  * @notice It performs `x` * `y`. 
   * @dev It will throw on overflow. 
   * @param x The first operand. 
   * @param y The second operand. 
-  * @return u128. The result of x * y. 
+  * @return u128. The result of `x` * `y`. 
   */
   public fun mul(x: u128, y: u128): u128 {
     x * y
   }
 
   /*
-  * @notice It performs x / y rounding down. 
+  * @notice It performs `x` / `y` rounding down. 
   * @dev It will throw on zero division. 
   * @param x The first operand. 
   * @param y The second operand. 
-  * @return u128. The result of x / y. 
-  */  
+  * @return u128. The result of `x` / `y`. 
+  */   
   public fun div_down(x: u128, y: u128): u128 {
     x / y
   }
 
   /*
-  * @notice It performs x / y rounding up. 
+  * @notice It performs `x` / `y` rounding up. 
   * @dev It will throw on zero division. 
   * @dev It does not overflow. 
   * @param x The first operand. 
   * @param y The second operand. 
-  * @return u128. The result of x / y. 
+  * @return u128. The result of `x` / `y`. 
   */  
   public fun div_up(a: u128, b: u128): u128 {
     // (a + b - 1) / b can overflow on addition, so we distribute.
@@ -159,24 +159,24 @@ module suitears::math128 {
   }  
 
   /*
-  * @notice It performs x * y / z rounding down. 
+  * @notice It performs `x` * `y` / `z` rounding down. 
   * @dev It will throw on zero division. 
   * @param x The first operand. 
   * @param y The second operand.  
   * @param z The divisor.
-  * @return u128. The result of x * y / z. 
+  * @return u128. The result of `x` * `y` / `z`. 
   */
   public fun mul_div_down(x: u128, y: u128, z: u128): u128 {
     (math256::mul_div_down((x as u256), (y as u256), (z as u256)) as u128)
   }
 
   /*
-  * @notice It performs x * y / z rounding up. 
+  * @notice It performs `x` * `y` / `z` rounding up. 
   * @dev It will throw on zero division. 
   * @param x The first operand. 
   * @param y The second operand. 
   * @param z The divisor.  
-  * @return u128. The result of x * y / z. 
+  * @return u128. The result of `x` * `y` / `z`. 
   */
   public fun mul_div_up(x: u128, y: u128, z: u128): u128 {
     (math256::mul_div_up((x as u256), (y as u256), (z as u256)) as u128)
@@ -202,8 +202,8 @@ module suitears::math128 {
     if (x >= y) x else y
   }  
 
-  /*
-  * @notice Clamps x between the range of [lower, upper].
+   /*
+  * @notice Clamps `x` between the range of [lower, upper].
   * @param x The operand. 
   * @param lower The lower bound of the range. 
   * @param upper The upper bound of the range.   
@@ -217,7 +217,7 @@ module suitears::math128 {
   * @notice Performs |x - y|.
   * @param x The first operand. 
   * @param y The second operand.  
-  * @return u256. The difference. 
+  * @return u128. The difference. 
   */
   public fun diff(x: u128, y: u128): u128 {
     if (x > y) {
@@ -228,17 +228,17 @@ module suitears::math128 {
   }
 
   /*
-  * @notice Performs n**e.
+  * @notice Performs n^e.
   * @param n The base. 
   * @param e The exponent.  
-  * @return u128. The result of n**e. 
+  * @return u128. The result of n^e. 
   */
   public fun pow(n: u128, e: u128): u128 {
     (math256::pow((n as u256), (e as u256)) as u128)
   }
 
-  /*
-  * @notice Adds all xs in a vector.
+   /*
+  * @notice Adds all x in `nums` in a vector.
   * @param nums A vector of numbers.  
   * @return u256. The sum. 
   */
@@ -256,11 +256,11 @@ module suitears::math128 {
   }
 
   /*
-  * @notice It returns the average between two numbers (a + b) / 2.
+  * @notice It returns the average between two numbers (`x` + `y`) / 2.
   * @dev It does not overflow.
   * @param x The first operand. 
   * @param y The second operand. 
-  * @return u128. (a + b) / 2. 
+  * @return u128. (`x` + `y`) / 2. 
   */
   public fun average(a: u128, b: u128): u128 {
     // (a + b) / 2 can overflow.
@@ -268,7 +268,7 @@ module suitears::math128 {
   }
 
   /*
-  * @notice Calculates the average of vector of numbers sum of vector / lengh of vector.
+  * @notice Calculates the average of the vector of numbers sum of vector/length of vector.
   * @param nums A vector of numbers.  
   * @return u128. The average. 
   */
@@ -283,7 +283,7 @@ module suitears::math128 {
   }
   
   /*
-  * @notice Returns the square root of a number. If the number is not a perfect square, the x is rounded down.
+  * @notice Returns the square root of `x` number. If the number is not a perfect square, the x is rounded down.
   * @dev Inspired by Henry S. Warren, Jr.'s "Hacker's Delight" (Chapter 11).
   * @param x The operand.  
   * @return u128. The square root of x rounding down. 
@@ -292,8 +292,8 @@ module suitears::math128 {
     (math256::sqrt_down((a as u256)) as u128)
   }
 
-  /*
-  * @notice Returns the square root of a number. If the number is not a perfect square, the x is rounded up.
+   /*
+  * @notice Returns the square root of `x` number. If the number is not a perfect square, the `x` is rounded up.
   * @dev Inspired by Henry S. Warren, Jr.'s "Hacker's Delight" (Chapter 11).
   * @param x The operand.  
   * @return u128. The square root of x rounding up. 
@@ -311,7 +311,7 @@ module suitears::math128 {
    math256::log2_down((x as u256))
   }
 
-  /*
+   /*
   * @notice Returns the log2(x) rounding up.
   * @param x The operand.  
   * @return u128. Log2(x). 
@@ -324,7 +324,7 @@ module suitears::math128 {
   * @notice Returns the log10(x) rounding down.
   * @param x The operand.  
   * @return u128. Log10(x). 
-  */ 
+  */
   public fun log10_down(x: u128): u8 {
     math256::log10_down((x as u256))
   }
@@ -333,7 +333,7 @@ module suitears::math128 {
   * @notice Returns the log10(x) rounding up.
   * @param x The operand.  
   * @return u128. Log10(x). 
-  */ 
+  */
   public fun log10_up(x: u128): u8 {
     math256::log10_up((x as u256))
   }
