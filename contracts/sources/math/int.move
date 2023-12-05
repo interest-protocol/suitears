@@ -698,7 +698,7 @@ module suitears::int {
   // === Friend only function ===  
 
   /*
-  * @notice It wraps the self around the max value.  
+  * @notice It wraps the `self` around the max value.  
   * @param self An Int struct.  
   * @param max The value that the self will wrap around. 
   * @return u256. The result after wrapping around.
