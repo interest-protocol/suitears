@@ -85,7 +85,7 @@
     public fun get_tokens(profile: &Profile) {
 
       // ✅ Right
-      let name = profile.name();
+      let name = profile.age();
 
       // ❌ Wrong
       let name2 = profile.profile_age();
