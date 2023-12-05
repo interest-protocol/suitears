@@ -1,5 +1,6 @@
 module suitears::quadratic_vesting_wallet {
   
+  use sui::math;
   use sui::transfer;
   use sui::coin::{Self, Coin};
   use sui::object::{Self, UID};
@@ -8,7 +9,9 @@ module suitears::quadratic_vesting_wallet {
 
   
   use suitears::owner::{Self, OwnerCap};
-  use suitears::math64::{quadratic, quadratic_scalar};
+  use suitears::fixed_point_roll::mul_down;
+
+  const ROLL: u64 = 1_000_000_000; // 1e9
 
   const EInvalidStart: u64 = 0;
 
@@ -162,8 +165,7 @@ module suitears::quadratic_vesting_wallet {
         let time_delta = timestamp - start;
         if (time_delta < cliff) return 0;
         if (time_delta >= duration) return total_allocation;
-        let scalar = quadratic_scalar();
-        let progress = time_delta * scalar / duration;
+        let progress = time_delta * ROLL / duration;
 
         // Evaluate quadratic trinomial where y = vested proportion of total_allocation out of SCALAR and x = progress through vesting period out of SCALAR
         // No need to check for overflow when casting uint256 to int256 because `progress` maxes out at SCALAR and so does `(progress ** 2) / SCALAR`
@@ -171,9 +173,13 @@ module suitears::quadratic_vesting_wallet {
 
         // Keep vested total_allocation in range [0, total]
         if (vested_proportion <= 0) return 0;
-        if (vested_proportion >= scalar) return total_allocation;
+        if (vested_proportion >= ROLL) return total_allocation;
 
         // Releasable = total_allocation * vested proportion (divided by SCALAR since proportion is scaled by SCALAR)
-        total_allocation * vested_proportion / scalar
+        total_allocation * vested_proportion / ROLL
+    }
+
+    fun quadratic(x: u64, a: u64, b: u64, c: u64): u64 {
+      mul_down(math::pow(x, 2), a + mul_down(b, x) + c)
     }
 }

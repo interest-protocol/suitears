@@ -17,7 +17,7 @@ module suitears::dao {
 
   use suitears::dao_potato::{Self, DaoPotato};
   use suitears::dao_treasury::{Self, DaoTreasury};
-  use suitears::fixed_point_roll::{roll_div_down};
+  use suitears::fixed_point_roll::div_down;
   use suitears::request::{Self, RequestPotato, Request};
 
   /// Proposal state
@@ -414,7 +414,7 @@ module suitears::dao {
     } else if (
       proposal.for_votes <= proposal.against_votes ||
       proposal.for_votes < proposal.quorum_votes || 
-      (proposal.voting_quorum_rate as u128) > roll_div_down((proposal.for_votes as u128), ((proposal.for_votes + proposal.against_votes) as u128))
+      proposal.voting_quorum_rate > div_down(proposal.for_votes, proposal.for_votes + proposal.against_votes)
     ) {
       // Defeated
       DEFEATED
