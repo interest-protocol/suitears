@@ -660,10 +660,10 @@ module suitears::int {
   }     
 
   /*
-  * @notice It performs self >> lhs.  
+  * @notice It performs self << lhs.  
   * @param self An Int struct.  
   * @param lhs The value to right-hand shift. 
-  * @return Int. The result of self >> lhs.  
+  * @return Int. The result of self << lhs.  
   */
   public fun shl(self: Int, lhs: u8): Int {
     Int {
