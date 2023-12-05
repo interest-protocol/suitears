@@ -35,7 +35,7 @@ module suitears::int {
 
   // @dev It occurs if an operation results in a value higher than `MAX_I256_U256`.   
   const EConversionFromU256Overflow: u64 = 0;
-  // @dev It occurs if a negative Int is converted to an unsigned integer
+  // @dev It occurs if a negative Int is converted to an unsigned integer. 
   const EConversionUnderflow: u64 = 1;
 
   // === Structs ===
@@ -48,7 +48,7 @@ module suitears::int {
   // === Public View Function ===  
   
   /*
-  * @notice It returns the inner value inside Int.
+  * @notice It returns the inner value inside `self`.
   * @param self The Int struct.  
   * @return u256. The inner value.
   */
@@ -59,7 +59,7 @@ module suitears::int {
   // === Public Create Functions ===   
 
   /*
-  * @notice It creates a zero Int.   
+  * @notice It creates a zero `Int`.   
   * @return Int. The wrapped value.
   */
   public fun zero(): Int {
@@ -67,7 +67,7 @@ module suitears::int {
   }
 
   /*
-  * @notice It creates a one Int.   
+  * @notice It creates an `Int` with a value of 1.   
   * @return Int. The wrapped value.
   */
   public fun one(): Int {
@@ -75,7 +75,7 @@ module suitears::int {
   } 
 
   /*
-  * @notice It creates the largest possible Int.   
+  * @notice It creates the largest possible `Int`.   
   * @return Int. The wrapped value.
   */
   public fun max(): Int {
@@ -83,54 +83,54 @@ module suitears::int {
   }
 
   /*
-  * @notice It wraps a u8 number into an Int.  
+  * @notice It wraps a u8 `value` into an `Int`.  
   * @param value The u8 value to wrap  
-  * @return Int. The wrapped value.
+  * @return Int. The wrapped `value`.
   */
   public fun from_u8(value: u8): Int {
     Int { value: (value as u256) }
   }
 
   /*
-  * @notice It wraps a u16 number into an Int.  
+  * @notice It wraps a u16 `value` into an `Int`.  
   * @param value The u16 value to wrap  
-  * @return Int. The wrapped value.
+  * @return Int. The wrapped `value`.
   */
   public fun from_u16(value: u16): Int {
     Int { value: (value as u256) }
   }
 
   /*
-  * @notice It wraps a u32 number into an Int.  
+  * @notice It wraps a u32 `value` into an `Int`.  
   * @param value The u32 value to wrap  
-  * @return Int. The wrapped value.
+  * @return Int. The wrapped `value`.
   */
   public fun from_u32(value: u32): Int {
     Int { value: (value as u256) }
   }
 
   /*
-  * @notice It wraps a u64 number into an Int.  
+  * @notice It wraps a u64 `value` into an `Int`.  
   * @param value The u64 value to wrap  
-  * @return Int. The wrapped value.
+  * @return Int. The wrapped `value`.
   */
   public fun from_u64(value: u64): Int {
     Int { value: (value as u256) }
   }
 
   /*
-  * @notice It wraps a u128 number into an Int.  
+  * @notice It wraps a u128 `value` into an `Int`.  
   * @param value The u128 value to wrap  
-  * @return Int. The wrapped value.
+  * @return Int. The wrapped `value`.
   */
   public fun from_u128(value: u128): Int {
     Int { value: (value as u256) }
   }
 
   /*
-  * @notice It wraps a u256 number into an Int.  
+  * @notice It wraps a u256 `value` into an `Int`.  
   * @param value The u256 value to wrap  
-  * @return Int. The wrapped value.
+  * @return Int. The wrapped `value`.
   *
   * aborts-if 
   *  - if value is larger than `MAX_I256_AS_U256`.  
@@ -141,9 +141,9 @@ module suitears::int {
   }
 
   /*
-  * @notice It wraps a u8 number into an Int and negates it.  
+  * @notice It wraps a u8 `value` into an `Int` and negates it.  
   * @param value The u8 value to wrap  
-  * @return Int. The wrapped value of -value.
+  * @return Int. The wrapped negative `value`.
   */
   public fun neg_from_u8(value: u8): Int {
     let ret = from_u8(value);
@@ -152,9 +152,9 @@ module suitears::int {
   }
 
   /*
-  * @notice It wraps a u16 number into an Int and negates it.  
+  * @notice It wraps a u16 `value` into an `Int` and negates it.  
   * @param value The u16 value to wrap  
-  * @return Int. The wrapped value of -value.
+  * @return Int. The wrapped negative `value`.
   */
   public fun neg_from_u16(value: u16): Int {
     let ret = from_u16(value);
@@ -163,9 +163,9 @@ module suitears::int {
   }
 
   /*
-  * @notice It wraps a u32 number into an Int and negates it.  
+  * @notice It wraps a u32 `value` into an `Int` and negates it.  
   * @param value The u32 value to wrap  
-  * @return Int. The wrapped value of -value.
+  * @return Int. The wrapped negative `value`.
   */
   public fun neg_from_u32(value: u32): Int {
     let ret = from_u32(value);
@@ -174,9 +174,9 @@ module suitears::int {
   }
 
   /*
-  * @notice It wraps a u64 number into an Int and negates it.  
+  * @notice It wraps a u64 `value` into an `Int` and negates it.  
   * @param value The u64 value to wrap  
-  * @return Int. The wrapped value of -value.
+  * @return Int. The wrapped negative `value`.
   */
   public fun neg_from_u64(value: u64): Int {
     let ret = from_u64(value);
@@ -185,9 +185,9 @@ module suitears::int {
   }
 
   /*
-  * @notice It wraps a u128 number into an Int and negates it.  
+  * @notice It wraps a u128 `value` into an `Int` and negates it.  
   * @param value The u128 value to wrap  
-  * @return Int. The wrapped value of -value.
+  * @return Int. The wrapped negative `value`.
   */
   public fun neg_from_u128(value: u128): Int {
     let ret = from_u128(value);
@@ -196,9 +196,9 @@ module suitears::int {
   }
 
   /*
-  * @notice It wraps a u256 number into an Int and negates it.  
+  * @notice It wraps a u256 `value` into an `Int` and negates it.  
   * @param value The u256 value to wrap  
-  * @return Int. The wrapped value of -value.
+  * @return Int. The wrapped negative `value`.
   */
   public fun neg_from_u256(value: u256): Int {
     let ret = from_u256(value);
@@ -207,12 +207,12 @@ module suitears::int {
   }
 
   /*
-  * @notice It unwraps the value inside Int and casts it to u8.  
+  * @notice It unwraps the value inside `self` and casts it to u8.  
   * @param self The Int struct.  
   * @return u8. The inner value cast to u8. 
   *
   * aborts-if 
-  *  - x.value is negative
+  *  - `self.value` is negative
   */
   public fun to_u8(self: Int): u8 {
     assert!(is_positive(self), EConversionUnderflow);
@@ -220,12 +220,12 @@ module suitears::int {
   }
 
   /*
-  * @notice It unwraps the value inside Int and casts it to u16.  
+  * @notice It unwraps the value inside `self` and casts it to u16.  
   * @param self The Int struct.  
   * @return u16. The inner value cast to u16. 
   *
   * aborts-if 
-  *  - x.value is negative
+  *  - `self.value` is negative
   */
   public fun to_u16(self: Int): u16 {
     assert!(is_positive(self), EConversionUnderflow);
@@ -233,12 +233,12 @@ module suitears::int {
   }
 
   /*
-  * @notice It unwraps the value inside Int and casts it to u32.  
+  * @notice It unwraps the value inside `self` and casts it to u32.  
   * @param self The Int struct.  
   * @return u32. The inner value cast to u32. 
   *
   * aborts-if 
-  *  - x.value is negative
+  *  - `self.value` is negative
   */
   public fun to_u32(self: Int): u32 {
     assert!(is_positive(self), EConversionUnderflow);
@@ -246,12 +246,12 @@ module suitears::int {
   }
 
   /*
-  * @notice It unwraps the value inside Int and casts it to u64.  
+  * @notice It unwraps the value inside `self` and casts it to u64.  
   * @param self The Int struct.  
   * @return u64. The inner value cast to u64. 
   *
   * aborts-if 
-  *  - x.value is negative
+  *  - `self.value` is negative
   */
   public fun to_u64(self: Int): u64 {
     assert!(is_positive(self), EConversionUnderflow);
@@ -259,12 +259,12 @@ module suitears::int {
   }
 
   /*
-  * @notice It unwraps the value inside Int and casts it to u128.  
+  * @notice It unwraps the value inside `self` and casts it to u128.  
   * @param self The Int struct.  
   * @return u128. The inner value cast to u128. 
   *
   * aborts-if 
-  *  - x.value is negative
+  *  - `self.value` is negative
   */
   public fun to_u128(self: Int): u128 {
     assert!(is_positive(self), EConversionUnderflow);
@@ -272,12 +272,12 @@ module suitears::int {
   }
 
   /*
-  * @notice It unwraps the value inside Int and casts it to u256.  
+  * @notice It unwraps the value inside `self` and casts it to u256.  
   * @param self The Int struct.  
   * @return u256. The inner value cast to u256. 
   *
   * aborts-if 
-  *  - x.value is negative
+  *  - `self.value` is negative
   */
   public fun to_u256(self: Int): u256 {
     assert!(is_positive(self), EConversionUnderflow);
@@ -285,45 +285,45 @@ module suitears::int {
   }
 
   /*
-  * @notice It unwraps the value inside Int and truncates it to u8.  
+  * @notice It unwraps the value inside `self` and truncates it to u8.  
   * @param self The Int struct.  
-  * @return u8. The inner value truncated to u8. 
+  * @return u8. The inner value is truncated to u8. 
   */
   public fun truncate_to_u8(self: Int): u8 {
     ((self.value & 0xFF) as u8)
   }
 
   /*
-  * @notice It unwraps the value inside Int and truncates it to u16.  
+  * @notice It unwraps the value inside `self` and truncates it to u16.  
   * @param self The Int struct.  
-  * @return u16. The inner value truncated to u16. 
+  * @return u16. The inner value is truncated to u16. 
   */
   public fun truncate_to_u16(self: Int): u16 {
     ((self.value & 0xFFFF) as u16)
   }
 
   /*
-  * @notice It unwraps the value inside Int and truncates it to u32.  
+  * @notice It unwraps the value inside `self` and truncates it to u32.  
   * @param self The Int struct.  
-  * @return u32. The inner value truncated to u32. 
+  * @return u32. The inner value is truncated to u32. 
   */
   public fun truncate_to_u32(self: Int): u32 {
     ((self.value & 0xFFFFFFFF) as u32)
   }
 
   /*
-  * @notice It unwraps the value inside Int and truncates it to u64.  
+  * @notice It unwraps the value inside `self` and truncates it to u64.  
   * @param self The Int struct.  
-  * @return u64. The inner value truncated to u64. 
+  * @return u64. The inner value is truncated to u64. 
   */
   public fun truncate_to_u64(self: Int): u64 {
     ((self.value & 0xFFFFFFFFFFFFFFFF) as u64)
   }
 
   /*
-  * @notice It unwraps the value inside Int and truncates it to u128.  
+  * @notice It unwraps the value inside `self` and truncates it to u128.  
   * @param self The Int struct.  
-  * @return u128. The inner value truncated to u128. 
+  * @return u128. The inner value is truncated to u128. 
   */
   public fun truncate_to_u128(self: Int): u128 {
     ((self.value & 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF) as u128)
@@ -332,7 +332,7 @@ module suitears::int {
   // === Public Utility Functions ===   
 
   /*
-  * @notice It flips the sign of Int.  
+  * @notice It flips the sign of `self`.  
   * @param self The Int struct.  
   * @return Int. The returned Int will have its signed flipped.  
   */
@@ -352,7 +352,7 @@ module suitears::int {
   // === Public Predicate Functions ===   
 
   /*
-  * @notice It checks if an Int is negative.  
+  * @notice It checks if `self` is negative.  
   * @param self The Int struct.  
   * @return bool.  
   */
@@ -361,7 +361,7 @@ module suitears::int {
   }
 
   /*
-  * @notice It checks if an Int is zero.  
+  * @notice It checks if `self` is zero.  
   * @param self The Int struct.  
   * @return bool.  
   */
@@ -370,7 +370,7 @@ module suitears::int {
   }
 
   /*
-  * @notice It checks if an Int is positive.  
+  * @notice It checks if `self` is positive.  
   * @param self The Int struct.  
   * @return bool.  
   */
@@ -380,7 +380,7 @@ module suitears::int {
 
 
   /*
-  * @notice It compared two Int structs.  
+  * @notice It compares `a` and `b`.  
   * @param a An Int struct.  
   * @param b An Int struct.  
   * @return 0. a == b.  
@@ -411,7 +411,7 @@ module suitears::int {
   }
 
   /*
-  * @notice It checks if a and b are equal.  
+  * @notice It checks if `a` and `b` are equal.  
   * @param a An Int struct.  
   * @param b An Int struct. 
   * @return bool.  
@@ -421,7 +421,7 @@ module suitears::int {
   }
 
   /*
-  * @notice It checks if a < b.  
+  * @notice It checks if `a` < `b`.  
   * @param a An Int struct.  
   * @param b An Int struct. 
   * @return bool.  
@@ -431,7 +431,7 @@ module suitears::int {
   }
 
   /*
-  * @notice It checks if a <= b.  
+  * @notice It checks if `a` <= `b`.  
   * @param a An Int struct.  
   * @param b An Int struct. 
   * @return bool.  
@@ -442,7 +442,7 @@ module suitears::int {
   }
 
   /*
-  * @notice It checks if a > b.  
+  * @notice It checks if `a` > `b`.  
   * @param a An Int struct.  
   * @param b An Int struct. 
   * @return bool.  
@@ -452,7 +452,7 @@ module suitears::int {
   }
 
   /*
-  * @notice It checks if a >= b.  
+  * @notice It checks if `a` >= `b`.  
   * @param a An Int struct.  
   * @param b An Int struct. 
   * @return bool.  
@@ -465,10 +465,10 @@ module suitears::int {
   // === Math Operations ===
 
   /*
-  * @notice It performs a + b.  
+  * @notice It performs `a` + `b`.  
   * @param a An Int struct.  
   * @param b An Int struct. 
-  * @return Int. The result of a + b.  
+  * @return Int. The result of `a` + `b`.  
   */
   public fun add(a: Int, b: Int): Int {
     if (is_positive(a)) {
@@ -497,10 +497,10 @@ module suitears::int {
   }
 
   /*
-  * @notice It performs a - b.  
+  * @notice It performs `a` - `b`.  
   * @param a An Int struct.  
   * @param b An Int struct. 
-  * @return Int. The result of a - b.  
+  * @return Int. The result of `a` - `b`.  
   */
   public fun sub(a: Int, b: Int): Int {
     if (is_positive(a)) {
@@ -529,10 +529,10 @@ module suitears::int {
   }
 
   /*
-  * @notice It performs a * b.  
+  * @notice It performs `a` * `b`.  
   * @param a An Int struct.  
   * @param b An Int struct. 
-  * @return Int. The result of a * b.  
+  * @return Int. The result of `a` * `b`.  
   */
   public fun mul(a: Int, b: Int): Int {
     if (is_positive(a)) {
@@ -557,10 +557,10 @@ module suitears::int {
   }
 
   /*
-  * @notice It performs a / b rounding down.  
+  * @notice It performs `a` / `b` rounding down.  
   * @param a An Int struct.  
   * @param b An Int struct. 
-  * @return Int. The result of a * b rounding down.  
+  * @return Int. The result of `a` / `b` rounding down.  
   */
   public fun div_down(a: Int, b: Int): Int {
     if (is_positive(a)) {
@@ -585,10 +585,10 @@ module suitears::int {
   }
 
   /*
-  * @notice It performs a / b rounding up.  
+  * @notice It performs `a` / `b` rounding up.  
   * @param a An Int struct.  
   * @param b An Int struct. 
-  * @return Int. The result of a * b rounding up.  
+  * @return Int. The result of `a` / `b` rounding up.  
   */
   public fun div_up(a: Int, b: Int): Int {
     if (is_positive(a)) {
@@ -613,10 +613,10 @@ module suitears::int {
   }  
 
   /*
-  * @notice It performs a % b.  
+  * @notice It performs `a` % `b`.  
   * @param a An Int struct.  
   * @param b An Int struct. 
-  * @return Int. The result of a % b.  
+  * @return Int. The result of `a` % `b`.  
   */
   public fun mod(a: Int, b: Int): Int {
     let a_abs = abs(a);
@@ -628,10 +628,10 @@ module suitears::int {
   }
 
   /*
-  * @notice It performs base ** exponent.  
+  * @notice It performs `base` ** `exponent`.  
   * @param base An Int struct.  
   * @param exponent The exponent. 
-  * @return Int. The result of base ** exponent.  
+  * @return Int. The result of `base` ** `exponent`.  
   */
   public fun pow(base: Int, exponent: u256): Int {
     let raw_value = math256::pow(abs(base).value, exponent);
@@ -644,10 +644,10 @@ module suitears::int {
   // === Bitwise Operations ===  
 
   /*
-  * @notice It performs self >> rhs.  
+  * @notice It performs `self` >> `rhs`.  
   * @param self An Int struct.  
   * @param rhs The value to right-hand shift. 
-  * @return Int. The result of self >> rhs.  
+  * @return Int. The result of `self` >> `rhs`.  
   */
   public fun shr(self: Int, rhs: u8): Int { 
     Int {
@@ -660,10 +660,10 @@ module suitears::int {
   }     
 
   /*
-  * @notice It performs self << lhs.  
+  * @notice It performs `self` << `lhs`.  
   * @param self An Int struct.  
   * @param lhs The value to right-hand shift. 
-  * @return Int. The result of self << lhs.  
+  * @return Int. The result of `self` << `lhs`.  
   */
   public fun shl(self: Int, lhs: u8): Int {
     Int {
@@ -672,10 +672,10 @@ module suitears::int {
   }
 
   /*
-  * @notice It performs a | b.  
-  * @param self An Int struct.  
-  * @param lhs The value to right-hand shift. 
-  * @return Int. The result of a | b.  
+  * @notice It performs `a` | `b`.  
+  * @param a The first operand.   
+  * @param b The second operand. 
+  * @return Int. The result of `a` | `b`.  
   */
   public fun or(a: Int, b: Int): Int {
     Int {
@@ -684,10 +684,10 @@ module suitears::int {
   }
 
   /*
-  * @notice It performs a & b.  
-  * @param self An Int struct.  
-  * @param lhs The value to right-hand shift. 
-  * @return Int. The result of a & b.  
+  * @notice It performs `a` & `b`.  
+  * @param a The first operand.   
+  * @param b The second operand. 
+  * @return Int. The result of `a` & `b`.  
   */
   public fun and(a: Int, b: Int): Int {
     Int {
