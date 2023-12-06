@@ -26,6 +26,7 @@ module suitears::comparator {
 
   /*
   * @dev It checks if the `result` of {compare} is `EQUAL`.
+  *
   * @param result This struct contains one of the following values: {SMALLER}, {EQUAL} or {GREATER}.
   * @return bool. True if it is `EQUAL`
   */
@@ -35,6 +36,7 @@ module suitears::comparator {
 
   /*
   * @dev It checks if the `result` of {compare} is `SMALLER`.
+  *
   * @param result This struct contains one of the following values: {SMALLER}, {EQUAL} or {GREATER}.
   * @return bool. True if it is `SMALLER`.
   */
@@ -44,6 +46,7 @@ module suitears::comparator {
 
   /*
   * @dev It checks if the `result` of {compare} is `GREATER`.
+  *
   * @param result This struct contains one of the following values: {SMALLER}, {EQUAL} or {GREATER}.
   * @return bool. True if it is `GREATER`.
   */
@@ -53,6 +56,7 @@ module suitears::comparator {
 
   /*
   * @dev It checks if the `result` of {compare} is `SMALLER` or `EQUAL`.
+  *
   * @param result This struct contains one of the following values: {SMALLER}, {EQUAL} or {GREATER}.
   * @return bool. True if it is `SMALLER` or `EQUAL`.
   */
@@ -62,6 +66,7 @@ module suitears::comparator {
 
   /*
   * @dev It checks if the `result` of {compare} is `GREATER` or `EQUAL`.
+  *
   * @param result This struct contains one of the following values: {SMALLER}, {EQUAL} or {GREATER}.
   * @return bool. True if it is `GREATER` or `EQUAL`.
   */
@@ -72,10 +77,12 @@ module suitears::comparator {
 
   /*
   * @notice Compares two structs of type `T`. 
+  *
   * @dev Performs a comparison of two types after BCS serialization.
   * @dev BCS uses little-endian encoding for all integer types, 
   * @dev so comparison between primitive integer types will not behave as expected.
   * @dev For example, 1(0x1) will be larger than 256(0x100) after BCS serialization.
+  *
   * @param left A struct of type `T`.
   * @param right A struct of type `T`.
   * @return Result. A struct that contains the following values: {SMALLER}, {EQUAL} or {GREATER}.
@@ -89,10 +96,12 @@ module suitears::comparator {
 
   /*
   * @notice Compares two bytes. 
+  *
   * @dev Performs a comparison of two types after BCS serialization.
   * @dev BCS uses little-endian encoding for all integer types, 
   * @dev so comparison between primitive integer types will not behave as expected.
   * @dev For example, 1(0x1) will be larger than 256(0x100) after BCS serialization.
+  *
   * @param left A set of bytes.
   * @param right A struct of type `T`.
   * @return Result. A struct that contains the following values: {SMALLER}, {EQUAL} or {GREATER}.
