@@ -1,5 +1,6 @@
 /*
 * @title Fixed Point Roll: A set of functions to operate over u64 numbers with 1e9 precision.
+*
 * @dev It has the same precision as Sui's native token to facilitate operations. 
 */
 module suitears::fixed_point_roll {
@@ -16,6 +17,7 @@ module suitears::fixed_point_roll {
 
   /*
   * @notice It returns 1 ROLL. 
+  *
   * @return u64. 1e9. 
   */
   public fun roll(): u64 {
@@ -26,7 +28,9 @@ module suitears::fixed_point_roll {
 
   /*
   * @notice It tries to `x` * `y` / `ROLL` rounding down.
+  *
   * @dev It returns zero instead of throwing an overflow error. 
+  *
   * @param x The first operand. 
   * @param y The second operand. 
   * @param bool. If the operation was successful or not.
@@ -38,7 +42,9 @@ module suitears::fixed_point_roll {
 
   /*
   * @notice It tries to `x` * `y` / `ROLL` rounding up.
+  *
   * @dev It returns zero instead of throwing an overflow error. 
+  *
   * @param x The first operand. 
   * @param y The second operand. 
   * @param bool. If the operation was successful or not.
@@ -50,8 +56,10 @@ module suitears::fixed_point_roll {
 
   /*
   * @notice It tries to `x` * `ROLL` / `y` rounding down.
+  *
   * @dev It will return 0 if `y` is zero.
   * @dev It returns zero instead of throwing an overflow error. 
+  *
   * @param x The first operand. 
   * @param y The second operand. 
   * @param bool. If the operation was successful or not.
@@ -63,8 +71,10 @@ module suitears::fixed_point_roll {
 
   /*
   * @notice It tries to `x` * `ROLL` / `y` rounding up.
+  *
   * @dev It will return 0 if `y` is zero.
   * @dev It returns zero instead of throwing an overflow error. 
+  *
   * @param x The first operand. 
   * @param y The second operand. 
   * @param bool. If the operation was successful or not.
@@ -78,6 +88,7 @@ module suitears::fixed_point_roll {
 
   /*
   * @notice `x` * `y` / `ROLL` rounding down.
+  *
   * @param x The first operand. 
   * @param y The second operand. 
   * @return u64. The result of `x` * `y` / `ROLL`. 
@@ -88,6 +99,7 @@ module suitears::fixed_point_roll {
 
   /*
   * @notice `x` * `y` / `ROLL` rounding up.
+  *
   * @param x The first operand. 
   * @param y The second operand. 
   * @return u64. The result of `x` * `y` / `ROLL`. 
@@ -98,6 +110,7 @@ module suitears::fixed_point_roll {
 
   /*
   * @notice `x` * `ROLL` / `y` rounding down.
+  *
   * @param x The first operand. 
   * @param y The second operand. 
   * @return u64. The result of `x` * `ROLL` / `y`. 
@@ -108,6 +121,7 @@ module suitears::fixed_point_roll {
 
   /*
   * @notice `x` * `ROLL` / `y` rounding up.
+  *
   * @param x The first operand. 
   * @param y The second operand. 
   * @return u64. The result of `x` * `ROLL` / `y`. 
@@ -118,6 +132,7 @@ module suitears::fixed_point_roll {
 
   /*
   * @notice It converts `x` precision to a `ROLL`, a number with a precision of 1e9.
+  *
   * @param x The value to be converted. 
   * @param y The current decimal scalar of the x. 
   * @return u64. The result of `x` * `ROLL` / `decimal_factor`. 

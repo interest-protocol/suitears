@@ -1,5 +1,6 @@
 /*
 * @title Fixed Point 64: A library to perform math operations over an unsigned integer with 64-bit precision.
+*
 * @dev Any operation that results in a number larger than the maximum unsigned 128 bit, will be considered an overflow and throw.  
 * @dev All credits to Aptos - https://github.com/aptos-labs/aptos-core/blob/main/aptos-move/framework/aptos-stdlib/sources/fixed_point64.move
 */
@@ -40,6 +41,7 @@ module suitears::fixed_point64 {
 
   /*
   * @notice It returns the raw u128 value. 
+  *
   * @param self A FixedPoint64.
   * @return u128. The raw u128 value.
   */
@@ -50,7 +52,8 @@ module suitears::fixed_point64 {
   // === Convert Functions ===
 
   /*
-  * @notice Creates a FixedPoint64 from a u128 number.  
+  * @notice Creates a FixedPoint64 from a u128 number. 
+  * 
   * @dev It scales the number.
   * @param value A u128 number 
   * @return FixedPoint64. A FixedPoint64 calculated by right shifting - `value` << 64.
@@ -68,6 +71,7 @@ module suitears::fixed_point64 {
 
   /*
   * @notice Creates a FixedPoint64 from a u128 `value`.  
+  *
   * @dev It does not scale the `value`.
   * @param value A u128 number 
   * @return FixedPoint64. It wraps the u128.
@@ -78,6 +82,7 @@ module suitears::fixed_point64 {
 
   /*
   * @notice Creates a FixedPoint64 from a rational number specified by a `numerator` and `denominator`.  
+  *
   * @dev 0.0125 will round down to 0.012 instead of up to 0.013.
   * @param numerator The numerator of the rational number. 
   * @param denominator The denominator of the rational number. 
@@ -99,6 +104,7 @@ module suitears::fixed_point64 {
 
   /*
   * @notice Converts a FixedPoint64 into a u128 number to the closest integer.  
+  *
   * @param self A FixedPoint64. 
   * @return u128.
   */
@@ -114,6 +120,7 @@ module suitears::fixed_point64 {
 
   /*
   * @notice Converts a FixedPoint64 into a u128 number rounding down.  
+  *
   * @param self A FixedPoint64. 
   * @return u128.
   */
@@ -123,6 +130,7 @@ module suitears::fixed_point64 {
 
   /*
   * @notice Converts a FixedPoint64 into a u128 number rounding up.  
+  *
   * @param self A FixedPoint64. 
   * @return u128.
   */
@@ -139,6 +147,7 @@ module suitears::fixed_point64 {
 
   /*
   * @notice Checks if `self` is zero.  
+  *
   * @param self A FixedPoint64. 
   * @return bool. If the `self.value` is zero.
   */
@@ -147,7 +156,8 @@ module suitears::fixed_point64 {
   }   
 
   /*
-  * @notice Checks if `x` is equal to `y`.  
+  * @notice Checks if `x` is equal to `y`. 
+  * 
   * @param x A FixedPoint64. 
   * @param y A FixedPoint64.   
   * @return bool. If the values are equal. 
@@ -157,7 +167,8 @@ module suitears::fixed_point64 {
   } 
 
   /*
-  * @notice Checks if `x` is smaller than `y`.  
+  * @notice Checks if `x` is smaller than `y`. 
+  * 
   * @param x A FixedPoint64. 
   * @param y A FixedPoint64.   
   * @return bool. If `x` is smaller than `y`.
@@ -168,6 +179,7 @@ module suitears::fixed_point64 {
 
   /*
   * @notice Checks if `x` is bigger than `y`.  
+  *
   * @param x A FixedPoint64. 
   * @param y A FixedPoint64.   
   * @return bool. If `x` is bigger than `y`.
@@ -178,6 +190,7 @@ module suitears::fixed_point64 {
 
  /*
   * @notice Checks if `x` is smaller or equal to `y`.  
+  *
   * @param x A FixedPoint64. 
   * @param y A FixedPoint64.   
   * @return bool. If `x` is smaller or equal to `y`.
@@ -187,7 +200,8 @@ module suitears::fixed_point64 {
   }
 
   /*
-  * @notice Checks if `x` is bigger or equal to `y`.  
+  * @notice Checks if `x` is bigger or equal to `y`. 
+  * 
   * @param x A FixedPoint64. 
   * @param y A FixedPoint64.   
   * @return bool. If `x` is bigger or equal to `y`.
@@ -197,7 +211,8 @@ module suitears::fixed_point64 {
   } 
 
   /*
-  * @notice It returns the larger of the two arguments.     
+  * @notice It returns the larger of the two arguments. 
+  *    
   * @param x The first operand. 
   * @param y The second operand. 
   * @return FixedPoint64. The larger argument. 
@@ -207,7 +222,8 @@ module suitears::fixed_point64 {
   }
 
   /*
-  * @notice It returns the smaller of the two arguments.     
+  * @notice It returns the smaller of the two arguments. 
+  *   
   * @param x The first operand. 
   * @param y The second operand. 
   * @return FixedPoint64. The smaller argument. 
@@ -220,6 +236,7 @@ module suitears::fixed_point64 {
 
   /*
   * @notice It returns `x` - `y`.     
+  *
   * @param x The first operand. 
   * @param y The second operand. 
   * @return FixedPoint64. The result of `x` - `y`. 
@@ -237,7 +254,8 @@ module suitears::fixed_point64 {
   }
 
   /*
-  * @notice It returns `x` + `y`.     
+  * @notice It returns `x` + `y`.  
+  *   
   * @param x The first operand. 
   * @param y The second operand. 
   * @return FixedPoint64. The result of `x` + `y`. 
@@ -256,7 +274,8 @@ module suitears::fixed_point64 {
   }
 
   /*
-  * @notice It returns `x` * `y`.     
+  * @notice It returns `x` * `y`.    
+  * 
   * @param x The first operand. 
   * @param y The second operand. 
   * @return FixedPoint64. The result of `x` * `y`. 
@@ -271,7 +290,8 @@ module suitears::fixed_point64 {
   }
 
   /*
-  * @notice It returns `x` / `y`.     
+  * @notice It returns `x` / `y`.    
+  * 
   * @param x The first operand. 
   * @param y The second operand. 
   * @return FixedPoint64. The result of `x` / `y`. 
@@ -288,6 +308,7 @@ module suitears::fixed_point64 {
 
   /*
   * @notice Specialized function for `x` * `y` / `z` that omits intermediate shifting.     
+  *
   * @param x The first operand. 
   * @param y The second operand. 
   * @param z The third operand.   
@@ -306,7 +327,9 @@ module suitears::fixed_point64 {
   /*
   * @notice It returns `x` * `y`.   
   * @notice It multiplies a u128 number with a FixedPoint64.
+  *
   * @dev It truncates the fractional part of the product. E.g. - 9 * 0.333 = 2.  
+  *
   * @param x The first operand, a u128 number. . 
   * @param y The second operand, a FixedPoint64. 
   * @return u128. The result of `x` * `y` without the 64-bit precision. 
@@ -324,6 +347,7 @@ module suitears::fixed_point64 {
   /*
   * @notice It returns `numerator` / `denominator` rounded down.   
   * @notice It divides a FixedPoint64 by a u128 number.
+  *
   * @param numerator The first operand, a u128 number. 
   * @param denominator The second operand, a FixedPoint64. 
   * @return u128. The result of `numerator` / `denominator` without the 64-bit precision. 
@@ -343,6 +367,7 @@ module suitears::fixed_point64 {
   /*
   * @notice It returns `numerator` / `denominator` rounded up.   
   * @notice It divides a FixedPoint64 by a u128 number.
+  *
   * @param numerator The first operand, a u128 number. 
   * @param denominator The second operand, a FixedPoint64. 
   * @return u128. The result of `numerator` / `denominator` without the 64-bit precision. 
@@ -360,7 +385,8 @@ module suitears::fixed_point64 {
   }  
 
   /*
-  * @notice It returns `base` ** `exponent`.     
+  * @notice It returns `base` ** `exponent`.   
+  *  
   * @param base The base. 
   * @param exponent The exponent. 
   * @return FixedPoint64. The result of `base` ** `exponent`. 
@@ -376,7 +402,8 @@ module suitears::fixed_point64 {
   }
 
   /*
-  * @notice Square root of `x`.     
+  * @notice Square root of `x`.   
+  *  
   * @param x The operand.
   * @return FixedPoint64. The result of the square root. 
   */
@@ -392,6 +419,7 @@ module suitears::fixed_point64 {
   /*
   * @notice Exponent function with a precision of 9 digits.  
   * @notice It performs e^x.    
+  *
   * @param x The operand.
   * @return FixedPoint64. The result of e^x. 
   */    
@@ -406,6 +434,7 @@ module suitears::fixed_point64 {
 
   /*
   * @notice Calculates e^x where x and the result are fixed point numbers.  
+  *
   * @param x The base. 
   * @return u256. The result of e^x. 
   */  
@@ -439,6 +468,7 @@ module suitears::fixed_point64 {
 
   /*
   * @notice Calculate `x` to the power of `n`, where `x` and the result are fixed point numbers.  
+  *
   * @param x The base. 
   * @param n The exponent. 
   * @return u256. The result of x^n. 

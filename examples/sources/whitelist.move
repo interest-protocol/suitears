@@ -1,6 +1,6 @@
 // Source & inspired from Scallop 
-
-module suitears::whitelist {
+// Whitelist implementation
+module examples::whitelist {
   use sui::object::UID;
   use sui::dynamic_field as df;
 

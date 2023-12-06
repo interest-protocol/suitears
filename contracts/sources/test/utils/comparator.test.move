@@ -21,7 +21,7 @@ module suitears::comparator_tests {
     assert!(eq(&compare(&value1, &value1)), 1);
     assert!(eq(&compare(&value2, &value2)), 2);
     assert!(lte(&compare(&value2, &value2)), 2);
-   assert!(gte(&compare(&value2, &value2)), 2);
+    assert!(gte(&compare(&value2, &value2)), 2);
 
     assert!(gt(&compare(&value0, &value1)), 3);
     assert!(gte(&compare(&value0, &value1)), 3);
