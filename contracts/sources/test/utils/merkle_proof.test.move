@@ -1,44 +1,67 @@
 #[test_only]
 module suitears::merkle_proof_tests {
-  use std::vector;
-
   use sui::test_utils::assert_eq;
   
   use suitears::merkle_proof::{verify, multi_proof_verify};
 
   #[test]
   fun test_verify() {
-    let proof = vector::empty<vector<u8>>();
-    vector::push_back(&mut proof, x"f99692a8fccf12eb2bf6399f23bf9379e38a98367a75e250d53eb727c1385624");
-    let root = x"59d3298db60c8c3ea35d3de0f43e297df7f27d8c3ba02555bcd7a2eee106aace";
-    let leaf = x"45db79b20469c3d6b3c40ea3e4e76603cca6981e7765382ffa4cb1336154efe5";
+    // Check utils/src/merkle-proof.ts
+    // https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/test/utils/cryptography/MerkleProof.test.js
+    let proof = vector[
+      x"7051e21dd45e25ed8c605a53da6f77de151dcbf47b0e3ced3c5d8b61f4a13dbc",
+      x"1629d3b5b09b30449d258e35bbd09dd5e8a3abb91425ef810dc27eef995f7490",
+      x"633d21baee4bbe5ed5c51ac0c68f7946b8f28d2937f0ca7ef5e1ea9dbda52e7a",
+      x"8a65d3006581737a3bab46d9e4775dbc1821b1ea813d350a13fcd4f15a8942ec",
+      x"d6c3f3e36cd23ba32443f6a687ecea44ebfe2b8759a62cccf7759ec1fb563c76",
+      x"276141cd72b9b81c67f7182ff8a550b76eb96de9248a3ec027ac048c79649115",                              
+    ];
+
+
+    let root = x"b89eb120147840e813a77109b44063488a346b4ca15686185cf314320560d3f3";
+    let leaf = x"6efbf77e320741a027b50f02224545461f97cd83762d5fbfeb894b9eb3287c16";
+    assert_eq(verify(&proof, root, leaf), true);
+
+
+    let proof = vector[
+      x"1629d3b5b09b30449d258e35bbd09dd5e8a3abb91425ef810dc27eef995f7490",
+      x"633d21baee4bbe5ed5c51ac0c68f7946b8f28d2937f0ca7ef5e1ea9dbda52e7a",
+      x"8a65d3006581737a3bab46d9e4775dbc1821b1ea813d350a13fcd4f15a8942ec",
+      x"d6c3f3e36cd23ba32443f6a687ecea44ebfe2b8759a62cccf7759ec1fb563c76",
+      x"276141cd72b9b81c67f7182ff8a550b76eb96de9248a3ec027ac048c79649115",                              
+    ];
+    let leaf = x"a68bdd3859f39d4723bb3e83e33ae8205e6c8004c7df8a420db5f84280f63ba0";
     assert_eq(verify(&proof, root, leaf), true);
   }
 
   #[test]
   fun test_verify_bad_proof() {
-    let proof = vector::empty<vector<u8>>();
-    vector::push_back(&mut proof, x"3e23e8160039594a33894f6564e1b1349bbd7a0088d42c4acb73eeaed59c008d");
-    let root = x"59d3298db60c8c3ea35d3de0f43e297df7f27d8c3ba02555bcd7a2eee106aace";
-    let leaf = x"45db79b20469c3d6b3c40ea3e4e76603cca6981e7765382ffa4cb1336154efe5";
-    assert_eq(!verify(&proof, root, leaf), true);
+    // Proof from a different tree
+    let proof = vector[x"7b0c6cd04b82bfc0e250030a5d2690c52585e0cc6a4f3bc7909d7723b0236ece"];
+    let root = x"f2129b5a697531ef818f644564a6552b35c549722385bc52aa7fe46c0b5f46b1";
+    let leaf = x"9c15a6a0eaeed500fd9eed4cbeab71f797cefcc67bfd46683e4d2e6ff7f06d1c";
+    assert_eq(verify(&proof, root, leaf), false);
   }
 
   #[test]
   fun test_verify_bad_root() {
-    let proof = vector::empty<vector<u8>>();
-    vector::push_back(&mut proof, x"f99692a8fccf12eb2bf6399f23bf9379e38a98367a75e250d53eb727c1385624");
-    let root = x"58d3298db60c8c3ea35d3de0f43e297df7f27d8c3ba02555bcd7a2eee106aace";
-    let leaf = x"45db79b20469c3d6b3c40ea3e4e76603cca6981e7765382ffa4cb1336154efe5";
-    assert_eq(!verify(&proof, root, leaf), true);
+    let proof = vector[
+      x"19ba6c6333e0e9a15bf67523e0676e2f23eb8e574092552d5e888c64a4bb3681",
+      x"9cf5a63718145ba968a01c1d557020181c5b252f665cf7386d370eddb176517b"
+    ];
+    let root = x"736a8b2b04d5e692a88f2d85a89b2c821bd69e2a6d58fbc6c789bdb94c86da41";
+    let leaf = x"9c15a6a0eaeed500fd9eed4cbeab71f797cefcc67bfd46683e4d2e6ff7f06d1c";
+    assert_eq(verify(&proof, root, leaf), false);
   }
 
   #[test]
   fun test_verify_bad_leaf() {
-    let proof = vector::empty<vector<u8>>();
-    vector::push_back(&mut proof, x"f99692a8fccf12eb2bf6399f23bf9379e38a98367a75e250d53eb727c1385624");
-    let root = x"59d3298db60c8c3ea35d3de0f43e297df7f27d8c3ba02555bcd7a2eee106aace";
-    let leaf = x"35db79b20469c3d6b3c40ea3e4e76603cca6981e7765382ffa4cb1336154efe5";
-    assert_eq(!verify(&proof, root, leaf), true);
+    let proof = vector[
+      x"19ba6c6333e0e9a15bf67523e0676e2f23eb8e574092552d5e888c64a4bb3681",
+      x"9cf5a63718145ba968a01c1d557020181c5b252f665cf7386d370eddb176517b"
+    ];
+    let root = x"f2129b5a697531ef818f644564a6552b35c549722385bc52aa7fe46c0b5f46b1";
+    let leaf = x"eba909cf4bb90c6922771d7f126ad0fd11dfde93f3937a196274e1ac20fd2f5b";
+    assert_eq(verify(&proof, root, leaf), false);
   }  
 }
