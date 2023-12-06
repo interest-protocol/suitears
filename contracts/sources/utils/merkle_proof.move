@@ -51,6 +51,7 @@ module suitears::merkle_proof {
   * @dev Returns true if a `leaf` can be proved to be a part of a Merkle tree defined by `root`. 
   * For this, a `proof` must be provided, containing sibling hashes on the branch from the leaf to the root of the tree. 
   * Each pair of leaves and each pair of pre-images are assumed to be sorted.
+  * @dev The index logic is from ENS token: https://etherscan.io/token/0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72#code 
   *
   * @param proof The Merkle proof. 
   * @param root The root of the Merkle Tree. 
@@ -148,7 +149,7 @@ module suitears::merkle_proof {
     let total_hashes = vector::length(proof_flags);
 
     // Check proof validity.
-    assert!(leaves_len + vector::length(proof) - 1 == total_hashes, EInvalidMultiProof);
+    assert!(leaves_len + vector::length(proof) == total_hashes + 1, EInvalidMultiProof);
 
     // The xxxPos values are "pointers" to the next value to consume in each array. All accesses are done using
     // `xxx[xxxPos++]`, which return the current value and increment the pointer, thus mimicking a queue's "pop".
@@ -165,24 +166,29 @@ module suitears::merkle_proof {
 
     while (i < total_hashes) {
       let a = if (leaf_pos < leaves_len) {
+        let v = *vector::borrow(leaves, leaf_pos);
         leaf_pos = leaf_pos + 1;
-        *vector::borrow(leaves, leaf_pos)
+        v
       } else {
+        let v = *vector::borrow(&hashes, hash_pos);
         hash_pos = hash_pos + 1;
-        *vector::borrow(&hashes, hash_pos)
+        v
       };
 
       let b = if (*vector::borrow(proof_flags, i)) {
         if (leaf_pos < leaves_len) {
+          let v = *vector::borrow(leaves, leaf_pos);
           leaf_pos = leaf_pos + 1;
-          *vector::borrow(leaves, leaf_pos)
+          v
         } else {
+          let v = *vector::borrow(&hashes, hash_pos);
           hash_pos = hash_pos + 1;
-          *vector::borrow(&hashes, hash_pos)
+          v
         }
       } else {
+        let v = *vector::borrow(proof, proof_pos);
         proof_pos = proof_pos + 1;
-        *vector::borrow(proof, proof_pos)
+        v
       };
 
       vector::push_back(&mut hashes, hash_pair(a, b));

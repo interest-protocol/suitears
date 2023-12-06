@@ -63,5 +63,22 @@ module suitears::merkle_proof_tests {
     let root = x"f2129b5a697531ef818f644564a6552b35c549722385bc52aa7fe46c0b5f46b1";
     let leaf = x"eba909cf4bb90c6922771d7f126ad0fd11dfde93f3937a196274e1ac20fd2f5b";
     assert_eq(verify(&proof, root, leaf), false);
+  }
+
+  #[test]
+  fun test_multi_proof_verify() {
+    let root = x"6deb52b5da8fd108f79fab00341f38d2587896634c646ee52e49f845680a70c8";
+    let proof_flags = vector[false, true, false, true];
+    let leaves = vector[
+      x"19ba6c6333e0e9a15bf67523e0676e2f23eb8e574092552d5e888c64a4bb3681",
+      x"c62a8cfa41edc0ef6f6ae27a2985b7d39c7fea770787d7e104696c6e81f64848",
+      x"eba909cf4bb90c6922771d7f126ad0fd11dfde93f3937a196274e1ac20fd2f5b"
+    ];
+    let proof =  vector[
+      x"9a4f64e953595df82d1b4f570d34c4f4f0cfaf729a61e9d60e83e579e1aa283e",
+      x"8076923e76cf01a7c048400a2304c9a9c23bbbdac3a98ea3946340fdafbba34f"
+    ];
+
+    assert_eq(multi_proof_verify(&proof, &proof_flags, root, &leaves), true);
   }  
 }

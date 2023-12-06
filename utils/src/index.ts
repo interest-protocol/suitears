@@ -1,3 +1,3 @@
-import { invalidVerify } from './merkle-proof';
+import { multiProofVerify } from './merkle-proof';
 
-invalidVerify();
+multiProofVerify();

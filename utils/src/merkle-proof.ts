@@ -52,3 +52,20 @@ export const invalidVerify = () => {
     wrongLeaf,
   });
 };
+
+export const multiProofVerify = () => {
+  const merkleTree = StandardMerkleTree.of(toElements('abcdef'), ['string']);
+
+  const root = merkleTree.root;
+  const { proof, proofFlags, leaves } = merkleTree.getMultiProof(
+    toElements('bdf'),
+  );
+  const hashes = leaves.map((e) => merkleTree.leafHash(e));
+
+  console.log({
+    root,
+    proofFlags,
+    hashes,
+    proof,
+  });
+};
