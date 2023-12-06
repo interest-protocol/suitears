@@ -2,7 +2,7 @@
 module suitears::merkle_proof_tests {
   use sui::test_utils::assert_eq;
   
-  use suitears::merkle_proof::{verify, multi_proof_verify};
+  use suitears::merkle_proof::{verify, verify_with_index, multi_proof_verify};
 
   #[test]
   fun test_verify() {
@@ -17,11 +17,9 @@ module suitears::merkle_proof_tests {
       x"276141cd72b9b81c67f7182ff8a550b76eb96de9248a3ec027ac048c79649115",                              
     ];
 
-
     let root = x"b89eb120147840e813a77109b44063488a346b4ca15686185cf314320560d3f3";
     let leaf = x"6efbf77e320741a027b50f02224545461f97cd83762d5fbfeb894b9eb3287c16";
     assert_eq(verify(&proof, root, leaf), true);
-
 
     let proof = vector[
       x"1629d3b5b09b30449d258e35bbd09dd5e8a3abb91425ef810dc27eef995f7490",
@@ -32,6 +30,40 @@ module suitears::merkle_proof_tests {
     ];
     let leaf = x"a68bdd3859f39d4723bb3e83e33ae8205e6c8004c7df8a420db5f84280f63ba0";
     assert_eq(verify(&proof, root, leaf), true);
+  }
+
+  #[test]
+  fun test_verify_with_index() {
+      let proof = vector[
+      x"7051e21dd45e25ed8c605a53da6f77de151dcbf47b0e3ced3c5d8b61f4a13dbc",
+      x"1629d3b5b09b30449d258e35bbd09dd5e8a3abb91425ef810dc27eef995f7490",
+      x"633d21baee4bbe5ed5c51ac0c68f7946b8f28d2937f0ca7ef5e1ea9dbda52e7a",
+      x"8a65d3006581737a3bab46d9e4775dbc1821b1ea813d350a13fcd4f15a8942ec",
+      x"d6c3f3e36cd23ba32443f6a687ecea44ebfe2b8759a62cccf7759ec1fb563c76",
+      x"276141cd72b9b81c67f7182ff8a550b76eb96de9248a3ec027ac048c79649115",                              
+    ];
+
+    let root = x"b89eb120147840e813a77109b44063488a346b4ca15686185cf314320560d3f3";
+    let leaf = x"6efbf77e320741a027b50f02224545461f97cd83762d5fbfeb894b9eb3287c16";
+
+    let (pred, index) = verify_with_index(&proof, root, leaf);   
+    assert_eq(pred, true);
+    assert_eq(index, 19);
+
+    let proof = vector[
+      x"6efbf77e320741a027b50f02224545461f97cd83762d5fbfeb894b9eb3287c16",
+      x"1629d3b5b09b30449d258e35bbd09dd5e8a3abb91425ef810dc27eef995f7490",
+      x"633d21baee4bbe5ed5c51ac0c68f7946b8f28d2937f0ca7ef5e1ea9dbda52e7a",
+      x"8a65d3006581737a3bab46d9e4775dbc1821b1ea813d350a13fcd4f15a8942ec",
+      x"d6c3f3e36cd23ba32443f6a687ecea44ebfe2b8759a62cccf7759ec1fb563c76",
+      x"276141cd72b9b81c67f7182ff8a550b76eb96de9248a3ec027ac048c79649115",                              
+    ];
+
+    let leaf = x"7051e21dd45e25ed8c605a53da6f77de151dcbf47b0e3ced3c5d8b61f4a13dbc";
+    let (pred, index2) = verify_with_index(&proof, root, leaf);   
+    assert_eq(pred, true);
+    assert_eq(index != index2, true);
+    assert_eq(index2 >  index, true);
   }
 
   #[test]
@@ -159,5 +191,4 @@ module suitears::merkle_proof_tests {
     ];   
     multi_proof_verify(&proof, &proof_flags, root, &leaves);        
   }
-
 }

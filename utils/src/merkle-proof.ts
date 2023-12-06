@@ -15,7 +15,9 @@ export const validVerify = () => {
 
   const root = merkleTree.root;
   const hash = merkleTree.leafHash(['A']);
+  const hashB = merkleTree.leafHash(['B']);
   const proof = merkleTree.getProof(['A']);
+  const proofB = merkleTree.getProof(['B']);
 
   const noSuchLeaf = hashPair(
     ethers.toBeArray(merkleTree.leafHash(['A'])),
@@ -25,7 +27,9 @@ export const validVerify = () => {
   console.log({
     root,
     hash,
+    hashB,
     proof,
+    proofB,
     noSuchLeaf,
   });
 };

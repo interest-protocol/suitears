@@ -1,3 +1,3 @@
-import { treeWithOneLeaf } from './merkle-proof';
+import { validVerify } from './merkle-proof';
 
-treeWithOneLeaf();
+validVerify();
