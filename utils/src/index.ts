@@ -1,3 +1,3 @@
-import { multiProofVerify } from './merkle-proof';
+import { treeWithOneLeaf } from './merkle-proof';
 
-multiProofVerify();
+treeWithOneLeaf();
