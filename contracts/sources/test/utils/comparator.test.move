@@ -3,7 +3,7 @@ module suitears::comparator_tests {
   use std::vector;
   use std::string;
 
-  use suitears::comparator::{compare, is_equal, is_greater_than, is_smaller_than};
+  use suitears::comparator::{compare, eq, gt, lt};
 
   struct Complex has drop {
     value0: vector<u128>,
@@ -17,18 +17,18 @@ module suitears::comparator_tests {
     let value1 = string::utf8(b"beta");
     let value2 = string::utf8(b"betaa");
 
-    assert!(is_equal(&compare(&value0, &value0)), 0);
-    assert!(is_equal(&compare(&value1, &value1)), 1);
-    assert!(is_equal(&compare(&value2, &value2)), 2);
+    assert!(eq(&compare(&value0, &value0)), 0);
+    assert!(eq(&compare(&value1, &value1)), 1);
+    assert!(eq(&compare(&value2, &value2)), 2);
 
-    assert!(is_greater_than(&compare(&value0, &value1)), 3);
-    assert!(is_smaller_than(&compare(&value1, &value0)), 4);
+    assert!(gt(&compare(&value0, &value1)), 3);
+    assert!(lt(&compare(&value1, &value0)), 4);
 
-    assert!(is_smaller_than(&compare(&value0, &value2)), 5);
-    assert!(is_greater_than(&compare(&value2, &value0)), 6);
+    assert!(lt(&compare(&value0, &value2)), 5);
+    assert!(gt(&compare(&value2, &value0)), 6);
 
-    assert!(is_smaller_than(&compare(&value1, &value2)), 7);
-    assert!(is_greater_than(&compare(&value2, &value1)), 8);
+    assert!(lt(&compare(&value1, &value2)), 7);
+    assert!(gt(&compare(&value2, &value1)), 8);
   }
 
   #[test]
@@ -37,18 +37,18 @@ module suitears::comparator_tests {
     let value1: u128 = 152;
     let value2: u128 = 511; // 0x1ff
 
-    assert!(is_equal(&compare(&value0, &value0)), 0);
-    assert!(is_equal(&compare(&value1, &value1)), 1);
-    assert!(is_equal(&compare(&value2, &value2)), 2);
+    assert!(eq(&compare(&value0, &value0)), 0);
+    assert!(eq(&compare(&value1, &value1)), 1);
+    assert!(eq(&compare(&value2, &value2)), 2);
 
-    assert!(is_smaller_than(&compare(&value0, &value1)), 2);
-    assert!(is_greater_than(&compare(&value1, &value0)), 3);
+    assert!(lt(&compare(&value0, &value1)), 2);
+    assert!(gt(&compare(&value1, &value0)), 3);
 
-    assert!(is_smaller_than(&compare(&value0, &value2)), 3);
-    assert!(is_greater_than(&compare(&value2, &value0)), 4);
+    assert!(lt(&compare(&value0, &value2)), 3);
+    assert!(gt(&compare(&value2, &value0)), 4);
 
-    assert!(is_smaller_than(&compare(&value1, &value2)), 5);
-    assert!(is_greater_than(&compare(&value2, &value1)), 6);
+    assert!(lt(&compare(&value1, &value2)), 5);
+    assert!(gt(&compare(&value2, &value1)), 6);
   }
 
   #[test]
@@ -90,13 +90,13 @@ module suitears::comparator_tests {
       value2: 42,
     };
 
-    assert!(is_equal(&compare(&base, &base)), 0);
-    assert!(is_smaller_than(&compare(&base, &other_0)), 1);
-    assert!(is_greater_than(&compare(&other_0, &base)), 2);
-    assert!(is_smaller_than(&compare(&base, &other_1)), 3);
-    assert!(is_greater_than(&compare(&other_1, &base)), 4);
-    assert!(is_smaller_than(&compare(&base, &other_2)), 5);
-    assert!(is_greater_than(&compare(&other_2, &base)), 6);
+    assert!(eq(&compare(&base, &base)), 0);
+    assert!(lt(&compare(&base, &other_0)), 1);
+    assert!(gt(&compare(&other_0, &base)), 2);
+    assert!(lt(&compare(&base, &other_1)), 3);
+    assert!(gt(&compare(&other_1, &base)), 4);
+    assert!(lt(&compare(&base, &other_2)), 5);
+    assert!(gt(&compare(&other_2, &base)), 6);
   }  
 
   #[test]
@@ -106,10 +106,10 @@ module suitears::comparator_tests {
     let value0: u128 = 1;
     let value1: u128 = 256;
 
-    assert!(is_equal(&compare(&value0, &value0)), 0);
-    assert!(is_equal(&compare(&value1, &value1)), 1);
+    assert!(eq(&compare(&value0, &value0)), 0);
+    assert!(eq(&compare(&value1, &value1)), 1);
 
-    assert!(is_smaller_than(&compare(&value0, &value1)), 2);
-    assert!(is_greater_than(&compare(&value1, &value0)), 3);
+    assert!(lt(&compare(&value0, &value1)), 2);
+    assert!(gt(&compare(&value1, &value0)), 3);
   }    
 }
