@@ -39,16 +39,16 @@ module suitears::string {
   * aborts-if: 
   * - `b` is longer than `a`.  
   */
-  public fun contains(a: &String, b: &String): bool {
-    if (ascii::length(b) > ascii::length(a)) return false;
+  public fun contains(a: String, b: String): bool {
+    if (ascii::length(&b) > ascii::length(&a)) return false;
 
     let (haystack, needle) = (a, b);
     
-    let (i, end) = (0, ascii::length(needle) - 1);
-    while (i + end < ascii::length(haystack)) {
+    let (i, end) = (0, ascii::length(&needle) - 1);
+    while (i + end < ascii::length(&haystack)) {
       let j = end;
       loop {
-        if (into_char(haystack, i + j) == into_char(needle, j)) {
+        if (into_char(&haystack, i + j) == into_char(&needle, j)) {
           if (j == 0) {
             return true // Found the substring
           } else {
