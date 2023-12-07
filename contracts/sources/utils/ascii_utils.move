@@ -1,18 +1,16 @@
 /*
-* @title String - A utility library to operate on strings. 
+* @title ASCII Utils - A utility library to operate on ASCII strings. 
 *
 * @notice We would like to credit Movemate and Capsules for some function implementations. 
 * Movemate - https://github.com/pentagonxyz/movemate/blob/main/sui/sources/to_string.move 
 * Capsules - https://github.com/capsule-craft/capsules/blob/master/packages/sui_utils/sources/ascii2.move 
 */
-module suitears::string {
+module suitears::ascii_utils {
   // === Imports ===
 
   use std::bcs;
   use std::vector;
   use std::ascii::{Self, String, Char};
-  
-  use sui::object::{Self, ID};
 
   // === Constants ===
 
@@ -267,39 +265,6 @@ module suitears::string {
     };
 
     ascii::string(ascii_bytes)
-  }
-
-  /*
-  * @notice Converts a `ascii::String` to `object::ID`.
-  *
-  * @dev ASCII only characters. 
-  *
-  * @param str A 32-byte string.   
-  * @return ID. The `object::ID` representation of `str`. 
-  */ 
-  public fun ascii_into_id(str: String): ID {
-    ascii_bytes_into_id(ascii::into_bytes(str))
-  }
-
-  /*
-  * @notice Converts a `ascii::String` bytes to `object::ID`.
-  *
-  * @dev ASCII only characters. 
-  *
-  * @param ascii_bytes Ascii Bytes.   
-  * @return ID. The `object::ID` representation of `str`. 
-  */ 
-  public fun ascii_bytes_into_id(ascii_bytes: vector<u8>): ID {
-    let (i, addr_bytes) = (0, vector::empty<u8>());
-
-    while (i < vector::length(&ascii_bytes)) {
-      let low: u8 = ascii_to_u8(*vector::borrow(&ascii_bytes, i + 1));
-      let high: u8 = ascii_to_u8(*vector::borrow(&ascii_bytes, i)) * 16u8;
-      vector::push_back(&mut addr_bytes, low + high);
-      i = i + 2;
-    };
-
-    object::id_from_bytes(addr_bytes)
   }
 
   /*

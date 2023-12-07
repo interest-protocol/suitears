@@ -1,15 +1,17 @@
 #[test_only]
-module suitears::string_tests {
+module suitears::ascii_utils_tests {
   use std::ascii::{Self, string, length};
 
   use sui::test_scenario;
   use sui::test_utils::assert_eq;
 
-  use suitears::string::{
+  use suitears::ascii_utils::{
     slice,
     append,
     contains, 
     into_char,
+    u8_to_ascii,
+    ascii_to_u8,
     to_lower_case,
     to_upper_case,
     u128_to_string,
@@ -51,7 +53,7 @@ module suitears::string_tests {
   }
 
   #[test]
-  public fun test_change_case() {
+  fun test_change_case() {
     let string = ascii::string(b"HeLLo WorLd");
     let lower = to_lower_case(string);
     let upper = to_upper_case(string);
@@ -101,7 +103,7 @@ module suitears::string_tests {
 
 
   #[test]
-  public fun test_decompose_type() {
+  fun test_decompose_type() {
     let scenario = test_scenario::begin(@0x5);
     {
       let type = string(b"0x21a31ea6f1924898b78f06f0d929f3b91a2748c0::schema::Schema");
@@ -114,7 +116,7 @@ module suitears::string_tests {
   }
 
   #[test]
-  public fun test_addr_into_string() {
+  fun test_addr_into_string() {
     let scenario = test_scenario::begin(@0x5);
     let _ctx = test_scenario::ctx(&mut scenario);
     {
@@ -123,4 +125,32 @@ module suitears::string_tests {
     };
     test_scenario::end(scenario);
   } 
+
+  #[test]
+  fun test_u8_to_ascii() {
+    assert_eq(u8_to_ascii(0), 48);
+    assert_eq(u8_to_ascii(1), 49);
+    assert_eq(u8_to_ascii(2), 50);
+    assert_eq(u8_to_ascii(3), 51);
+    assert_eq(u8_to_ascii(4), 52);
+    assert_eq(u8_to_ascii(5), 53);
+    assert_eq(u8_to_ascii(6), 54);
+    assert_eq(u8_to_ascii(7), 55);
+    assert_eq(u8_to_ascii(8), 56);
+    assert_eq(u8_to_ascii(9), 57);
+  }
+
+  #[test]
+  fun test_ascii_to_u8() {
+    assert_eq(ascii_to_u8(48), 0);
+    assert_eq(ascii_to_u8(49), 1);
+    assert_eq(ascii_to_u8(50), 2);
+    assert_eq(ascii_to_u8(51), 3);
+    assert_eq(ascii_to_u8(52), 4);
+    assert_eq(ascii_to_u8(53), 5);
+    assert_eq(ascii_to_u8(54), 6);
+    assert_eq(ascii_to_u8(55), 7);
+    assert_eq(ascii_to_u8(56), 8);
+    assert_eq(ascii_to_u8(57), 9);
+  }
 }
