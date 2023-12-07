@@ -1,5 +1,5 @@
 /*
-* @title String - A utility library to operate on string. 
+* @title String - A utility library to operate on strings. 
 *
 * @notice We would like to credit Movemate and Capsules for some function implementations. 
 * Movemate - https://github.com/pentagonxyz/movemate/blob/main/sui/sources/to_string.move 
@@ -29,7 +29,7 @@ module suitears::string {
   /*
   * @notice It checks if `a` contains `b`. 
   *
-  * @dev Computes the index of the first occurrence of a string. Returns false if no occurrence found.
+  * @dev Computes the index of the first occurrence of a string. Returns false if no occurrence is found.
   * @dev Naive implementation of a substring matching algorithm, intended to be used with < 100 length strings. 
   *
   * @param a A string. 
@@ -82,8 +82,6 @@ module suitears::string {
     a_copy
   }
 
-  // Returns a [i, j) slice of the string starting at index i and going up to, but not including, index j
-  // Aborts if j is greater than the length of the string 
   /*
   * @Notice Returns a [i, j) slice of the string starting at index i and going up to, but not including, index j. 
   *
@@ -131,10 +129,10 @@ module suitears::string {
   }
 
  /*
- * @notice It lower cases a string.  
+ * @notice It is lowercase a string.  
  * 
  * @param string The string we wish to lowercase.   
- * @return String. The lowercased `string`.   
+ * @return String. The lowercase `string`.   
  */
   public fun to_lower_case(string: String): String {
     let (bytes, i) = (ascii::into_bytes(string), 0);
@@ -251,7 +249,7 @@ module suitears::string {
   * @dev Addresses are 32 bytes, whereas the string-encoded address is 64 bytes.
   * @dev Outputted strings do not include the 0x prefix. 
   *
-  * @param addr A 32 bytes address.  
+  * @param addr A 32-byte address.  
   * @return String. The `ascii::String` representation of `addr`. 
   */    
   public fun addr_into_string(addr: address): String {
@@ -276,7 +274,7 @@ module suitears::string {
   *
   * @dev ASCII only characters. 
   *
-  * @param str A 32 bytes string.   
+  * @param str A 32-byte string.   
   * @return ID. The `object::ID` representation of `str`. 
   */ 
   public fun ascii_into_id(str: String): ID {
@@ -309,7 +307,7 @@ module suitears::string {
   *
   * @dev This function assumes `num` is [0...15].
   *
-  * @param num reprents a ASCII character.    
+  * @param num represents an ASCII character.    
   * @return u8. The `ascii::String` code for `num`. 
   */ 
   public fun u8_to_ascii(num: u8): u8 {
@@ -321,11 +319,11 @@ module suitears::string {
   }
 
   /*
-  * @notice Converts a ascii character to its decimal representation u8.
+  * @notice Converts an ASCII character to its decimal representation u8.
   *
-  * @dev This function assumes ascii character is [0...15].
+  * @dev This function assumes the ascii character is [0...15].
   *
-  * @param char  ascii character.    
+  * @param char ASCII character.    
   * @return u8. The decimal representation of `char`. 
   */ 
   public fun ascii_to_u8(char: u8): u8 {

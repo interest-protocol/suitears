@@ -4,7 +4,7 @@
  * @dev It is from OZ. 
  * @dev https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/cryptography/MerkleProof.sol
  *
- * @dev The tree and the proofs can be generated using OZ's library.abort
+ * @dev The tree and the proofs can be generated using OZ's library.
  * @dev https://github.com/OpenZeppelin/merkle-tree[JavaScript library].
  *
  * @dev WARNING: You should avoid using leaf values that are 64 bytes long prior to hashing, 
@@ -89,7 +89,7 @@ module suitears::merkle_proof {
   /*
   * @dev Returns the rebuilt hash obtained by traversing a Merkle tree up from `leaf` using `proof`. 
   * A `proof` is valid if and * only if the rebuilt hash matches the root of the tree. 
-  * When processing the proof, the pairs of leafs & pre-images are assumed to be sorted. 
+  * When processing the proof, the pairs of leaves & pre-images are assumed to be sorted. 
   *
   * @param proof The Merkle proof. 
   * @param leaf The `leaf` we wish to prove if it is part of the tree. 
@@ -112,7 +112,7 @@ module suitears::merkle_proof {
   * @dev Returns true if the `leaves` can be proved to be a part of a Merkle tree defined by 
   * `root`, according to `proof` and `proofFlags` as described in {processMultiProof}. 
   *
-  * @param proof The proof that the `leaves` belong to the the Merkle tree. 
+  * @param proof The proof that the `leaves` belong to the Merkle tree. 
   * @param proof_flags Instructions to reconstruct the `root`. 
   * @param root The root we wish to prove. 
   * @param leaves The leaves we are checking. 
@@ -131,7 +131,7 @@ module suitears::merkle_proof {
   * @dev Returns the root of a tree reconstructed from `leaves` and the sibling nodes in `proof`,
   * consuming from one or the other at each step according to the instructions given by `proofFlags`.
   *
-  * @param proof The proof that the `leaves` belong to the the Merkle tree. 
+  * @param proof The proof that the `leaves` belong to the Merkle tree. 
   * @param proof_flags Instructions to reconstruct the `root`. 
   * @param leaves The leaves we are checking. 
   * @return root. The reconstructed root. 
@@ -211,7 +211,7 @@ module suitears::merkle_proof {
   *
   * @param a Bytes to be appended and hashed. 
   * @param b Bytes to be appended and hashed. 
-  * @return vector<u8>. The result of hasing `a` and `b`. 
+  * @return vector<u8>. The result of hashing `a` and `b`. 
   */
   fun hash_pair(a: vector<u8>, b: vector<u8>): vector<u8> {
     if (vectors::lt(&a, &b)) efficient_hash(a, b) else efficient_hash(b, a)

@@ -275,6 +275,8 @@ module suitears::fixed_point64 {
 
   /*
   * @notice It returns `x` * `y`.    
+  *
+  * @dev Use {mul_128} if you think the values can overflow.
   * 
   * @param x The first operand. 
   * @param y The second operand. 
