@@ -180,6 +180,6 @@ module suitears::quadratic_vesting_wallet {
     }
 
     fun quadratic(x: u64, a: u64, b: u64, c: u64): u64 {
-      mul_down(math::pow(x, 2), a + mul_down(b, x) + c)
+      mul_down(math::pow(x, 2) / ROLL, a + mul_down(b, x) + c)
     }
 }

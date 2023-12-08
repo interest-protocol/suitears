@@ -1,5 +1,8 @@
 /*
-* @title Fixed Point WAD: A set of functions to operate over u256 numbers with 1e18 precision.
+* @title Fixed Point WAD
+*
+* @notice A set of functions to operate over u256 numbers with 1e18 precision.
+*
 * @dev It emulates the decimal precision of ERC20 to port some of their advanced math operations such as exp and {exp} and {ln}. 
 */
 module suitears::fixed_point_wad {
@@ -34,7 +37,9 @@ module suitears::fixed_point_wad {
 
   /*
   * @notice It tries to `x` * `y` / `WAD` rounding down.
+  *
   * @dev It returns zero instead of throwing an overflow error. 
+  *
   * @param x The first operand. 
   * @param y The second operand. 
   * @param bool. If the operation was successful or not.
@@ -46,7 +51,9 @@ module suitears::fixed_point_wad {
 
   /*
   * @notice It tries to `x` * `y` / `WAD` rounding up.
+  *
   * @dev It returns zero instead of throwing an overflow error. 
+  *
   * @param x The first operand. 
   * @param y The second operand. 
   * @param bool. If the operation was successful or not.
@@ -58,8 +65,10 @@ module suitears::fixed_point_wad {
 
   /*
   * @notice It tries to `x` * `WAD` / `y` rounding down.
+  *
   * @dev It will return 0 if `y` is zero.
   * @dev It returns zero instead of throwing an overflow error. 
+  *
   * @param x The first operand. 
   * @param y The second operand. 
   * @param bool. If the operation was successful or not.
@@ -71,8 +80,10 @@ module suitears::fixed_point_wad {
 
   /*
   * @notice It tries to `x` * `WAD` / `y` rounding up.
+  *
   * @dev It will return 0 if `y` is zero.
   * @dev It returns zero instead of throwing an overflow error. 
+  *
   * @param x The first operand. 
   * @param y The second operand. 
   * @param bool. If the operation was successful or not.
@@ -84,6 +95,7 @@ module suitears::fixed_point_wad {
 
   /*
   * @notice `x` * `y` / `WAD` rounding down.
+  *
   * @param x The first operand. 
   * @param y The second operand. 
   * @return u256. The result of `x` * `y` / `WAD`. 
@@ -94,6 +106,7 @@ module suitears::fixed_point_wad {
 
   /*
   * @notice `x` * `y` / `WAD` rounding up.
+  *
   * @param x The first operand. 
   * @param y The second operand. 
   * @return u256. The result of `x` * `y` / `WAD`. 
@@ -104,6 +117,7 @@ module suitears::fixed_point_wad {
 
   /*
   * @notice `x` * `WAD` / `y` rounding down.
+  *
   * @param x The first operand. 
   * @param y The second operand. 
   * @return u256. The result of `x` * `WAD` / `y`. 
@@ -114,6 +128,7 @@ module suitears::fixed_point_wad {
 
   /*
   * @notice `x` * `WAD` / `y` rounding up.
+  *
   * @param x The first operand. 
   * @param y The second operand. 
   * @return u256. The result of `x` * `WAD` / `y`. 
@@ -124,6 +139,7 @@ module suitears::fixed_point_wad {
 
   /*
   * @notice It converts `x` precision to a `WAD`, a number with a precision of 1e9.
+  *
   * @param x The value to be converted. 
   * @param y The current decimal scalar of the x. 
   * @return u256. The result of `x` * `WAD` / `decimal_factor`. 
@@ -134,8 +150,10 @@ module suitears::fixed_point_wad {
 
   /*
   * @notice e^x. 
+  *
   * @dev All credits to Remco Bloemen and more information here: https://xn--2-umb.com/22/exp-ln/ 
-  * @return Int. The result of e^x`. 
+  * @param x The exponent. 
+  * @return Int. The result of e^x. 
   *
   * aborts-if
   *   - `x` is larger than 135305999368893231589. 
@@ -172,7 +190,10 @@ module suitears::fixed_point_wad {
 
   /*
   * @notice ln(x). 
+  *
   * @dev All credits to Remco Bloemen and more information here: https://xn--2-umb.com/22/exp-ln/ 
+  *
+  * @param x The operand.
   * @return Int. The result of ln(x). 
   *
   * aborts-if

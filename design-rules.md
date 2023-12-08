@@ -44,7 +44,7 @@
   - borrow_property_name
   - borrow_mut_property_name
 
-- **Do call structs as \*Potato. It is a pattern recognized by the lack of abilities:**
+- **Do not call structs as \*Potato. It is a pattern recognized by the lack of abilities:**
 
   ```Move
   module suitears::request {

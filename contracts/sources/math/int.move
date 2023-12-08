@@ -1,5 +1,8 @@
 /*
-* @title A library to convert unsigned integers to signed integers using two's complement. It contains basic arithmetic operations for signed integers. 
+* @title Int 
+*
+* @notice A library to convert unsigned integers to signed integers using two's complement. It contains basic arithmetic operations for signed integers. 
+*
 * @dev It is inspired by Movemate i64 https://github.com/pentagonxyz/movemate/blob/main/sui/sources/i64.move 
 * @dev Uses arithmetic shr and shl for negative numbers 
 */
@@ -49,6 +52,7 @@ module suitears::int {
   
   /*
   * @notice It returns the inner value inside `self`.
+  *
   * @param self The Int struct.  
   * @return u256. The inner value.
   */
@@ -60,6 +64,7 @@ module suitears::int {
 
   /*
   * @notice It creates a zero `Int`.   
+  *
   * @return Int. The wrapped value.
   */
   public fun zero(): Int {
@@ -67,7 +72,8 @@ module suitears::int {
   }
 
   /*
-  * @notice It creates an `Int` with a value of 1.   
+  * @notice It creates an `Int` with a value of 1. 
+  *  
   * @return Int. The wrapped value.
   */
   public fun one(): Int {
@@ -75,7 +81,8 @@ module suitears::int {
   } 
 
   /*
-  * @notice It creates the largest possible `Int`.   
+  * @notice It creates the largest possible `Int`.
+  *   
   * @return Int. The wrapped value.
   */
   public fun max(): Int {
@@ -84,6 +91,7 @@ module suitears::int {
 
   /*
   * @notice It wraps a u8 `value` into an `Int`.  
+  *
   * @param value The u8 value to wrap  
   * @return Int. The wrapped `value`.
   */
@@ -92,7 +100,8 @@ module suitears::int {
   }
 
   /*
-  * @notice It wraps a u16 `value` into an `Int`.  
+  * @notice It wraps a u16 `value` into an `Int`. 
+  * 
   * @param value The u16 value to wrap  
   * @return Int. The wrapped `value`.
   */
@@ -102,6 +111,7 @@ module suitears::int {
 
   /*
   * @notice It wraps a u32 `value` into an `Int`.  
+  *
   * @param value The u32 value to wrap  
   * @return Int. The wrapped `value`.
   */
@@ -111,6 +121,7 @@ module suitears::int {
 
   /*
   * @notice It wraps a u64 `value` into an `Int`.  
+  *
   * @param value The u64 value to wrap  
   * @return Int. The wrapped `value`.
   */
@@ -119,7 +130,8 @@ module suitears::int {
   }
 
   /*
-  * @notice It wraps a u128 `value` into an `Int`.  
+  * @notice It wraps a u128 `value` into an `Int`.
+  *  
   * @param value The u128 value to wrap  
   * @return Int. The wrapped `value`.
   */
@@ -129,6 +141,7 @@ module suitears::int {
 
   /*
   * @notice It wraps a u256 `value` into an `Int`.  
+  *
   * @param value The u256 value to wrap  
   * @return Int. The wrapped `value`.
   *
@@ -142,6 +155,7 @@ module suitears::int {
 
   /*
   * @notice It wraps a u8 `value` into an `Int` and negates it.  
+  *
   * @param value The u8 value to wrap  
   * @return Int. The wrapped negative `value`.
   */
@@ -153,6 +167,7 @@ module suitears::int {
 
   /*
   * @notice It wraps a u16 `value` into an `Int` and negates it.  
+  *
   * @param value The u16 value to wrap  
   * @return Int. The wrapped negative `value`.
   */
@@ -164,6 +179,7 @@ module suitears::int {
 
   /*
   * @notice It wraps a u32 `value` into an `Int` and negates it.  
+  *
   * @param value The u32 value to wrap  
   * @return Int. The wrapped negative `value`.
   */
@@ -174,7 +190,8 @@ module suitears::int {
   }
 
   /*
-  * @notice It wraps a u64 `value` into an `Int` and negates it.  
+  * @notice It wraps a u64 `value` into an `Int` and negates it. 
+  * 
   * @param value The u64 value to wrap  
   * @return Int. The wrapped negative `value`.
   */
@@ -186,6 +203,7 @@ module suitears::int {
 
   /*
   * @notice It wraps a u128 `value` into an `Int` and negates it.  
+  *
   * @param value The u128 value to wrap  
   * @return Int. The wrapped negative `value`.
   */
@@ -197,6 +215,7 @@ module suitears::int {
 
   /*
   * @notice It wraps a u256 `value` into an `Int` and negates it.  
+  *
   * @param value The u256 value to wrap  
   * @return Int. The wrapped negative `value`.
   */
@@ -208,6 +227,7 @@ module suitears::int {
 
   /*
   * @notice It unwraps the value inside `self` and casts it to u8.  
+  *
   * @param self The Int struct.  
   * @return u8. The inner value cast to u8. 
   *
@@ -220,7 +240,8 @@ module suitears::int {
   }
 
   /*
-  * @notice It unwraps the value inside `self` and casts it to u16.  
+  * @notice It unwraps the value inside `self` and casts it to u16. 
+  * 
   * @param self The Int struct.  
   * @return u16. The inner value cast to u16. 
   *
@@ -234,6 +255,7 @@ module suitears::int {
 
   /*
   * @notice It unwraps the value inside `self` and casts it to u32.  
+  *
   * @param self The Int struct.  
   * @return u32. The inner value cast to u32. 
   *
@@ -247,6 +269,7 @@ module suitears::int {
 
   /*
   * @notice It unwraps the value inside `self` and casts it to u64.  
+  *
   * @param self The Int struct.  
   * @return u64. The inner value cast to u64. 
   *
@@ -260,6 +283,7 @@ module suitears::int {
 
   /*
   * @notice It unwraps the value inside `self` and casts it to u128.  
+  *
   * @param self The Int struct.  
   * @return u128. The inner value cast to u128. 
   *
@@ -272,7 +296,8 @@ module suitears::int {
   }
 
   /*
-  * @notice It unwraps the value inside `self` and casts it to u256.  
+  * @notice It unwraps the value inside `self` and casts it to u256. 
+  * 
   * @param self The Int struct.  
   * @return u256. The inner value cast to u256. 
   *
@@ -286,6 +311,7 @@ module suitears::int {
 
   /*
   * @notice It unwraps the value inside `self` and truncates it to u8.  
+  *
   * @param self The Int struct.  
   * @return u8. The inner value is truncated to u8. 
   */
@@ -295,6 +321,7 @@ module suitears::int {
 
   /*
   * @notice It unwraps the value inside `self` and truncates it to u16.  
+  *
   * @param self The Int struct.  
   * @return u16. The inner value is truncated to u16. 
   */
@@ -304,6 +331,7 @@ module suitears::int {
 
   /*
   * @notice It unwraps the value inside `self` and truncates it to u32.  
+  *
   * @param self The Int struct.  
   * @return u32. The inner value is truncated to u32. 
   */

@@ -1,6 +1,9 @@
 /*
-* @title Math u256: A set of functions to operate over u256 numbers.
+* @title Math256
+*
+* @notice A set of functions to operate over u256 numbers.
 * @notice Many functions are implementations of https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/math/Math.sol
+*
 * @dev Beware that some operations throw on overflow and underflows.  
 */
 module suitears::math256 {
@@ -16,8 +19,10 @@ module suitears::math256 {
   // === Try Functions do not throw ===
 
   /*
-  * @notice It tries to perform `x` + `y`. 
+  * @notice It tries to perform `x` + `y`.
+  * 
   * @dev Checks for overflow. 
+  *
   * @param x The first operand. 
   * @param y The second operand. 
   * @return bool. If the operation was successful.
@@ -34,7 +39,9 @@ module suitears::math256 {
 
   /*
   * @notice It tries to perform `x` - `y`. 
+  *
   * @dev Checks for underflow. 
+  *
   * @param x The first operand. 
   * @param y The second operand. 
   * @return bool. If the operation was successful.
@@ -46,7 +53,9 @@ module suitears::math256 {
 
   /*
   * @notice It tries to perform `x` * `y`. 
+  *
   * @dev Checks for overflow. 
+  *
   * @param x The first operand. 
   * @param y The second operand. 
   * @return bool. If the operation was successful.
@@ -59,7 +68,9 @@ module suitears::math256 {
 
   /*
   * @notice It tries to perform `x` / `y rounding down. 
+  *
   * @dev Checks for zero division. 
+  *
   * @param x The first operand. 
   * @param y The second operand. 
   * @return bool. If the operation was successful.
@@ -71,7 +82,9 @@ module suitears::math256 {
 
   /*
   * @notice It tries to perform `x` / `y` rounding up. 
+  *
   * @dev Checks for zero division. 
+  *
   * @param x The first operand. 
   * @param y The second operand. 
   * @return bool. If the operation was successful.
@@ -83,8 +96,10 @@ module suitears::math256 {
 
   /*
   * @notice It tries to perform `x` * `y` / `z` rounding down. 
+  *
   * @dev Checks for zero division. 
   * @dev Checks for overflow. 
+  *
   * @param x The first operand. 
   * @param y The second operand. 
   * @param z The divisor. 
@@ -101,8 +116,10 @@ module suitears::math256 {
 
   /*
   * @notice It tries to perform `x` * `y` / `z` rounding up. 
+  *
   * @dev Checks for zero division. 
   * @dev Checks for overflow. 
+  *
   * @param x The first operand. 
   * @param y The second operand. 
   * @param z The divisor. 
@@ -119,7 +136,9 @@ module suitears::math256 {
 
   /*
   * @notice It tries to perform `x` % `y`. 
+  *
   * @dev Checks for zero division. 
+  *
   * @param x The first operand. 
   * @param y The second operand. 
   * @return bool. If the operation was successful.
@@ -133,7 +152,9 @@ module suitears::math256 {
 
   /*
   * @notice It performs `x` * `y`. 
+  *
   * @dev It will throw on overflow. 
+  *
   * @param x The first operand. 
   * @param y The second operand. 
   * @return u256. The result of `x` * `y`. 
@@ -144,7 +165,9 @@ module suitears::math256 {
 
   /*
   * @notice It performs `x` / `y` rounding down. 
+  *
   * @dev It will throw on zero division. 
+  *
   * @param x The first operand. 
   * @param y The second operand. 
   * @return u256. The result of `x` / `y`. 
@@ -155,8 +178,10 @@ module suitears::math256 {
 
   /*
   * @notice It performs `x` / `y` rounding up. 
+  *
   * @dev It will throw on zero division. 
   * @dev It does not overflow. 
+  *
   * @param x The first operand. 
   * @param y The second operand. 
   * @return u256. The result of `x` / `y`. 
@@ -167,7 +192,9 @@ module suitears::math256 {
 
   /*
   * @notice It performs `x` * `y` / `z` rounding down. 
+  *
   * @dev It will throw on zero division. 
+  *
   * @param x The first operand. 
   * @param y The second operand.  
   * @param z The divisor.
@@ -179,7 +206,9 @@ module suitears::math256 {
 
   /*
   * @notice It performs `x` * `y` / `z` rounding up. 
+  *
   * @dev It will throw on zero division. 
+  *
   * @param x The first operand. 
   * @param y The second operand. 
   * @param z The divisor.  
@@ -192,6 +221,7 @@ module suitears::math256 {
 
   /*
   * @notice It returns the lowest number. 
+  *
   * @param x The first operand. 
   * @param y The second operand. 
   * @return u256. The lowest number. 
@@ -202,6 +232,7 @@ module suitears::math256 {
 
   /*
   * @notice It returns the largest number. 
+  *
   * @param x The first operand. 
   * @param y The second operand. 
   * @return u256. The largest number. 
@@ -212,6 +243,7 @@ module suitears::math256 {
 
   /*
   * @notice Clamps `x` between the range of [lower, upper].
+  *
   * @param x The operand. 
   * @param lower The lower bound of the range. 
   * @param upper The upper bound of the range.   
@@ -223,6 +255,7 @@ module suitears::math256 {
 
   /*
   * @notice Performs |x - y|.
+  *
   * @param x The first operand. 
   * @param y The second operand.  
   * @return u256. The difference. 
@@ -237,6 +270,7 @@ module suitears::math256 {
 
   /*
   * @notice Performs n^e.
+  *
   * @param n The base. 
   * @param e The exponent.  
   * @return u256. The result of n^e. 
@@ -259,6 +293,7 @@ module suitears::math256 {
 
   /*
   * @notice Adds all xs in a vector.
+  *
   * @param nums A vector of numbers.  
   * @return u256. The sum. 
   */
@@ -277,6 +312,7 @@ module suitears::math256 {
 
   /*
   * @notice It returns the average between two numbers (`x` + `y`) / 2.
+  *
   * @dev It does not overflow.
   * @param x The first operand. 
   * @param y The second operand. 
@@ -290,6 +326,7 @@ module suitears::math256 {
 
   /*
   * @notice Calculates the average of the vector of numbers sum of vector/length of vector.
+  *
   * @param nums A vector of numbers.  
   * @return u256. The average. 
   */
@@ -305,7 +342,9 @@ module suitears::math256 {
    
   /*
   * @notice Returns the square root of a number. If the number is not a perfect square, the x is rounded down.
+  *
   * @dev Inspired by Henry S. Warren, Jr.'s "Hacker's Delight" (Chapter 11).
+  *
   * @param x The operand.  
   * @return u256. The square root of x rounding down. 
   */ 
@@ -327,7 +366,9 @@ module suitears::math256 {
 
   /*
   * @notice Returns the square root of `x` number. If the number is not a perfect square, the `x` is rounded up.
+  *
   * @dev Inspired by Henry S. Warren, Jr.'s "Hacker's Delight" (Chapter 11).
+  *
   * @param x The operand.  
   * @return u256. The square root of x rounding up. 
   */ 
@@ -338,6 +379,7 @@ module suitears::math256 {
 
   /*
   * @notice Returns the log2(x) rounding down.
+  *
   * @param x The operand.  
   * @return u256. Log2(x). 
   */ 
@@ -386,6 +428,7 @@ module suitears::math256 {
 
   /*
   * @notice Returns the log2(x) rounding up.
+  *
   * @param x The operand.  
   * @return u256. Log2(x). 
   */ 
@@ -396,6 +439,7 @@ module suitears::math256 {
 
   /*
   * @notice Returns the log10(x) rounding down.
+  *
   * @param x The operand.  
   * @return u256. Log10(x). 
   */ 
@@ -440,6 +484,7 @@ module suitears::math256 {
 
   /*
   * @notice Returns the log10(x) rounding up.
+  *
   * @param x The operand.  
   * @return u256. Log10(x). 
   */ 
@@ -450,6 +495,7 @@ module suitears::math256 {
 
   /*
   * @notice Returns the log256(x) rounding down.
+  *
   * @param x The operand.  
   * @return u256. Log256(x). 
   */ 
@@ -484,6 +530,7 @@ module suitears::math256 {
 
   /*
   * @notice Returns the log256(x) rounding up.
+  *
   * @param x The operand.  
   * @return u256. Log256(x). 
   */ 

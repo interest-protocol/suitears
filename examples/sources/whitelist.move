@@ -1,6 +1,6 @@
 // Source & inspired from Scallop 
-
-module suitears::whitelist {
+// Whitelist implementation
+module examples::whitelist {
   use sui::object::UID;
   use sui::dynamic_field as df;
 
@@ -96,8 +96,7 @@ module suitears::whitelist {
   public fun is_user_allowed(self: &UID, user: address): bool {
     if (is_blacklisted(self, user) || is_rejecting_all(self)) return false;
     if (is_whitelist_mode(self) && is_whitelisted(self, user)) return true;
-    if (is_whitelist_mode(self)) return false;
-    true
+    !is_whitelist_mode(self)
   }
 
   public fun assert_is_accepting_all(self: &UID) {
