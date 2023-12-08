@@ -22,14 +22,14 @@ module suitears::vectors {
   /*
   * @notice Searches a sorted `vec` and returns the first index that contains
   * a value greater or equal to `element`. If no such index exists (i.e. all
-  * values in the vector are strictly less than `element`), the vector length is returned.
+  * values in the vector are strictly less than `element`), and the vector length is returned.
   *
   * @dev Time complexity O(log n).
   * @dev `vec` is expected to be sorted in ascending order, and to contain no repeated elements. 
   *
   * @param vec The vector to be searched. 
   * @param element We check if there is a value higher than it in the vector. 
-  * @return u64. The index of the member that is higher is `element`. The length is returned if no member is found.
+  * @return u64. The index of the member that is larger than `element`. The length is returned if no member is found.
   */
   public fun find_upper_bound(vec: vector<u64>, element: u64): u64 {
     if (vector::length(&vec) == 0) {
@@ -95,14 +95,14 @@ module suitears::vectors {
   * aborts-if 
   * - `a` and `b` have different lengths. 
   */
-  public fun gt(a: &vector<u8>, b: &vector<u8>): bool {
+  public fun gt(a: vector<u8>, b: vector<u8>): bool {
     let i = 0;
-    let len = vector::length(a);
-    assert!(len == vector::length(b), EVectorLengthMismatch);
+    let len = vector::length(&a);
+    assert!(len == vector::length(&b), EVectorLengthMismatch);
 
     while (i < len) {
-      let aa = *vector::borrow(a, i);
-      let bb = *vector::borrow(b, i);
+      let aa = *vector::borrow(&a, i);
+      let bb = *vector::borrow(&b, i);
       if (aa > bb) return true;
       if (aa < bb) return false;
       i = i + 1;
@@ -121,14 +121,14 @@ module suitears::vectors {
   * aborts-if 
   * - `a` and `b` have different lengths. 
   */
-  public fun lte(a: &vector<u8>, b: &vector<u8>): bool {
+  public fun lte(a: vector<u8>, b: vector<u8>): bool {
     let i = 0;
-    let len = vector::length(a);
-    assert!(len == vector::length(b), EVectorLengthMismatch);
+    let len = vector::length(&a);
+    assert!(len == vector::length(&b), EVectorLengthMismatch);
 
     while (i < len) {
-      let aa = *vector::borrow(a, i);
-      let bb = *vector::borrow(b, i);
+      let aa = *vector::borrow(&a, i);
+      let bb = *vector::borrow(&b, i);
       if (aa < bb) return true;
       if (aa > bb) return false;
       i = i + 1;
@@ -147,14 +147,14 @@ module suitears::vectors {
   * aborts-if 
   * - `a` and `b` have different lengths. 
   */
-  public fun gte(a: &vector<u8>, b: &vector<u8>): bool {
+  public fun gte(a: vector<u8>, b: vector<u8>): bool {
     let i = 0;
-    let len = vector::length(a);
-    assert!(len == vector::length(b), EVectorLengthMismatch);
+    let len = vector::length(&a);
+    assert!(len == vector::length(&b), EVectorLengthMismatch);
 
     while (i < len) {
-      let aa = *vector::borrow(a, i);
-      let bb = *vector::borrow(b, i);
+      let aa = *vector::borrow(&a, i);
+      let bb = *vector::borrow(&b, i);
       if (aa > bb) return true;
       if (aa < bb) return false;
       i = i + 1;
@@ -166,36 +166,42 @@ module suitears::vectors {
   // === Sorting Functions ===   
 
   /*
-  * @notice Sorts a `x` in ascending order. E.g. [342] => [234].  
+  * @notice Sorts a `a` in ascending order. E.g. [342] => [234].  
   *
-  * @param x The vector to sort. 
-  * @return vector<u256>. Sorted `x`.
+  * @param a The vector to sort. 
+  * @return vector<u256>. Sorted `a`.
   */
-  public fun ascending_insertion_sort(x: vector<u256>): vector<u256> {
-    let len = vector::length(&x) - 1;
-    let i = 0;
+  public fun ascending_insertion_sort(a: vector<u256>): vector<u256> {
+    let len = vector::length(&a);
+    let i = 1;
 
-    while (i < len) {
-      let j = i;
-      while (j > 0 && *vector::borrow(&x, j - 1) >  *vector::borrow(&x, j)) {
-        vector::swap(&mut x, j, j - 1);
-        j = j - 1;
+    while (len > i) {
+      let x = *vector::borrow(&a, i);
+      let curr = i;
+      let j = 0;
+
+      while (len > j) {
+        let y = *vector::borrow(&a, curr - 1);
+        if (y < x) break;
+        *vector::borrow_mut(&mut a, curr) = y;
+        curr = curr - 1;
+        if (curr == 0) break;
       };
 
+      *vector::borrow_mut(&mut a, curr) = x;  
       i = i + 1;
     }; 
 
-    x
+    a
   }  
 
   /*
-  * @notice Sorts a `x` in descending order. E.g. [342] => [432].  
+  * @notice Sorts a `a` in descending order. E.g. [342] => [432].  
   *
-  * @param x The vector to sort. 
-  * @return vector<u256>. Sorted `x`.
+  * @param a The vector to sort. 
+  * @return vector<u256>. Sorted `a`.
   */
-  public fun descending_insertion_sort(x: &vector<u256>): vector<u256> {
-    let a = *x;
+  public fun descending_insertion_sort(a: vector<u256>): vector<u256> {
     let len = vector::length(&a);
     let i = 1;
 
@@ -220,17 +226,17 @@ module suitears::vectors {
   }
 
   /*
-  * @notice Sorts a `x`. E.g. [342] => [432].  
+  * @notice Sorts a `values`. E.g. [342] => [234].  
   *
-  * @dev It mutates `x`. 
+  * @dev It mutates `values`. 
   * @dev It uses recursion. 
   * @dev Credits to https://github.com/suidouble/suidouble-liquid/blob/main/move/sources/suidouble_liquid_staker.move 
   *
   * @param values The vector to sort. 
-  * @param left The smaller side of the pivot. 
-  * @param right The larger side of the pivot. 
+  * @param left The smaller side of the pivot. Pass the 0.
+  * @param right The larger side of the pivot. Pass the `vector::length - 1`.
   */  
-  public fun quick_sort(values: &mut vector<u128>, left: u64, right: u64) {
+  public fun quick_sort(values: &mut vector<u256>, left: u64, right: u64) {
     if (left < right) {
       let partition_index = partion(values, left, right);
 
@@ -256,7 +262,7 @@ module suitears::vectors {
   * @param left The smaller side of the pivot. 
   * @param right The larger side of the pivot. 
   */  
-  fun partion(values: &mut vector<u128>, left: u64, right: u64): u64 {
+  fun partion(values: &mut vector<u256>, left: u64, right: u64): u64 {
     let pivot: u64 = left;
     let index: u64 = pivot + 1;
     let i: u64 = index;
