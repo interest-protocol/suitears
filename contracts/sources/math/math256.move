@@ -1,6 +1,9 @@
 /*
-* @title Math u256: A set of functions to operate over u256 numbers.
+* @title Math256
+*
+* @notice A set of functions to operate over u256 numbers.
 * @notice Many functions are implementations of https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/math/Math.sol
+*
 * @dev Beware that some operations throw on overflow and underflows.  
 */
 module suitears::math256 {

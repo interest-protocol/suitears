@@ -1,5 +1,7 @@
 /*
-* @title Math u64: A set of functions to operate over u64 numbers.
+* @title Math64 
+*
+* @notice A set of functions to operate over u64 numbers.
 *
 * @notice Many functions are implementations of https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/math/Math.sol
 *

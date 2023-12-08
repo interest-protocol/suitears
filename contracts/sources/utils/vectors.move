@@ -1,36 +1,50 @@
-/// @title vectors
-/// @notice Vector utilities.
-/// @dev TODO: Fuzz testing?
-/// Taken from https://github.com/pentagonxyz/movemate
+/*
+* @title Vectors
+*
+* @notice Utility functions for vectors.  
+*
+* @dev Credits to Movemate at https://github.com/pentagonxyz/movemate. 
+*/
 module suitears::vectors {
+  // === Imports ===
+
   use std::vector;
 
   use suitears::math64::average;
 
+  // === Errors ===  
+
   /// @dev When you supply vectors of different lengths to a function requiring equal-length vectors.
-  /// TODO: Support variable length vectors?
   const EVectorLengthMismatch: u64 = 0;
 
-  /// @dev Searches a sorted `vec` and returns the first index that contains
-  /// a value greater or equal to `element`. If no such index exists (i.e. all
-  /// values in the vector are strictly less than `element`), the vector length is
-  /// returned. Time complexity O(log n).
-  /// `vec` is expected to be sorted in ascending order, and to contain no
-  /// repeated elements.
-  public fun find_upper_bound(vec: &vector<u64>, element: u64): u64 {
-    if (vector::length(vec) == 0) {
+  // === Compare Functions ===  
+
+  /*
+  * @notice Searches a sorted `vec` and returns the first index that contains
+  * a value greater or equal to `element`. If no such index exists (i.e. all
+  * values in the vector are strictly less than `element`), the vector length is returned.
+  *
+  * @dev Time complexity O(log n).
+  * @dev `vec` is expected to be sorted in ascending order, and to contain no repeated elements. 
+  *
+  * @param vec The vector to be searched. 
+  * @param element We check if there is a value higher than it in the vector. 
+  * @return u64. The index of the member that is higher is `element`. The length is returned if no member is found.
+  */
+  public fun find_upper_bound(vec: vector<u64>, element: u64): u64 {
+    if (vector::length(&vec) == 0) {
       return 0
     };
 
     let low = 0;
-    let high = vector::length(vec);
+    let high = vector::length(&vec);
 
     while (low < high) {
       let mid = average(low, high);
 
       // Note that mid will always be strictly less than high (i.e. it will be a valid vector index)
       // because Math::average rounds down (it does integer division with truncation).
-      if (*vector::borrow(vec, mid) > element) {
+      if (*vector::borrow(&vec, mid) > element) {
         high = mid;
       } else {
         low = mid + 1;
@@ -38,21 +52,31 @@ module suitears::vectors {
     };
 
     // At this point `low` is the exclusive upper bound. We will return the inclusive upper bound.
-    if (low > 0 && *vector::borrow(vec, low - 1) == element) {
+    if (low > 0 && *vector::borrow(&vec, low - 1) == element) {
       low - 1
     } else {
       low
     }
   }
 
-  public fun lt(a: &vector<u8>, b: &vector<u8>): bool {
+  /*
+  * @notice Checks if `a` is smaller than `b`. E.g. x"123" < x"456". 
+  *
+  * @param a The first operand. 
+  * @param b The second operand. 
+  * @return bool. If `a` is smaller than `b`.
+  *
+  * aborts-if 
+  * - `a` and `b` have different lengths. 
+  */
+  public fun lt(a: vector<u8>, b: vector<u8>): bool {
     let i = 0;
-    let len = vector::length(a);
-    assert!(len == vector::length(b), EVectorLengthMismatch);
+    let len = vector::length(&a);
+    assert!(len == vector::length(&b), EVectorLengthMismatch);
 
     while (i < len) {
-      let aa = *vector::borrow(a, i);
-      let bb = *vector::borrow(b, i);
+      let aa = *vector::borrow(&a, i);
+      let bb = *vector::borrow(&b, i);
       if (aa < bb) return true;
       if (aa > bb) return false;
       i = i + 1;
@@ -61,6 +85,16 @@ module suitears::vectors {
     false
   }
 
+  /*
+  * @notice Checks if `a` is larger than `b`. E.g. x"123" < x"456". 
+  *
+  * @param a The first operand. 
+  * @param b The second operand. 
+  * @return bool. If `a` is larger than `b`.
+  *
+  * aborts-if 
+  * - `a` and `b` have different lengths. 
+  */
   public fun gt(a: &vector<u8>, b: &vector<u8>): bool {
     let i = 0;
     let len = vector::length(a);
@@ -77,6 +111,16 @@ module suitears::vectors {
     false
   }
 
+  /*
+  * @notice Checks if `a` is smaller or equal to `b`. E.g. x"123" < x"456". 
+  *
+  * @param a The first operand. 
+  * @param b The second operand. 
+  * @return bool. If `a` is smaller or equal to `b`.
+  *
+  * aborts-if 
+  * - `a` and `b` have different lengths. 
+  */
   public fun lte(a: &vector<u8>, b: &vector<u8>): bool {
     let i = 0;
     let len = vector::length(a);
@@ -93,6 +137,16 @@ module suitears::vectors {
     true
   }
 
+  /*
+  * @notice Checks if `a` is larger or equal to `b`. E.g. x"123" < x"456". 
+  *
+  * @param a The first operand. 
+  * @param b The second operand. 
+  * @return bool. If `a` is larger or equal to `b`.
+  *
+  * aborts-if 
+  * - `a` and `b` have different lengths. 
+  */
   public fun gte(a: &vector<u8>, b: &vector<u8>): bool {
     let i = 0;
     let len = vector::length(a);
@@ -109,10 +163,15 @@ module suitears::vectors {
     true
   }
 
-  // Our pools will not have more than 4 tokens
-  // Bubble sort is enough
-  public fun ascending_insertion_sort(x: &vector<u256>): vector<u256> {
-    let x = *x;
+  // === Sorting Functions ===   
+
+  /*
+  * @notice Sorts a `x` in ascending order. E.g. [342] => [234].  
+  *
+  * @param x The vector to sort. 
+  * @return vector<u256>. Sorted `x`.
+  */
+  public fun ascending_insertion_sort(x: vector<u256>): vector<u256> {
     let len = vector::length(&x) - 1;
     let i = 0;
 
@@ -129,6 +188,12 @@ module suitears::vectors {
     x
   }  
 
+  /*
+  * @notice Sorts a `x` in descending order. E.g. [342] => [432].  
+  *
+  * @param x The vector to sort. 
+  * @return vector<u256>. Sorted `x`.
+  */
   public fun descending_insertion_sort(x: &vector<u256>): vector<u256> {
     let a = *x;
     let len = vector::length(&a);
@@ -154,7 +219,17 @@ module suitears::vectors {
     a
   }
 
-  // @dev From https://github.com/suidouble/suidouble-liquid/blob/main/move/sources/suidouble_liquid_staker.move
+  /*
+  * @notice Sorts a `x`. E.g. [342] => [432].  
+  *
+  * @dev It mutates `x`. 
+  * @dev It uses recursion. 
+  * @dev Credits to https://github.com/suidouble/suidouble-liquid/blob/main/move/sources/suidouble_liquid_staker.move 
+  *
+  * @param values The vector to sort. 
+  * @param left The smaller side of the pivot. 
+  * @param right The larger side of the pivot. 
+  */  
   public fun quick_sort(values: &mut vector<u128>, left: u64, right: u64) {
     if (left < right) {
       let partition_index = partion(values, left, right);
@@ -170,8 +245,17 @@ module suitears::vectors {
     pragma opaque;
   }
 
-  // @dev Quick Sort Partition
-  // From SuiDouble
+  // === Private Functions ===    
+
+  /*
+  * @notice A utility function for {quick_sort}. 
+  *
+  * @dev Places the pivot and smaller elements on the left and larger elements on the right.  
+  *
+  * @param values The vector to sort. 
+  * @param left The smaller side of the pivot. 
+  * @param right The larger side of the pivot. 
+  */  
   fun partion(values: &mut vector<u128>, left: u64, right: u64): u64 {
     let pivot: u64 = left;
     let index: u64 = pivot + 1;

@@ -1,5 +1,7 @@
 /*
-* @title Fixed Point WAD: A set of functions to operate over u256 numbers with 1e18 precision.
+* @title Fixed Point WAD
+*
+* @notice A set of functions to operate over u256 numbers with 1e18 precision.
 *
 * @dev It emulates the decimal precision of ERC20 to port some of their advanced math operations such as exp and {exp} and {ln}. 
 */

@@ -1,5 +1,7 @@
 /*
- * @title Merkle Proof. Allows users to verify Merkle Tree proofs. 
+ * @title Merkle Proof. 
+ *
+ * @notice Allows users to verify Merkle Tree proofs. 
  *
  * @dev It is from OZ. 
  * @dev https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/cryptography/MerkleProof.sol
@@ -73,7 +75,7 @@ module suitears::merkle_proof {
       j = j * 2;
       let proof_element = *vector::borrow(proof, i);
 
-      computed_hash = if (vectors::lt(&computed_hash, &proof_element)) 
+      computed_hash = if (vectors::lt(computed_hash, proof_element)) 
         efficient_hash(computed_hash, proof_element) 
       else {
         j = j + 1;
@@ -214,7 +216,7 @@ module suitears::merkle_proof {
   * @return vector<u8>. The result of hashing `a` and `b`. 
   */
   fun hash_pair(a: vector<u8>, b: vector<u8>): vector<u8> {
-    if (vectors::lt(&a, &b)) efficient_hash(a, b) else efficient_hash(b, a)
+    if (vectors::lt(a, b)) efficient_hash(a, b) else efficient_hash(b, a)
   }
 
   /*

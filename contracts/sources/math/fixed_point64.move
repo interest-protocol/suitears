@@ -1,5 +1,7 @@
 /*
-* @title Fixed Point 64: A library to perform math operations over an unsigned integer with 64-bit precision.
+* @title Fixed Point 64
+*
+* @notice A library to perform math operations over an unsigned integer with 64-bit precision.
 *
 * @dev Any operation that results in a number larger than the maximum unsigned 128 bit, will be considered an overflow and throw.  
 * @dev All credits to Aptos - https://github.com/aptos-labs/aptos-core/blob/main/aptos-move/framework/aptos-stdlib/sources/fixed_point64.move

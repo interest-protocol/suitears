@@ -1,6 +1,9 @@
 /*
-* @title Comparator. A library to compare structs. 
+* @title Comparator. 
+* 
+* @notice A library to compare structs. 
 * @notice All credits to https://github.com/aptos-labs/aptos-core/blob/main/aptos-move/framework/aptos-stdlib/sources/comparator.move 
+*
 * @dev BCS uses little-endian encoding for all integer types, so results might be unexpected.
 */
 module suitears::comparator {

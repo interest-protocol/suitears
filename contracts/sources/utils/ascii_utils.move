@@ -1,5 +1,7 @@
 /*
-* @title ASCII Utils - A utility library to operate on ASCII strings. 
+* @title ASCII Utils
+*
+* @notice A utility library to operate on ASCII strings. 
 *
 * @notice We would like to credit Movemate and Capsules for some function implementations. 
 * Movemate - https://github.com/pentagonxyz/movemate/blob/main/sui/sources/to_string.move 

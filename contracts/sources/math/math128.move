@@ -1,5 +1,7 @@
 /*
-* @title Math u128: A set of functions to operate over u128 numbers.
+* @title Math128
+*
+* @notice A set of functions to operate over u128 numbers.
 *
 * @notice Many functions are implementations of https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/math/Math.sol
 *

@@ -1,5 +1,7 @@
 /*
-* @title Fixed Point Roll: A set of functions to operate over u64 numbers with 1e9 precision.
+* @title Fixed Point Roll
+*
+* @notice A set of functions to operate over u64 numbers with 1e9 precision.
 *
 * @dev It has the same precision as Sui's native token to facilitate operations. 
 */
