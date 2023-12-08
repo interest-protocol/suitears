@@ -118,10 +118,26 @@ module suitears::ac_collection {
   * aborts-if 
   * - `cap` is not the owner of `self`. 
   */
-  public fun destroy_collection<C: store>(self: AcCollection<C>, cap: &OwnerCap<AcCollectionWitness>): C {
+  public fun destroy<C: store>(self: AcCollection<C>, cap: &OwnerCap<AcCollectionWitness>): C {
     owner::assert_ownership(cap, object::id(&self));
     let AcCollection { id, collection } = self;
     object::delete(id);
     collection
   }
+
+  /*
+  * @notice Drops the wrapped struct `AcCollection<C>` and `C`. 
+  *
+  * @param self The wrapped collection. 
+  * @param cap A reference to the `AcCollection<C>`'s {OwnerCap}.
+  * @return C. The inner collection.  
+  *
+  * aborts-if 
+  * - `cap` is not the owner of `self`. 
+  */
+  public fun drop<C: store + drop>(self: AcCollection<C>, cap: &OwnerCap<AcCollectionWitness>) {
+    owner::assert_ownership(cap, object::id(&self));
+    let AcCollection { id, collection } = self;
+    object::delete(id);
+  }  
 }
