@@ -1,7 +1,7 @@
 /*
 * @title Access Control Collection
 *
-* @notice Provides access control to an object.
+* @notice Provides access control to an object via a capability.
 *
 * @dev Wraps a collection in a `AcCollection<C>` object to allow anyone to {borrow} `C` but only the owner to {borrow_mut}.
 */
@@ -50,7 +50,7 @@ module suitears::ac_collection {
   * @notice Wraps a `collection` in a `AcCollection<C>` and assigns the ownership to `cap`. 
   *
   * @param collection An object with the store ability.
-  * @param cap A mutable reference to a {OwnerCap}. 
+  * @param cap A mutable reference to an {OwnerCap}. 
   * @return AcCollection<C>. The wrapped `collection`.  
   */
   public fun new_with_cap<C: store>(collection: C, cap: &mut OwnerCap<AcCollectionWitness>, ctx: &mut TxContext): AcCollection<C> {

@@ -21,7 +21,7 @@ module suitears::coin_decimals {
   struct Decimals has store {
     // Decimals of a `sui::coin` 
     decimals: u8,
-    // The scalar of a `sui::coin`'s decimals. It is calculated by 10**decimals.  
+    // The scalar of a `sui::coin`'s decimals. It is calculated by 10^decimals.  
     // E.g. `sui::sui` has a scalar of 1_000_000_000 or 1e9. 
     scalar: u64
   }
@@ -47,14 +47,14 @@ module suitears::coin_decimals {
   * @notice Checks if a coin with type `CoinType` has been added to `self`.
   *
   * @param self A {CoinDecimals} object. 
-  * @return bool. True if the coin's decimals and scalar is in the `self`. 
+  * @return bool. True if the coin's decimals and scalar are in the `self`. 
   */
   public fun contains<CoinType>(self: &CoinDecimals): bool {
     df::exists_(&self.id, type_name::get<CoinType>())
   }    
 
   /*
-  * @notice returns the decimals of a coin with type `CoinType`.
+  * @notice returns the decimals of a coin with the type `CoinType`.
   *
   * @param self A {CoinDecimals} object. 
   * @return u8. The decimals of the coin. 
@@ -71,7 +71,7 @@ module suitears::coin_decimals {
   * @notice returns the decimals scalar of a coin with type `CoinType`.
   *
   * @param self A {CoinDecimals} object. 
-  * @return u64. The decimal's scalar. It is calculated by 10**decimals.  
+  * @return u64. The decimal's scalar. It is calculated by 10^decimals.  
   *
   * aborts-if 
   * - `CoinType` has not been added to the `self`.
@@ -84,7 +84,7 @@ module suitears::coin_decimals {
   // === Public Mutate Function ===  
 
   /*
-  * @notice Adds the decimals and decimal's scalar of a coin with type `CoinType` to `self`.
+  * @notice Adds the decimals and decimal scalar of a coin with type `CoinType` to `self`.
   *
   * @dev It does not abort if it has been added already. 
   *
