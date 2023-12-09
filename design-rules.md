@@ -177,6 +177,7 @@
 
 - **Comment functions with tags and refer to parameters name with ``.**
 
+  - notice: An explanation to the user
   - dev: An explanation to developers
   - param: It must be followed by the param name and a description
   - return: Name and type of the return
@@ -188,7 +189,10 @@
   module suitears::math {
 
       /*
-      * @dev It divides `x` by `y` and rounds down
+      * @notice It divides `x` by `y` and rounds down
+      *
+      * @dev It rounds down.
+      *
       * @param x The numerator in the division
       * @param y the denominator in the division
       * @return u64 The result of dividing `x` by `y`
