@@ -189,7 +189,7 @@
   module suitears::math {
 
       /*
-      * @notice It divides `x` by `y` and rounds down
+      * @notice It divides `x` by `y`.
       *
       * @dev It rounds down.
       *

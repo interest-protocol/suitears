@@ -41,7 +41,7 @@ module suitears::ac_collection {
     };
 
     (
-      owner::create(AcCollectionWitness {}, vector[object::id(&cap_collection)], ctx), 
+      owner::new(AcCollectionWitness {}, vector[object::id(&cap_collection)], ctx), 
       cap_collection
     )
   }
@@ -63,6 +63,15 @@ module suitears::ac_collection {
 
     cap_collection
   }
+
+  /*
+  * @notice Creates an {OwnerCap}. 
+  *
+  * @return OwnerCap<AcCollectionWitness>. A capability to {borrow_mut} and {borrow_mut_uid} {AcCollection<C>}. 
+  */
+  public fun new_cap(ctx: &mut TxContext): OwnerCap<AcCollectionWitness> {
+    owner::new(AcCollectionWitness {}, vector[], ctx)
+  }  
 
   // === Public Access Functions === 
 
@@ -137,7 +146,7 @@ module suitears::ac_collection {
   */
   public fun drop<C: store + drop>(self: AcCollection<C>, cap: &OwnerCap<AcCollectionWitness>) {
     owner::assert_ownership(cap, object::id(&self));
-    let AcCollection { id, collection } = self;
+    let AcCollection { id, collection: _ } = self;
     object::delete(id);
   }  
 }

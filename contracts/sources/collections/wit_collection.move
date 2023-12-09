@@ -93,7 +93,7 @@ module suitears::wit_collection {
   * @return C. The inner collection.  
   */
   public fun drop<W: drop, C: store + drop>(self: WitCollection<W, C>, _: W) {
-    let WitCollection { id, collection } = self;
+    let WitCollection { id, collection: _ } = self;
     object::delete(id);
   }  
 }

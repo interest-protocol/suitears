@@ -12,7 +12,6 @@
 module suitears::bitmap {
   // === Imports ===
 
-  use sui::bcs;
   use sui::object::{Self, UID};
   use sui::dynamic_field as df;
   use sui::tx_context::TxContext;
@@ -103,7 +102,7 @@ module suitears::bitmap {
   // === Private Functions ===  
 
   /*
-  * @notice Finds the key and the slot of an `index`. 
+  * @notice Finds the key and the mask to find the `index` in a {Bitmap}. 
   *
   * @param index A slot in the {Bitmap}. 
   * @return key. The key in the {Bitmap}.   

@@ -59,7 +59,7 @@ module suitears::quadratic_vesting_wallet {
   }
 
   public fun create_clawback_cap(ctx: &mut TxContext): OwnerCap<WalletWitness> {
-    owner::create(WalletWitness {}, vector[], ctx)
+    owner::new(WalletWitness {}, vector[], ctx)
   }
 
   public fun create_with_clawback<T>(
