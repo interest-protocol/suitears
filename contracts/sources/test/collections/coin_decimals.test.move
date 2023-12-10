@@ -39,6 +39,9 @@ module suitears::coin_decimals_tests {
 
       assert_eq(coin_decimals::decimals<ETH>(&obj), 9);
       assert_eq(coin_decimals::scalar<ETH>(&obj), 1_000_000_000);
+
+      // Does not throw
+      coin_decimals::add(&mut obj, &eth_metadata);
       
       transfer::public_transfer(obj, alice);
       test::return_shared(btc_metadata);
