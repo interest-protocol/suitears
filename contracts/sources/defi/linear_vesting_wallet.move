@@ -36,7 +36,7 @@ module suitears::linear_vesting_wallet {
   }
 
   public fun create_clawback_cap(ctx: &mut TxContext): OwnerCap<WalletWitness> {
-    owner::create(WalletWitness {}, vector[], ctx)
+    owner::new(WalletWitness {}, vector[], ctx)
   }
 
   public fun create_with_clawback<T>(
@@ -59,7 +59,7 @@ module suitears::linear_vesting_wallet {
       recipient
     };
 
-    owner::add(WalletWitness {}, cap, object::id(&wallet));
+    owner::add(cap, WalletWitness {},  object::id(&wallet));
 
     transfer::share_object(wallet);
   }

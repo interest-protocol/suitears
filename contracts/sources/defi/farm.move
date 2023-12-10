@@ -100,7 +100,7 @@ module suitears::farm {
   }
 
   public fun create_cap(ctx: &mut TxContext): OwnerCap<FarmWitness> {
-    owner::create(FarmWitness {}, vector[], ctx)
+    owner::new(FarmWitness {}, vector[], ctx)
   }
 
   public fun create_account<Label: drop, StakeCoin, RewardCoin>(_: Label, ctx: &mut TxContext): Account<Label, StakeCoin, RewardCoin> {
@@ -148,7 +148,7 @@ module suitears::farm {
 
     let farm_id = object::id(&farm);
 
-    owner::add(FarmWitness {},  cap, farm_id);
+    owner::add( cap, FarmWitness {}, farm_id);
     
     emit(CreateFarm<Label, StakeCoin, RewardCoin>{ farm: farm_id, cap: cap_id, sender: tx_context::sender(ctx) });
     
