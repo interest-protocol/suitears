@@ -131,7 +131,7 @@ module suitears::bitmap {
   */
   fun safe_register(self: &mut Bitmap, key: u256) {
     if (!bucket_exists(self, key)) {
-      df::add(&mut self.id, key, 0);
+      df::add<u256, u256>(&mut self.id, key, 0);
     };
   }
 }
