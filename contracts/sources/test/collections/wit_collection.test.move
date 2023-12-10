@@ -7,7 +7,7 @@ module suitears::wit_collection_tests {
   use sui::test_scenario::{Self as test, next_tx, ctx};
 
  use suitears::test_utils::{people, scenario};
-use suitears::wit_collection::{new, borrow, borrow_mut, borrow_mut_uid, destroy, drop};  
+ use suitears::wit_collection::{new, borrow, borrow_mut, borrow_mut_uid, destroy, drop};  
 
   struct Witness has drop {}
 
