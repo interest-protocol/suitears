@@ -59,7 +59,7 @@ module suitears::ac_collection {
       collection
     };
 
-    owner::add(AcCollectionWitness {}, cap, object::id(&cap_collection));
+    owner::add(cap, AcCollectionWitness {}, object::id(&cap_collection));
 
     cap_collection
   }

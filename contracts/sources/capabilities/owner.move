@@ -57,7 +57,7 @@ module suitears::owner {
   /*
   * @notice returns the vector of the `sui::object::ID` that the `self` owns.
   *
-  * @param self A {CoinDecimals} object. 
+  * @param self A {OwnerCap<T>} object. 
   * @return vector<ID>. The vector of `sui::object::ID`. 
   */
   public fun of<T: drop>(self: &OwnerCap<T>): vector<ID> {
@@ -67,37 +67,72 @@ module suitears::owner {
   // === Public Mutate Function ===    
 
   /*
-  * @notice Adds `x` to `self`.
+  * @notice Assigns the `self` {OwnerCap<T>} as the owner of `x`.
   *
   * @dev It does not abort if it has been added already. 
   *
-  * @param _ A witness to make sure only the module can `sui::object::ID` to the self.
-  * @param self A {CoinDecimals} object. 
-  * @param coin_metadata The `sui::coin::CoinMetadata` of a coin with type `CoinType`. 
+  * @param self A {OwnerCap<T>} object. 
+  * @param _ A witness to make sure only the right module can add the `sui::object::ID` to the self.
+  * @param x The `sui::object::ID` of the object, which the `self` will have ownership rights to. 
   */
-  public fun add<T: drop>(_: T, self: &mut OwnerCap<T>, x: ID) {
+  public fun add<T: drop>(self: &mut OwnerCap<T>, _: T, x: ID) {
     if (vector::contains(&self.of, &x)) return;
     vector::push_back(&mut self.of, x);
   }
 
-  public fun remove<T: drop>(_: T, self: &mut OwnerCap<T>, x: ID) {
+  /*
+  * @notice Removes the `self` {OwnerCap<T>} as the owner of `x`.
+  *
+  * @dev It does not abort if it has already been removed. 
+  *
+  * @param self A {OwnerCap<T>} object. 
+  * @param _ A witness to make sure only the right module can remove the `sui::object::ID` from the self.
+  * @param x The `sui::object::ID` of the object, which the `self` will lose its ownership rights to. 
+  */
+  public fun remove<T: drop>(self: &mut OwnerCap<T>, _: T, x: ID) {
     let (present, i) = vector::index_of(&self.of, &x);
     if (!present) return;
     vector::remove(&mut self.of, i);
   }
 
+  // === Public Destroy Functions ===    
+
+  /*
+  * @notice Destroys an {OwnerCap<T>}.
+  *
+  * @dev This capability might own several `sui::object::ID`. 
+  *
+  * @param self A {OwnerCap<T>} object. 
+  */
   public fun destroy<T: drop>(self: OwnerCap<T>) {
     let  OwnerCap { id, of: _ } = self; 
     object::delete(id);
   }
 
+  /*
+  * @notice Destroys an {OwnerCap<T>}.
+  *
+  * @dev It ensures that the `self` does not own any `sui::object::ID`. 
+  *
+  * @param self A {OwnerCap<T>} object. 
+  */
   public fun destroy_empty<T>(self: OwnerCap<T>) {
     let  OwnerCap { id, of} = self; 
     object::delete(id);
     vector::destroy_empty(of);
   }
 
+  // === Public Assert Function ===    
 
+  /*
+  * @notice Checks that the `self` owns `x`.
+  *
+  * @param self A {OwnerCap<T>} object. 
+  * @param x An `sui::object::ID`.
+  *
+  * aborts-if 
+  * - `x` is not present in the `self.of` 
+  */
   public fun assert_ownership<T: drop>(self: &OwnerCap<T>, x: ID) {
     assert!(contains(self, x), ENotAllowed);
   }  

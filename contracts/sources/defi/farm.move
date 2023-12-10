@@ -148,7 +148,7 @@ module suitears::farm {
 
     let farm_id = object::id(&farm);
 
-    owner::add(FarmWitness {},  cap, farm_id);
+    owner::add( cap, FarmWitness {}, farm_id);
     
     emit(CreateFarm<Label, StakeCoin, RewardCoin>{ farm: farm_id, cap: cap_id, sender: tx_context::sender(ctx) });
     
