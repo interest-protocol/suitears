@@ -28,7 +28,7 @@ airdrop
 capabilities
 ├─ owner — "Owner capability to give access to multiple objects"
 ├─ quest — "A wrapper that can only be unwrapped once a set of actions are completed"
-├─ request — "A hot potato to ensure that a set of requests are completed before destroying it"
+├─ request_lock — "A hot potato to ensure that a set of requests are completed before destroying it"
 ├─ timelock — "Timelock capability to add a delay between actions"
 collections
 ├─ ac_collection — "Capability access wrapper for collections"
@@ -42,7 +42,7 @@ defi
 ├─ quadratic_vesting_wallet — "Wallet that allows withdrawals according to a quadratic vesting"
 governance
 ├─ dao — "Decentralized autonomous organization"
-├─ dao_potato — "DAO module to create a RequestPotato"
+├─ dao_request_lock — "DAO module to create a request locks"
 ├─ dao_treasury — "A treasury plugin for the DAO module"
 math
 ├─ fixed_point64 — "Fixed point math module for x << 64 numbers"

@@ -15,10 +15,10 @@ module suitears::dao {
   use sui::types::is_one_time_witness;
   use sui::tx_context::{Self, TxContext};
 
-  use suitears::dao_potato::{Self, DaoPotato};
-  use suitears::dao_treasury::{Self, DaoTreasury};
   use suitears::fixed_point_roll::div_down;
-  use suitears::request::{Self, RequestPotato, Request};
+  use suitears::dao_request_lock::{Self, Issuer};
+  use suitears::dao_treasury::{Self, DaoTreasury};
+  use suitears::request_lock::{Self, Lock, Request};
 
   /// Proposal state
   const PENDING: u8 = 1;
@@ -231,7 +231,7 @@ module suitears::dao {
     while (num_of_requests > index) {
       let req = vector::borrow(&requests, index);
 
-      vec_set::insert(&mut set, request::request_name(req));  
+      vec_set::insert(&mut set, request_lock::name(req));  
 
       index = index + 1;
     };
@@ -358,23 +358,23 @@ module suitears::dao {
   public fun execute_proposal<DaoWitness: drop>(
     proposal: &mut Proposal<DaoWitness>, 
     c: &Clock
-  ): RequestPotato<DaoPotato<DaoWitness>> {
+  ): Lock<Issuer<DaoWitness>> {
     let now = clock::timestamp_ms(c);
     assert!(get_proposal_state(proposal, now) == EXECUTABLE, ECannotExecuteThisProposal);
     assert!(now >= proposal.end_time + proposal.action_delay, ETooEarlyToExecute);
 
-    let potato = dao_potato::new();
+    let lock = dao_request_lock::new();
 
     let num_of_requests = vector::length(&proposal.requests);
     let index = 0;
 
     while (num_of_requests > index) {
-      request::add_request(&mut potato, vector::remove(&mut proposal.requests, 0));
+      request_lock::add(&mut lock, vector::remove(&mut proposal.requests, 0));
 
       index = index + 1;
     };
 
-    potato
+    lock
   }
 
   public fun proposal_state<DaoWitness: drop>(proposal: &Proposal<DaoWitness>, c: &Clock): u8 {
@@ -451,7 +451,7 @@ module suitears::dao {
 
   public fun update_dao_config<DaoWitness: drop>(
     dao: &mut Dao<DaoWitness>,
-    potato: RequestPotato<DaoPotato<DaoWitness>>
+    lock: Lock<Issuer<DaoWitness>>, 
   ) {
     let Config { 
       voting_delay, 
@@ -459,9 +459,9 @@ module suitears::dao {
       voting_quorum_rate, 
       min_action_delay, 
       min_quorum_votes  
-    } = request::complete_request_with_payload<DaoPotato<DaoWitness>, ConfigTask, Config>(ConfigTask {}, &mut potato);
+    } = request_lock::complete_with_payload<Issuer<DaoWitness>, ConfigTask, Config>(&mut lock, ConfigTask {});
 
-    request::destroy_potato(potato);
+    request_lock::destroy(lock);
 
     dao.voting_delay = option::destroy_with_default(voting_delay, dao.voting_delay);
     dao.voting_period = option::destroy_with_default(voting_period, dao.voting_period);

@@ -5,7 +5,7 @@
 * It is possible to make a RequestPotato with no Requests!
 * A Request might contain a payload
 */
-module suitears::request {
+module suitears::request_lock {
   use std::vector;
   use std::type_name::{Self, TypeName};
 
@@ -19,7 +19,10 @@ module suitears::request {
   const ERequestHasNoPayload: u64 = 2;
   const ERequestHasAlreadyBeenAdded: u64 = 3;
 
-  struct RequestKey has copy, drop, store { witness: TypeName }
+  struct Lock<phantom Issuer: drop> {
+    required_requests: vector<Request>,
+    completed_requests: VecSet<TypeName>
+  }
 
   struct Request has key, store {
     id: UID,
@@ -27,21 +30,26 @@ module suitears::request {
     has_payload: bool
   }
 
-  struct RequestPotato<phantom Issuer: drop> {
-    required_requests: vector<Request>,
-    completed_requests: VecSet<TypeName>
-  }
+  struct RequestKey has copy, drop, store { witness: TypeName }
 
-  public fun request_name(req: &Request): TypeName {
+  public fun name(req: &Request): TypeName {
     req.name
   }
 
-  public fun request_has_payload(req: &Request): bool {
+  public fun has_payload(req: &Request): bool {
     req.has_payload
   }
 
-  public fun new_potato<Witness: drop>(_: Witness): RequestPotato<Witness> {
-    RequestPotato { required_requests: vector[], completed_requests: vec_set::empty()}
+  public fun borrow_required_requests<Witness: drop>(lock: &Lock<Witness>): &vector<Request> {
+    &lock.required_requests
+  }
+
+  public fun completed_requests<Witness: drop>(potato: &Lock<Witness>): vector<TypeName> {
+    *vec_set::keys(&potato.completed_requests)
+  }  
+
+  public fun new_lock<Witness: drop>(_: Witness): Lock<Witness> {
+    Lock { required_requests: vector[], completed_requests: vec_set::empty()}
   }
 
   public fun new_request<RequestName: drop>(ctx: &mut TxContext): Request {
@@ -65,50 +73,31 @@ module suitears::request {
     req
   }
 
-  public fun add_request<Witness: drop>(potato: &mut RequestPotato<Witness>, req: Request) {
-    let length = vector::length(&potato.required_requests);
+  public fun add<Witness: drop>(lock: &mut Lock<Witness>, req: Request) {
+    let length = vector::length(&lock.required_requests);
     let index = 0;
 
     while (length > index) {
-      assert!(vector::borrow(&potato.required_requests, index).name != req.name, ERequestHasAlreadyBeenAdded);
+      assert!(vector::borrow(&lock.required_requests, index).name != req.name, ERequestHasAlreadyBeenAdded);
       index = index + 1;
     };
 
-    vector::push_back(&mut potato.required_requests, req);
+    vector::push_back(&mut lock.required_requests, req);
   }
 
-  public fun potato_required_requests_name<Witness: drop>(potato: &RequestPotato<Witness>): vector<TypeName> {
-    let names = vector[];
-    let length = vector::length(&potato.required_requests);
-    let index = 0;
-
-    while (length > index) {
-
-      vector::push_back(&mut names, vector::borrow(&potato.required_requests, index).name);
-
-      index = index + 1;
-    };
-
-    names
-  }
-
-  public fun potato_completed_requests<Witness: drop>(potato: &RequestPotato<Witness>): vector<TypeName> {
-    *vec_set::keys(&potato.completed_requests)
-  }
-
-  public fun complete_request<Witness: drop, Request: drop>(_: Request, potato: &mut RequestPotato<Witness>) {
-    let num_of_requests = vector::length(&potato.required_requests);
-    let req = vector::borrow(&potato.required_requests, num_of_requests);
+  public fun complete<Witness: drop, Request: drop>(lock: &mut Lock<Witness>, _: Request) {
+    let num_of_requests = vector::length(&lock.required_requests);
+    let req = vector::borrow(&lock.required_requests, num_of_requests);
     let completed_req_name = type_name::get<Request>();
 
     assert!(req.name == completed_req_name, EWrongRequest);
     assert!(!req.has_payload, ERequestHasPayload);
-    vec_set::insert(&mut potato.completed_requests, completed_req_name);
+    vec_set::insert(&mut lock.completed_requests, completed_req_name);
   }
 
-  public fun complete_request_with_payload<Witness: drop, Request: drop, Payload: store>(_: Request, potato: &mut RequestPotato<Witness>): Payload {
-    let num_of_requests = vector::length(&potato.required_requests);
-    let req = vector::borrow_mut(&mut potato.required_requests, num_of_requests);
+  public fun complete_with_payload<Witness: drop, Request: drop, Payload: store>(lock: &mut Lock<Witness>, _: Request): Payload {
+    let num_of_requests = vector::length(&lock.required_requests);
+    let req = vector::borrow_mut(&mut lock.required_requests, num_of_requests);
     let completed_req_name = type_name::get<Request>();
 
     assert!(req.name == completed_req_name, EWrongRequest);
@@ -117,12 +106,12 @@ module suitears::request {
 
     assert!(req.has_payload, ERequestHasNoPayload);
 
-    vec_set::insert(&mut potato.completed_requests, completed_req_name);
+    vec_set::insert(&mut lock.completed_requests, completed_req_name);
     df::remove(&mut req.id, key)
   }
 
-  public fun destroy_potato<Witness: drop>(potato: RequestPotato<Witness>) {
-    let RequestPotato { required_requests, completed_requests } = potato;
+  public fun destroy<Witness: drop>(lock: Lock<Witness>) {
+    let Lock { required_requests, completed_requests } = lock;
 
     let num_of_requests = vector::length(&required_requests);
     let completed_requests = vec_set::into_keys(completed_requests);
