@@ -2,6 +2,8 @@
 * @title Timelock
 *
 * @notice Locks any object with the store ability for a specific amount of time. 
+*
+* @dev We do not provide a function to read the data inside the {Timelock<T>} to prevent capabilities from being used. 
 */
 module suitears::timelock {
   // === Imports ===
@@ -17,16 +19,20 @@ module suitears::timelock {
   // @dev Thrown if one tries to {unlock} the {Timelock} before the `unlock_time`. 
   const ETooEarly: u64 = 1;
 
+  // === Struct ===  
+
   struct Timelock<T: store> has key, store {
     id: UID,
+    // The unlock time in milliseconds. 
     unlock_time: u64,
+    // Any object with the store ability. 
     data: T,
   }
 
   // === Public View Function ===      
 
   /*
-  * @notice Returns the unlock_time in milliseconds. 
+  * @notice Returns the unlock time in milliseconds. 
   *
   * @param self A {Timelock<T>} 
   * @return u64. The `self.unlock_time`.  
@@ -46,7 +52,7 @@ module suitears::timelock {
   * @return {Timelock<T>}.
   *
   * aborts-if
-  * - `unlock_time` is in the past   
+  * - `unlock_time` is in the past.    
   */
   public fun lock<T: store>(
     data: T, 
