@@ -5,7 +5,7 @@
 *
 * @dev We do not provide a function to read the data inside the {PermanentLock<T>} to prevent capabilities from being used. 
 */
-module suitears::permanent_lock {
+module examples::permanent_lock {
   // === Imports ===
 
   use sui::object::{Self, UID};

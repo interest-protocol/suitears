@@ -16,6 +16,7 @@ module suitears::owner {
 
   // === Errors ===
   
+  // @dev Thrown when the {OwnerCap} does not own a `sui::object::ID`. 
   const ENotAllowed: u64 = 0;
 
   // === Structs ===

@@ -3,7 +3,7 @@ module examples::permanent_lock_admin {
     use sui::tx_context::TxContext;
     use sui::types::is_one_time_witness;    
 
-    use suitears::permanent_lock::{Self, PermanentLock};
+    use examples::permanent_lock::{Self, PermanentLock};
 
     const EInvalidWitness: u64 = 0;
 
