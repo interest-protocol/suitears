@@ -42,9 +42,12 @@ module suitears::quest {
   /*
   * @notice Creates a {Quest<Reward>} . 
   *
-  * @param collection An object with the store ability.
-  * @return OwnerCap<AcCollectionWitness>. A capability to {borrow_mut} and {borrow_mut_uid}. 
-  * @return AcCollection<C>. The wrapped `collection`.  
+  * @param required_tasks A vector set of the required tasks to unlock the `reward`. 
+  * @param reward An object with the store ability that can be redeemed once all tasks are completed.
+  * @return Quest.
+  *
+  * aborts-if 
+  * - `self.required_tasks` is empty   
   */
   public fun new<Reward: store>(
   required_tasks: VecSet<TypeName>, 
@@ -58,28 +61,48 @@ module suitears::quest {
   // === Public View Function ===    
 
   /*
-  * @notice Wraps a `collection` in a `AcCollection<C>` and creates its {OwnerCap}. 
+  * @notice Returns the required quests of the `self`. 
   *
-  * @param collection An object with the store ability.
-  * @return OwnerCap<AcCollectionWitness>. A capability to {borrow_mut} and {borrow_mut_uid}. 
-  * @return AcCollection<C>. The wrapped `collection`.  
+  * @param self A {Quest}.
+  * @return vector<TypeName>. A vector of the required Witness names to complete the quest.   
   */
-  public fun required_tasks<Reward: store>(quest: &Quest<Reward>): vector<TypeName> {
-    *vec_set::keys(&quest.required_tasks)
+  public fun required_tasks<Reward: store>(self: &Quest<Reward>): vector<TypeName> {
+    *vec_set::keys(&self.required_tasks)
   }
 
-  public fun completed_tasks<Reward: store>(quest: &Quest<Reward>): vector<TypeName> {
-    *vec_set::keys(&quest.completed_tasks)
+  /*
+  * @notice Returns the completed quests of the `self`. 
+  *
+  * @param self A {Quest}.
+  * @return vector<TypeName>. A vector of the completed Witness names to complete the quest.   
+  */
+  public fun completed_tasks<Reward: store>(self: &Quest<Reward>): vector<TypeName> {
+    *vec_set::keys(&self.completed_tasks)
   }
 
   // === Public Mutative Functions ===      
 
-  public fun add<Reward: store, Task: drop>(_: Task, quest: &mut Quest<Reward>) {
-    vec_set::insert(&mut quest.completed_tasks, type_name::get<Task>());
+  /*
+  * @notice Completes a quest by adding the witness `Task` name to the `self.completed_tasks` vector. 
+  *
+  * @param self A {Quest}.
+  * @param _ A witness `Task`.   
+  */
+  public fun complete<Reward: store, Task: drop>(self: &mut Quest<Reward>, _: Task) {
+    vec_set::insert(&mut self.completed_tasks, type_name::get<Task>());
   }
 
-  public fun finish<Reward: store>(quest: Quest<Reward>): Reward {
-    let Quest { id, required_tasks, completed_tasks, reward } = quest;
+  /*
+  * @notice Finishes a quest and returns the `Reward` to the caller. 
+  *
+  * @param self A {Quest}.
+  * @return Reward.   
+  *
+  * aborts-if
+  * - required_tasks do not match the completed_tasks
+  */
+  public fun finish<Reward: store>(self: Quest<Reward>): Reward {
+    let Quest { id, required_tasks, completed_tasks, reward } = self;
 
     object::delete(id);
 

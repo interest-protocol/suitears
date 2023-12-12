@@ -40,7 +40,7 @@ module suitears::permanent_lock {
   // === Public View Functions ===      
 
   /*
-  * @notice Returns the time at which this lock was created. 
+  * @notice Returns the time at which the `self` was created. 
   *
   * @param self A {PermanentLock<T>} 
   * @return u64. The `self.start`.  
@@ -50,7 +50,7 @@ module suitears::permanent_lock {
   }
 
   /*
-  * @notice Returns how long until this lock can be opened temporarily. 
+  * @notice Returns how long until the `self` can be opened temporarily. 
   *
   * @dev To find the current unlock time you must add the `self.start` with `self.time_delay`.  
   *
@@ -62,7 +62,7 @@ module suitears::permanent_lock {
   }
 
   /*
-  * @notice Returns the time at which this lock can be opened temporarily. 
+  * @notice Returns the time at which the `self` can be opened temporarily. 
   *
   * @param self A {PermanentLock<T>} 
   * @return u64. `self.start` + `self.time_delay`.  
@@ -74,7 +74,7 @@ module suitears::permanent_lock {
   // === Public Mutative Function ===       
 
   /*
-  * @notice Locks the `data` forever. However, the {PermanentLock<T>} can be often once every period.  
+  * @notice Locks the `data` forever. The {PermanentLock<T>} can be opened once `time_delay`.  
   *
   * @param data An object with the store ability.  
   * @param c The shared `sui::clock::Clock` object.   
@@ -123,7 +123,7 @@ module suitears::permanent_lock {
   }
 
   /*
-  * @notice Relocks the data `T` and destroys the hot potato `temporary`.  
+  * @notice Relocks the data `T` and destroys the hot potato `temporarily`.  
   *
   * @param data An object with the store ability.  
   * @param c The shared `sui::clock::Clock` object.   
