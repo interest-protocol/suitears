@@ -178,7 +178,7 @@ module suitears::request_lock {
   * - if the {Request} has a payload. 
   */
   public fun complete<Witness: drop, Request: drop>(lock: &mut Lock<Witness>, _: Request) {
-    let num_of_requests = vector::length(&lock.required_requests);
+    let num_of_requests = vec_set::size(&lock.completed_requests);
     let req = vector::borrow(&lock.required_requests, num_of_requests);
     let completed_req_name = type_name::get<Request>();
 
@@ -200,7 +200,7 @@ module suitears::request_lock {
   * - if the {Request} does not have a payload. 
   */
   public fun complete_with_payload<Witness: drop, Request: drop, Payload: store>(lock: &mut Lock<Witness>, _: Request): Payload {
-    let num_of_requests = vector::length(&lock.required_requests);
+    let num_of_requests = vec_set::size(&lock.completed_requests);
     let req = vector::borrow_mut(&mut lock.required_requests, num_of_requests);
     let completed_req_name = type_name::get<Request>();
 
