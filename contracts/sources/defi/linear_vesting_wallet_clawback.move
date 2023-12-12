@@ -15,6 +15,8 @@ module suitears::linear_vesting_wallet_with_clawback {
 
   use suitears::owner::{Self, OwnerCap};
 
+  use suitears::vesting::linear_vested_amount;
+
   // === Errors ===
 
   // @dev Thrown if you try to create a Wallet with a vesting schedule that starts in the past. 
@@ -183,7 +185,7 @@ module suitears::linear_vesting_wallet_with_clawback {
   * @return u64. A portion of the amount that has not yet been released
   */
   public fun vesting_status<T>(self: &Wallet<T>, c: &Clock): (u64, u64) {
-    let vested = vested_amount(
+    let vested = linear_vested_amount(
       self.start, 
       self.duration, 
       balance::value(&self.balance), 
@@ -203,36 +205,5 @@ module suitears::linear_vesting_wallet_with_clawback {
     let Wallet { id, start: _, duration: _, balance, released: _ } = self;
     object::delete(id);
     balance::destroy_zero(balance);
-  }
-
-  // === Private Functions ===    
-
-  /*
-  * @notice Calculates the amount that has already vested.  
-  *
-  * @param start The beginning of the vesting schedule.  
-  * @param duration The duration of the schedule.  
-  * @param balance The current amount of tokens in the wallet.   
-  * @param already_released The total amount of tokens released.  
-  * @param timestamp The current time in milliseconds.  
-  * @return u64. The vested amount.  
-  */
-  fun vested_amount(start: u64, duration: u64, balance: u64, already_released: u64, timestamp: u64): u64 {
-    vesting_schedule(start, duration, balance + already_released, timestamp)
-  }
-  
-  /*
-  * @notice Virtual implementation of the vesting formula.  
-  *
-  * @param start The beginning of the vesting schedule.  
-  * @param duration The duration of the schedule.  
-  * @param total_allocation The total amount of tokens since the beginning.  
-  * @param timestamp The current time in milliseconds.  
-  * @return u64. This returns the amount vested, as a function of time, for an asset given its total historical allocation.  
-  */ 
-  fun vesting_schedule(start: u64, duration: u64, total_allocation: u64, timestamp: u64): u64 {
-    if (timestamp < start) return 0;
-    if (timestamp > start + duration) return total_allocation;
-    (total_allocation * (timestamp - start)) / duration
   }
 }

@@ -39,7 +39,9 @@ defi
 ├─ farm — "Farm module to reward coin holders over time"
 ├─ fund — "Struct to track shares associated with underlying deposits/withdrawals"
 ├─ linear_vesting_wallet — "Wallet that allows withdrawals according to a linear vesting"
-├─ quadratic_vesting_wallet — "Wallet that allows withdrawals according to a quadratic vesting"
+├─ linear_vesting_wallet_with_clawback — "An airdrop that distributes the tokens according to a linear vesting and allows the clawback owner to claim all unreleased coins"
+├─ quadratic_vesting_wallet — "Wallet that allows withdrawals according to a quadratic
+├─ vesting — "Virtual implementation of vesting schedules"
 governance
 ├─ dao — "Decentralized autonomous organization"
 ├─ dao_request_lock — "DAO module to create a request locks"
