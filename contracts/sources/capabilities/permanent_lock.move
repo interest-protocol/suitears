@@ -81,7 +81,7 @@ module suitears::permanent_lock {
   * @patam time_delay Unlock intervals.  
   * @return {Permanent<T>}.
   *
-  * aborts-if
+  * aborts-if:
   * - `time_delay` is zero.    
   */
   public fun lock<T: store>(
@@ -109,7 +109,7 @@ module suitears::permanent_lock {
   * @return T. The previously locked object with the store ability.  
   * @return Temporary<T>. A hot potato that must be destroyed by calling the function {relock}.  
   *
-  * aborts-if
+  * aborts-if:
   * - `self.start` + `self.time_delay` is in the future.    
   */
   public fun unlock_temporarily<T: store>(self: PermanentLock<T>, c: &Clock): (T, Temporary<T>) {

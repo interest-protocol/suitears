@@ -46,7 +46,7 @@ module suitears::quest {
   * @param reward An object with the store ability that can be redeemed once all tasks are completed.
   * @return Quest.
   *
-  * aborts-if 
+  * aborts-if: 
   * - `self.required_tasks` is empty   
   */
   public fun new<Reward: store>(
