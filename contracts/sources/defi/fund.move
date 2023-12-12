@@ -152,7 +152,7 @@ module suitears::fund {
   * @param self A {Fund}.  
   * @param profit The amount of underlying to add as profit to `self.underlying`.     
   */
-  public fun add_profits(rebase: &mut Fund, profit: u64) {
+  public fun add_profit(rebase: &mut Fund, profit: u64) {
     rebase.underlying = rebase.underlying + (profit as u128);
   }  
 }
