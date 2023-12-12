@@ -195,7 +195,7 @@ module suitears::dao_treasury {
     
     let token = coin::take<CoinType>(bag::borrow_mut(&mut treasury.coins, coin_typename), value, ctx);
 
-    let wallet = linear_vesting_wallet::create(token, c, start, duration, ctx);
+    let wallet = linear_vesting_wallet::new(token, c, start, duration, ctx);
 
     emit(TransferLinearWallet<DaoWitness, CoinType> { 
         value, 
