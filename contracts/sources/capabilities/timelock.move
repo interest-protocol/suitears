@@ -1,33 +1,62 @@
+/*
+* @title Timelock
+*
+* @notice Locks any object with the store ability for a specific amount of time. 
+*
+* @dev We do not provide a function to read the data inside the {Timelock<T>} to prevent capabilities from being used. 
+*/
 module suitears::timelock {
+  // === Imports ===
 
   use sui::object::{Self, UID};
   use sui::clock::{Self, Clock};
   use sui::tx_context::TxContext;
 
+  // === Errors ===
+
+  // @dev Thrown if one tries to lock an object in the past. 
   const EInvalidTime: u64 = 0;
+  // @dev Thrown if one tries to {unlock} the {Timelock} before the `unlock_time`. 
   const ETooEarly: u64 = 1;
+
+  // === Struct ===  
 
   struct Timelock<T: store> has key, store {
     id: UID,
+    // The unlock time in milliseconds. 
     unlock_time: u64,
+    // Any object with the store ability. 
     data: T,
   }
 
-  struct PermanentLock<T: store> has key, store {
-    id: UID,
-    start: u64,
-    data: T,
-    time_delay: u64
-  }
+  // === Public View Function ===      
 
-  // Hot Potatoe to force the data to be locked again
-  struct Temporary<phantom T> {
-    time_delay: u64, 
-  }
+  /*
+  * @notice Returns the unlock time in milliseconds. 
+  *
+  * @param self A {Timelock<T>} 
+  * @return u64. The `self.unlock_time`.  
+  */
+  public fun unlock_time<T: store>(self: &Timelock<T>): u64 {
+    self.unlock_time
+  }  
 
+  // === Public Mutative Function ===     
+
+  /*
+  * @notice Locks the `data` for `unlock_time` milliseconds.  
+  *
+  * @param data An object with the store ability.  
+  * @param c The shared `sui::clock::Clock` object.   
+  * @patam unlock_time The lock period in milliseconds.  
+  * @return {Timelock<T>}.
+  *
+  * aborts-if
+  * - `unlock_time` is in the past.    
+  */
   public fun lock<T: store>(
-    c:&Clock,
     data: T, 
+    c: &Clock,
     unlock_time: u64,
     ctx: &mut TxContext
   ): Timelock<T> {
@@ -41,68 +70,23 @@ module suitears::timelock {
     }
   }
 
-  public fun lock_permanently<T: store>(
-    c:&Clock,
-    data: T,
-    time_delay: u64,
-    ctx: &mut TxContext
-  ): PermanentLock<T> {
-    // It makes no sense to lock in the past
-    assert!(time_delay != 0, EInvalidTime);
+  /*
+  * @notice Unlocks a {Timelock<T>} and returns the locked resource `T`.  
+  *
+  * @param self A {Timelock<T>} 
+  * @param c The shared `sui::clock::Clock` object.   
+  * @return `T`. An object with the store ability.   
+  *
+  * aborts-if
+  * - `unlock_time` has not passed.    
+  */
+  public fun unlock<T: store>(self: Timelock<T>, c:&Clock): T {
+    let Timelock { data, unlock_time, id } = self;
 
-    PermanentLock {
-      id: object::new(ctx),
-      data,
-      start: clock::timestamp_ms(c),
-      time_delay
-    }
-  }
-
-  // @dev We do not show the Data because if it is an Admin Capability
-  // It would allow the owner to use admin functions while the lock is active!
-  public fun view_lock<T: store>(lock: &Timelock<T>): u64 {
-    lock.unlock_time
-  }
-
-    // @dev We do not show the Data because if it is an Admin Capability
-  // It would allow the owner to use admin functions while the lock is active!
-  public fun view_permanent_lock<T: store>(lock: &PermanentLock<T>): u64 {
-    lock.start + lock.time_delay
-  }
-
-  public fun unlock<T: store>(c:&Clock, lock: Timelock<T>): T {
-    assert!(clock::timestamp_ms(c) >= lock.unlock_time, ETooEarly);
-
-    let Timelock { data, unlock_time: _, id } = lock;
+    assert!(clock::timestamp_ms(c) >= unlock_time, ETooEarly);
 
     object::delete(id);
 
     data
-  }
-
-  public fun unlock_temporarily<T: store>(c:&Clock, lock: PermanentLock<T>): (T, Temporary<T>) {
-    assert!(clock::timestamp_ms(c) >= lock.start + lock.time_delay, ETooEarly);
-
-    let PermanentLock { data, start: _, id, time_delay } = lock;
-
-    object::delete(id);
-
-   (data, Temporary { time_delay })
-  }
-
-  public fun relock_permanently<T: store>(
-    c:&Clock, 
-    temporary: Temporary<T>,
-    data: T, 
-    ctx: &mut TxContext
-  ): PermanentLock<T> {
-    let Temporary { time_delay } = temporary;
-
-    PermanentLock {
-      id: object::new(ctx),
-      data,
-      start: clock::timestamp_ms(c),
-      time_delay
-    }
   }
 }

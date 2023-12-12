@@ -76,11 +76,11 @@ module examples::timelock_upgrade {
         
         emit(InitUpgrade { unlock_timestamp, policy, digest });
 
-        timelock::lock(c, cap, unlock_timestamp,  ctx)
+        timelock::lock( cap, c, unlock_timestamp,  ctx)
     }
 
     public fun cancel_upgrade(c: &Clock, lock: Timelock<UpgradeWrapper>): UpgradeWrapper {
-        let cap = timelock::unlock(c, lock);
+        let cap = timelock::unlock( lock, c);
         cap.policy = 0;
         cap.digest = vector::empty();
         emit(CancelUpgrade { id:  package::upgrade_package(&cap.cap) });
@@ -91,7 +91,7 @@ module examples::timelock_upgrade {
         c: &Clock,
         lock: Timelock<UpgradeWrapper>,
     ): (UpgradeCap, UpgradeTicket) {
-        let cap = timelock::unlock(c, lock);
+        let cap = timelock::unlock(lock, c);
 
         emit(AuthorizeUpgrade { timestamp: clock::timestamp_ms(c), policy: cap.policy, digest: cap.digest });
 

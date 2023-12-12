@@ -10,9 +10,9 @@ module suitears::dao_treasury {
   use sui::balance::{Self, Balance};
   use sui::tx_context::{Self, TxContext};
 
-  use suitears::dao_potato::DaoPotato;
+  use suitears::dao_request_lock::Issuer;
   use suitears::fixed_point_roll::mul_up;
-  use suitears::request::{Self, destroy_potato, RequestPotato};
+  use suitears::request_lock::{Self, destroy, Lock};
   use suitears::linear_vesting_wallet::{Self, Wallet as LinearWallet};
   use suitears::quadratic_vesting_wallet::{Self, Wallet as QuadraticWallet};
 
@@ -147,16 +147,16 @@ module suitears::dao_treasury {
   public fun transfer<DaoWitness: drop, CoinType>(
     treasury: &mut DaoTreasury<DaoWitness>,
     pub: &Publisher,
-    potato: RequestPotato<DaoPotato<DaoWitness>>, 
+    lock: Lock<Issuer<DaoWitness>>, 
     ctx: &mut TxContext
   ): Coin<CoinType> {
     let TransferPayload { 
       type: coin_typename, 
       publisher_id, 
       value
-    } = request::complete_request_with_payload<DaoPotato<DaoWitness>, TransferTask, TransferPayload>(TransferTask {}, &mut potato);
+    } = request_lock::complete_with_payload<Issuer<DaoWitness>, TransferTask, TransferPayload>(&mut lock, TransferTask {});
     
-    destroy_potato(potato);
+    destroy(lock);
 
     assert!(get<CoinType>() == coin_typename, EMismatchCoinType);
     assert!(object::id(pub) == publisher_id, EInvalidPublisher);
@@ -177,7 +177,7 @@ module suitears::dao_treasury {
     treasury: &mut DaoTreasury<DaoWitness>,
     c: &Clock,
     pub: &Publisher,
-    potato: RequestPotato<DaoPotato<DaoWitness>>, 
+    lock: Lock<Issuer<DaoWitness>>, 
     ctx: &mut TxContext    
   ): LinearWallet<CoinType> {
     let TransferVestingWalletPayload { 
@@ -186,9 +186,9 @@ module suitears::dao_treasury {
       duration, 
       value, 
       type: coin_typename 
-    } = request::complete_request_with_payload<DaoPotato<DaoWitness>, TransferTask, TransferVestingWalletPayload>(TransferTask {}, &mut potato);
+    } = request_lock::complete_with_payload<Issuer<DaoWitness>, TransferTask, TransferVestingWalletPayload>(&mut lock, TransferTask {});
 
-    destroy_potato(potato);
+    destroy(lock);
 
     assert!(get<CoinType>() == coin_typename, EMismatchCoinType);
     assert!(object::id(pub) == publisher_id, EInvalidPublisher);
@@ -214,7 +214,7 @@ module suitears::dao_treasury {
     treasury: &mut DaoTreasury<DaoWitness>,
     c: &Clock,
     pub: &Publisher,
-    potato: RequestPotato<DaoPotato<DaoWitness>>, 
+    lock: Lock<Issuer<DaoWitness>>,  
     ctx: &mut TxContext    
   ): QuadraticWallet<CoinType> {
     let TransferQuadraticWalletPayload 
@@ -228,9 +228,9 @@ module suitears::dao_treasury {
       cliff,
       duration,
       value 
-    } = request::complete_request_with_payload<DaoPotato<DaoWitness>, TransferTask, TransferQuadraticWalletPayload>(TransferTask {}, &mut potato);
+    } = request_lock::complete_with_payload<Issuer<DaoWitness>, TransferTask, TransferQuadraticWalletPayload>( &mut lock, TransferTask {});
 
-    destroy_potato(potato);
+    destroy(lock);
 
     assert!(get<CoinType>() == coin_typename, EMismatchCoinType);
     assert!(object::id(pub) == publisher_id, EInvalidPublisher);

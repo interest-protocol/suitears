@@ -1,6 +1,8 @@
 /*
 * @title Owner
 *
+* @dev It uses `sui::vec_set::VecSet` to prevent duplicated IDs inside {OwnerCap}. 
+*
 * @notice Capability that provides access control to objects via their `sui::object::ID`.
 */
 module suitears::owner {
@@ -9,18 +11,20 @@ module suitears::owner {
   use std::vector;
 
   use sui::tx_context::TxContext;
+  use sui::vec_set::{Self, VecSet};
   use sui::object::{Self, UID, ID};
 
   // === Errors ===
   
+  // @dev Thrown when the {OwnerCap} does not own a `sui::object::ID`. 
   const ENotAllowed: u64 = 0;
 
   // === Structs ===
 
   struct OwnerCap<phantom T> has key, store {
     id: UID,
-    // Vector of `sui::object::ID` that this capability owns. 
-    of: vector<ID>
+    // VecSet of `sui::object::ID` that this capability owns. 
+    of: VecSet<ID>
   }
 
   // === Public Create Function ===  
@@ -35,9 +39,17 @@ module suitears::owner {
   * @return {OwnerCap<T>}.  
   */
   public fun new<T: drop>(_: T, of: vector<ID>, ctx: &mut TxContext): OwnerCap<T> {
+    let length = vector::length(&of);
+    let set = vec_set::empty();
+    let i = 0;
+    while (length > i) {
+      vec_set::insert(&mut set, *vector::borrow(&of, i));
+      i = i + 1;
+    };
+
     OwnerCap {
       id: object::new(ctx),
-      of
+      of: set
     }
   }
 
@@ -51,7 +63,7 @@ module suitears::owner {
   * @return bool. True if the `self` owns `x`. 
   */
   public fun contains<T: drop>(self: &OwnerCap<T>, x: ID): bool {
-    vector::contains(&self.of, &x)
+    vec_set::contains(&self.of, &x)
   }
 
   /*
@@ -61,7 +73,7 @@ module suitears::owner {
   * @return vector<ID>. The vector of `sui::object::ID`. 
   */
   public fun of<T: drop>(self: &OwnerCap<T>): vector<ID> {
-    self.of
+    *vec_set::keys(&self.of)
   }
 
   // === Public Mutate Function ===    
@@ -76,8 +88,8 @@ module suitears::owner {
   * @param x The `sui::object::ID` of the object, which the `self` will have ownership rights to. 
   */
   public fun add<T: drop>(self: &mut OwnerCap<T>, _: T, x: ID) {
-    if (vector::contains(&self.of, &x)) return;
-    vector::push_back(&mut self.of, x);
+    if (vec_set::contains(&self.of, &x)) return;
+    vec_set::insert(&mut self.of, x);
   }
 
   /*
@@ -90,9 +102,8 @@ module suitears::owner {
   * @param x The `sui::object::ID` of the object, which the `self` will lose its ownership rights to. 
   */
   public fun remove<T: drop>(self: &mut OwnerCap<T>, _: T, x: ID) {
-    let (present, i) = vector::index_of(&self.of, &x);
-    if (!present) return;
-    vector::remove(&mut self.of, i);
+    if (!vec_set::contains(&self.of, &x)) return;
+    vec_set::remove(&mut self.of, &x);
   }
 
   // === Public Destroy Functions ===    
@@ -119,7 +130,7 @@ module suitears::owner {
   public fun destroy_empty<T>(self: OwnerCap<T>) {
     let  OwnerCap { id, of} = self; 
     object::delete(id);
-    vector::destroy_empty(of);
+    vector::destroy_empty(vec_set::into_keys(of));
   }
 
   // === Public Assert Function ===    

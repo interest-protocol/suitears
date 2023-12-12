@@ -52,7 +52,7 @@ module suitears::airdrop {
 
     bitmap::set(&mut storage.map, index);
 
-    timelock::lock(c, coin::take(&mut storage.balance, amount, ctx), storage.start, ctx)
+    timelock::lock(coin::take(&mut storage.balance, amount, ctx), c,  storage.start, ctx)
   }
 
   public fun has_account_claimed<T>(
