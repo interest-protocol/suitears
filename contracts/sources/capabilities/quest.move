@@ -1,10 +1,10 @@
 /*
 * @title Quest
 *
-* @notice Quests can only be completed if all tasks are completed. 
+* @notice Quests can only be finished if all tasks are completed. 
 *
-* @dev To complete a task the function quest::complete_task must be called with the Witness
-* Only a quest giver can create quests by passing a Witness
+* @dev To complete a task the function quest::complete must be called with the Witness.   
+* Only a quest giver can create quests by passing a Witness. 
 * It is NOT possible to make a Quest with no tasks!
 */
 module suitears::quest {
@@ -61,7 +61,7 @@ module suitears::quest {
   // === Public View Function ===    
 
   /*
-  * @notice Returns the required quests of the `self`. 
+  * @notice Returns the required tasks of the `self`. 
   *
   * @param self A {Quest}.
   * @return vector<TypeName>. A vector of the required Witness names to complete the quest.   
@@ -71,7 +71,7 @@ module suitears::quest {
   }
 
   /*
-  * @notice Returns the completed quests of the `self`. 
+  * @notice Returns the completed tasks of the `self`. 
   *
   * @param self A {Quest}.
   * @return vector<TypeName>. A vector of the completed Witness names to complete the quest.   

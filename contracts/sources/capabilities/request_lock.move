@@ -5,7 +5,7 @@
 *
 * @dev The {Lock} is a hot potato. It has to be destroyed in the same {TransactionBlock} that is created. 
 * @dev The {Lock} can only be destroyed once all the requests are completed in order. 
-* @dev To complete a Request the function {complete} must be called with a Witness. 
+* @dev To complete a Request the function {complete} must be called with the associated Witness. 
 * @dev It is possible to create a {Lock} with no Requests!
 * @dev A Request might contain a payload. 
 */
@@ -22,7 +22,7 @@ module suitears::request_lock {
 
   // === Errors ===
 
-  // @dev Throws if one provides the wrong Witness once when completing a request.  
+  // @dev Throws if one provides the wrong Witness when completing a request.  
   // @dev Requests must be completed in order. 
   const EWrongRequest: u64 = 0;
   // @dev Thrown if a request with a payload is completed with the function {complete} instead of {complete_with_payload}.
@@ -59,7 +59,7 @@ module suitears::request_lock {
   * @notice Returns a request Witness `std::type_name::TypeName`. 
   *
   * @param req A {Request} 
-  * @return TypeName. The Witness `std::type_name::TypeName` of `req`.  
+  * @return TypeName. The Witness `std::type_name::TypeName` of the `req`.  
   */
   public fun name(req: &Request): TypeName {
     req.name
@@ -81,7 +81,7 @@ module suitears::request_lock {
   * @dev It is not possible to read a {Request} payload on-chain before completing it. 
   *
   * @param lock A {Lock<Issuer>} 
-  * @return &vector<Request>. Vector of all Requests.  
+  * @return &vector<Request>. Vector of all required Requests to destory the `lock`.  
   */
   public fun borrow_required_requests<Witness: drop>(lock: &Lock<Witness>): &vector<Request> {
     &lock.required_requests
@@ -110,9 +110,9 @@ module suitears::request_lock {
   }
 
   /*
-  * @notice Creates a {Request}. 
+  * @notice Creates a {Request} without a payload. 
   *
-  * @return Request. It has no payload.
+  * @return Request.
   */
   public fun new_request<RequestName: drop>(ctx: &mut TxContext): Request {
     Request {
@@ -125,7 +125,7 @@ module suitears::request_lock {
   /*
   * @notice Creates a {Request} `req` with a payload saved as a dynamic field under the key {RequestKey}. 
   *
-  * @return Request. It has no payload.
+  * @return Request.
   */
   public fun new_request_with_payload<RequestName: drop, Payload: store>(payload: Payload, ctx: &mut TxContext): Request {
     let name = type_name::get<RequestName>();
@@ -145,7 +145,7 @@ module suitears::request_lock {
   /*
   * @notice Adds a {Request} to the `lock`. 
   *
-  * @dev To destroy a {Lock<Witness>}. Requests must be completed in order. 
+  * @dev To destroy a {Lock<Witness>}, the requests must be completed in order. 
   *
   * @param lock A {Lock<Issuer>}.  
   * @param req A {Request}.  
@@ -166,7 +166,7 @@ module suitears::request_lock {
   }
 
   /*
-  * @notice Completes a task by adding the `Witness` name to the `lock.required_requests`. 
+  * @notice Completes a task by adding the `Witness` name to the `lock.completed_requests`. 
   *
   * @dev To destroy a {Lock<Witness>}. Tasks must be completed in order. 
   *
@@ -174,7 +174,7 @@ module suitears::request_lock {
   * @param _ A {Request} witness.  
   *
   * aborts-if 
-  * - The `req.name` has already been added to the `lock.required_requests`
+  * - The `req.name` has already been added to the `lock.completed_requests`
   * - if the {Request} has a payload. 
   */
   public fun complete<Witness: drop, Request: drop>(lock: &mut Lock<Witness>, _: Request) {
@@ -188,7 +188,7 @@ module suitears::request_lock {
   }
 
   /*
-  * @notice Completes a task by adding the `Witness` name to the `lock.required_requests` and returns the payload. 
+  * @notice Completes a task by adding the `Witness` name to the `lock.completed_requests` and returns the payload. 
   *
   * @dev To destroy a {Lock<Witness>}. Tasks must be completed in order. 
   *
@@ -196,7 +196,7 @@ module suitears::request_lock {
   * @param _ A {Request} witness.  
   *
   * aborts-if 
-  * - The `req.name` has already been added to the `lock.required_requests`
+  * - The `req.name` has already been added to the `lock.completed_requests`
   * - if the {Request} does not have a payload. 
   */
   public fun complete_with_payload<Witness: drop, Request: drop, Payload: store>(lock: &mut Lock<Witness>, _: Request): Payload {

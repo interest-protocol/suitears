@@ -44,7 +44,7 @@ module suitears::timelock {
   // === Public Mutative Function ===     
 
   /*
-  * @notice Locks the `data` for `unlock_time`.  
+  * @notice Locks the `data` for `unlock_time` milliseconds.  
   *
   * @param data An object with the store ability.  
   * @param c The shared `sui::clock::Clock` object.   
