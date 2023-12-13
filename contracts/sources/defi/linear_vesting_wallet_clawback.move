@@ -140,6 +140,26 @@ module suitears::linear_vesting_wallet_clawback {
     self.clawbacked
   }  
 
+  /*
+  * @notice Releases the current amount of coins available to the caller based on the linear schedule.  
+  *
+  * @param self A {Wallet<T>}.
+  * @param c The `sui::clock::Clock` shared object. 
+  * @return u64. The amount that has vested at the current time. 
+  * @return u64. A portion of the amount that has not yet been released
+  */
+  public fun vesting_status<T>(self: &Wallet<T>, c: &Clock): u64 {
+    let vested = linear_vested_amount(
+      self.start, 
+      self.duration, 
+      balance::value(&self.balance) + self.clawbacked, 
+      self.released, 
+      clock::timestamp_ms(c)
+    );
+
+    vested - self.released
+  }  
+
   // === Public Mutative Functions ===  
 
   /*
@@ -188,26 +208,6 @@ module suitears::linear_vesting_wallet_clawback {
 
     coin::from_balance(balance::split(&mut self.balance, remaining_value), ctx)
   }  
-
-  /*
-  * @notice Releases the current amount of coins available to the caller based on the linear schedule.  
-  *
-  * @param self A {Wallet<T>}.
-  * @param c The `sui::clock::Clock` shared object. 
-  * @return u64. The amount that has vested at the current time. 
-  * @return u64. A portion of the amount that has not yet been released
-  */
-  public fun vesting_status<T>(self: &Wallet<T>, c: &Clock): u64 {
-    let vested = linear_vested_amount(
-      self.start, 
-      self.duration, 
-      balance::value(&self.balance) + self.clawbacked, 
-      self.released, 
-      clock::timestamp_ms(c)
-    );
-
-    vested - self.released
-  }
 
   /*
   * @notice Destroys a {Wallet<T>} with no balance.  

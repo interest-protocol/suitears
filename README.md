@@ -22,9 +22,9 @@ The Sui Move contracts are located in the `contracts` directory.
 ```ml
 airdrop
 ├─ airdrop_utils — "Verify function for the airdrop modules"
-├─ airdrop — "An airdrop that distributes the tokens after a specific date"
-├─ linear_vesting_airdrop — "An airdrop that distributes the tokens according to a linear vesting"
-├─ quadratic_vesting_airdrop — "An airdrop that distributes the tokens according to a quadratic vesting"
+├─ airdrop — "A pull design airdrop that distributes the tokens after a specific date"
+├─ linear_vesting_airdrop — "A pull design that distributes the tokens according to a linear vesting"
+├─ quadratic_vesting_airdrop — "A pull design that distributes the tokens according to a quadratic vesting"
 capabilities
 ├─ owner — "Owner capability to give access to multiple objects"
 ├─ quest — "A wrapper that can only be unwrapped once a set of actions are completed"
@@ -39,8 +39,9 @@ defi
 ├─ farm — "Farm module to reward coin holders over time"
 ├─ fund — "Struct to track shares associated with underlying deposits/withdrawals"
 ├─ linear_vesting_wallet — "Wallet that allows withdrawals according to a linear vesting"
-├─ linear_vesting_wallet_with_clawback — "An airdrop that distributes the tokens according to a linear vesting and allows the clawback owner to claim all unreleased coins"
-├─ quadratic_vesting_wallet — "Wallet that allows withdrawals according to a quadratic
+├─ linear_vesting_wallet_with_clawback — "Wallet that distributes the tokens according to a linear vesting and allows the clawback owner to claim all unreleased coins back"
+├─ quadratic_vesting_wallet — "Wallet that allows withdrawals according to a quadratic"
+├─ quadratic_vesting_wallet_with_clawback — "Wallet that allows withdrawals according to a quadratic and allows the clawback owner to claim all unreleased coins back"
 ├─ vesting — "Virtual implementation of vesting schedules"
 governance
 ├─ dao — "Decentralized autonomous organization"
