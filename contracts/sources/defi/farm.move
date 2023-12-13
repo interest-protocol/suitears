@@ -422,7 +422,7 @@ module suitears::farm {
     };
 
     if (pending_reward != 0) {
-      coin::join(&mut reward_coin, coin::take(&mut farm.balance_reward_coin, amount, ctx));      
+      coin::join(&mut reward_coin, coin::take(&mut farm.balance_reward_coin, pending_reward, ctx));      
     };
 
     account.reward_debt = calculate_reward_debt(

@@ -114,6 +114,71 @@ module suitears::farm_tests {
     test::end(scenario);
   }
 
+  #[test]
+  fun test_unstake() {
+    let scenario = scenario();
+    let (alice, _) = people();
+
+    let test = &mut scenario;
+
+    set_up(test);
+
+    let c = clock::create_for_testing(ctx(test));
+
+    next_tx(test, alice);  
+    {
+      let farm = test::take_shared<Farm<ETH, SUI>>(test);
+      let account = test::take_from_sender<Account<ETH, SUI>>(test);
+      
+      burn_for_testing(farm::stake(
+        &mut farm,
+        &mut account,
+        mint_for_testing(500, ctx(test)),
+        &c,
+        ctx(test)
+      ));
+
+      test::return_to_sender(test, account);
+      test::return_shared(farm);      
+    }; 
+
+    next_tx(test, alice);
+    {
+      let farm = test::take_shared<Farm<ETH, SUI>>(test);
+      let account = test::take_from_sender<Account<ETH, SUI>>(test);
+
+      // 5 seconds of rewards
+      clock::increment_for_testing(&mut c, 5000 + 10_000);
+
+      let pending_rewards = farm::pending_rewards(&farm, &account, &c);   
+
+      let (stake_coin, reward_coin) = farm::unstake(
+        &mut farm,
+        &mut account,
+        300,
+        &c,
+        ctx(test)
+      );
+
+      let accrued_rewards_per_share = farm::accrued_rewards_per_share(&farm);
+
+      assert_eq(burn_for_testing(stake_coin), 300);
+      assert_eq(burn_for_testing(reward_coin), REWARDS_PER_SECOND * 5);
+      assert_eq(pending_rewards, REWARDS_PER_SECOND * 5);             
+      assert_eq(farm::amount(&account), 200);
+      assert_eq(farm::reward_debt(&account), (accrued_rewards_per_share * 200) / (SUI_DECIMAL_SCALAR as u256));
+      assert_eq(farm::balance_stake_coin(&farm), 200);
+      assert_eq(farm::last_reward_timestamp(&farm), 15_000 / 1000);
+      assert_eq(accrued_rewards_per_share, (SUI_DECIMAL_SCALAR as u256) * ((REWARDS_PER_SECOND as u256) * 5) / 500);
+
+      test::return_to_sender(test, account);
+      test::return_shared(farm);           
+    };
+
+    clock::destroy_for_testing(c);
+    test::end(scenario);       
+  }
+
   fun set_up(test: &mut Scenario) {
     let (alice, bob) = people();
 
