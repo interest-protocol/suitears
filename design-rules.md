@@ -121,8 +121,6 @@
   }
   ```
 
-- **Do not emit events. Sui emits native events on object mutations.**
-
 - **Shared objects must be created via a new function and be shared in a separate function. The share function must be named share.**
 
   ```Move
