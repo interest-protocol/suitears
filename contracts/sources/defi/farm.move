@@ -133,8 +133,8 @@ module suitears::farm {
     start_timestamp: u64,
     ctx: &mut TxContext
   ): Farm<StakeCoin, RewardCoin> {
-    assert!(clock::timestamp_ms(c) > start_timestamp, EInvalidStartTime);
-
+    assert!(start_timestamp > clock_timestamp_s(c), EInvalidStartTime);
+    
     let cap_id = object::id(cap);
 
     let farm = Farm {
@@ -182,7 +182,7 @@ module suitears::farm {
   * @param self The {Farm<StakeCoin, RewardCoin>}
   * @return u64. 
   */
-  public fun rewards_per_second<StakeCoin, RewardCoin>(self: &mut Farm<StakeCoin, RewardCoin>): u64 {
+  public fun rewards_per_second<StakeCoin, RewardCoin>(self: &Farm<StakeCoin, RewardCoin>): u64 {
     self.rewards_per_second
   }
 
@@ -192,7 +192,7 @@ module suitears::farm {
   * @param self The {Farm<StakeCoin, RewardCoin>}
   * @return u64. 
   */
-  public fun start_timestamp<StakeCoin, RewardCoin>(self: &mut Farm<StakeCoin, RewardCoin>): u64 {
+  public fun start_timestamp<StakeCoin, RewardCoin>(self: &Farm<StakeCoin, RewardCoin>): u64 {
     self.start_timestamp
   } 
 
@@ -202,7 +202,7 @@ module suitears::farm {
   * @param self The {Farm<StakeCoin, RewardCoin>}
   * @return u64. 
   */
-  public fun last_reward_timestamp<StakeCoin, RewardCoin>(self: &mut Farm<StakeCoin, RewardCoin>): u64 {
+  public fun last_reward_timestamp<StakeCoin, RewardCoin>(self: &Farm<StakeCoin, RewardCoin>): u64 {
     self.last_reward_timestamp
   }   
 
@@ -212,7 +212,7 @@ module suitears::farm {
   * @param self The {Farm<StakeCoin, RewardCoin>}
   * @return u256. 
   */
-  public fun accrued_rewards_per_share<StakeCoin, RewardCoin>(self: &mut Farm<StakeCoin, RewardCoin>): u256 {
+  public fun accrued_rewards_per_share<StakeCoin, RewardCoin>(self: &Farm<StakeCoin, RewardCoin>): u256 {
     self.accrued_rewards_per_share
   }   
 
@@ -222,7 +222,7 @@ module suitears::farm {
   * @param self The {Farm<StakeCoin, RewardCoin>}
   * @return u64. 
   */
-  public fun balance_stake_coin<StakeCoin, RewardCoin>(self: &mut Farm<StakeCoin, RewardCoin>): u64 {
+  public fun balance_stake_coin<StakeCoin, RewardCoin>(self: &Farm<StakeCoin, RewardCoin>): u64 {
     balance::value(&self.balance_stake_coin)
   }  
 
@@ -232,7 +232,7 @@ module suitears::farm {
   * @param self The {Farm<StakeCoin, RewardCoin>}
   * @return u64. 
   */
-  public fun balance_reward_coin<StakeCoin, RewardCoin>(self: &mut Farm<StakeCoin, RewardCoin>): u64 {
+  public fun balance_reward_coin<StakeCoin, RewardCoin>(self: &Farm<StakeCoin, RewardCoin>): u64 {
     balance::value(&self.balance_reward_coin)
   }  
 
@@ -242,7 +242,7 @@ module suitears::farm {
   * @param self The {Farm<StakeCoin, RewardCoin>}
   * @return u64. 
   */
-  public fun stake_coin_decimal_factor<StakeCoin, RewardCoin>(self: &mut Farm<StakeCoin, RewardCoin>): u64 {
+  public fun stake_coin_decimal_factor<StakeCoin, RewardCoin>(self: &Farm<StakeCoin, RewardCoin>): u64 {
     self.stake_coin_decimal_factor
   }   
 
@@ -252,7 +252,7 @@ module suitears::farm {
   * @param self The {Farm<StakeCoin, RewardCoin>}
   * @return ID. 
   */
-  public fun owned_by<StakeCoin, RewardCoin>(self: &mut Farm<StakeCoin, RewardCoin>): ID {
+  public fun owned_by<StakeCoin, RewardCoin>(self: &Farm<StakeCoin, RewardCoin>): ID {
     self.owned_by
   } 
 
@@ -544,14 +544,14 @@ module suitears::farm {
   * @param now The current timestamp in seconds.     
   */
   fun update<StakeCoin, RewardCoin>(farm: &mut Farm<StakeCoin, RewardCoin>, now: u64) {
-    if (farm.last_reward_timestamp >= now) return;
+    if (farm.last_reward_timestamp >= now || farm.start_timestamp / 1000 > now) return;
 
     let total_staked_value = balance::value(&farm.balance_stake_coin);
+    
+    let prev_reward_time_stamp = farm.last_reward_timestamp;
+    farm.last_reward_timestamp = now;
 
-    if (total_staked_value == 0) {
-      farm.last_reward_timestamp = now;
-      return
-    };
+    if (total_staked_value == 0) return;
 
     let total_reward_value = balance::value(&farm.balance_reward_coin);
 
@@ -561,7 +561,7 @@ module suitears::farm {
       total_staked_value,
       total_reward_value,
       farm.stake_coin_decimal_factor,
-      now - farm.last_reward_timestamp
+      now - prev_reward_time_stamp 
     );
   }
 
