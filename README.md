@@ -24,6 +24,7 @@ airdrop
 ├─ airdrop_utils — "Verify function for the airdrop modules"
 ├─ airdrop — "A pull design airdrop that distributes the tokens after a specific date"
 ├─ linear_vesting_airdrop — "A pull design that distributes the tokens according to a linear vesting"
+├─ multi_sender — "A push style airdrop"
 ├─ quadratic_vesting_airdrop — "A pull design that distributes the tokens according to a quadratic vesting"
 capabilities
 ├─ owner — "Owner capability to give access to multiple objects"

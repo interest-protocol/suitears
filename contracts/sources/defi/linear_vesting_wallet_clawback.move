@@ -84,6 +84,7 @@ module suitears::linear_vesting_wallet_clawback {
   * @notice It shares the {Wallet<T>} with the network.
   * @param self A {Wallet<T>}.  
   */
+  #[lint_allow(share_owned)]
   public fun share<T>(self: Wallet<T>) {
     transfer::share_object(self);
   }

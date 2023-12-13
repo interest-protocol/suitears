@@ -99,24 +99,6 @@ module suitears::linear_vesting_wallet {
     self.duration
   }  
 
-  // === Public Mutative Functions ===  
-
-  /*
-  * @notice Releases the current amount of coins available to the caller based on the linear schedule.  
-  *
-  * @param self A {Wallet<T>}.
-  * @param c The `sui::clock::Clock` shared object. 
-  * @return Coin<T>. 
-  */
-  public fun claim<T>(self: &mut Wallet<T>, c: &Clock, ctx: &mut TxContext): Coin<T> {
-    // Release amount
-    let releasable = vesting_status(self, c);
-
-    *&mut self.released = self.released + releasable;
-
-    coin::from_balance(balance::split(&mut self.balance, releasable), ctx)
-  }
-
   /*
   * @notice Releases the current amount of coins available to the caller based on the linear schedule.  
   *
@@ -134,6 +116,24 @@ module suitears::linear_vesting_wallet {
     );
 
     vested - self.released
+  }  
+
+  // === Public Mutative Functions ===  
+
+  /*
+  * @notice Releases the current amount of coins available to the caller based on the linear schedule.  
+  *
+  * @param self A {Wallet<T>}.
+  * @param c The `sui::clock::Clock` shared object. 
+  * @return Coin<T>. 
+  */
+  public fun claim<T>(self: &mut Wallet<T>, c: &Clock, ctx: &mut TxContext): Coin<T> {
+    // Release amount
+    let releasable = vesting_status(self, c);
+
+    *&mut self.released = self.released + releasable;
+
+    coin::from_balance(balance::split(&mut self.balance, releasable), ctx)
   }
 
   /*
