@@ -48,6 +48,7 @@ module suitears::linear_vesting_wallet_clawback {
   * @notice It creates a new {Wallet<T>} and two capabilities for the recipient and the clawback owner.  
   *
   * @param token A `sui::coin::Coin<T>`.
+  * @param c The shared object `sui::clock::Clock`
   * @param start Dictate when the vesting schedule starts.    
   * @param duration The duration of the vesting schedule. 
   * @return OwnerCap<ClawBackWitness>. The holder of this capability can clawback the coins. 

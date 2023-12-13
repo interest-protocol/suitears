@@ -39,6 +39,7 @@ module suitears::linear_vesting_wallet {
   * @notice It creates a new {Wallet<T>}.  
   *
   * @param token A `sui::coin::Coin<T>`.
+  * @param c The shared object `sui::clock::Clock`  
   * @param start Dictate when the vesting schedule starts.    
   * @param duration The duration of the vesting schedule. 
   * @return Wallet<T>.

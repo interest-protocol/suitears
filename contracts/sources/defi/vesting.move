@@ -8,8 +8,6 @@ module suitears::vesting {
 
   use sui::math;
 
-  use suitears::fixed_point_roll::mul_down;
-
   // === Constants ===   
 
   // @dev Represents 1 unit with 0 decimals - 1e9.
