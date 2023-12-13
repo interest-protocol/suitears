@@ -27,7 +27,7 @@ module suitears::farm {
   const EAccountHasValue: u64 = 1;
   // @dev Thrown when the user tries to create a {Farm} that starts in the past. 
   const EInvalidStartTime: u64 = 3;
-  // @dev Thrown when the user tries to uses the wrong {Account}. 
+  // @dev Thrown when the user uses the wrong {Account}. 
   const EInvalidAccount: u64 = 5;
 
   // === Structs ===  
@@ -272,7 +272,7 @@ module suitears::farm {
   * @param account An {Account}
   * @return u256. 
   */
-  public fun amount<StakeCoin, RewardCoin>(account: &Account<StakeCoin, RewardCoin>): u256 {
+  public fun reward_debt<StakeCoin, RewardCoin>(account: &Account<StakeCoin, RewardCoin>): u256 {
     account.reward_debt
   }  
 
@@ -329,7 +329,7 @@ module suitears::farm {
   /*
   * @notice Allows a user to stake `stake_coin` in the `farm`.
   *
-  * @dev On first deposits the returned Coin will havea value of zero. So make sure to destroy it. 
+  * @dev On the first deposits the returned Coin will have a value of zero. So make sure to destroy it. 
   * 
   * @param farm The {Farm<StakeCoin, RewardCoin>}.  
   * @param account The {Account} associated with the `farm`. 
@@ -511,7 +511,7 @@ module suitears::farm {
   }
 
   /*
-  * @notice Returns a mutable reference of the `farm`'s `sui::object::UI to allow the`cap` owner to extand its functionalities. 
+  * @notice Returns a mutable reference of the `farm`'s `sui::object::UI to allow the 'cap` owner to extend its functionalities. 
   * 
   * @param farm The {Farm<StakeCoin, RewardCoin>}.  
   * @param cap The {OwnerCap} that "owns" the `farm`.  
@@ -531,7 +531,7 @@ module suitears::farm {
   * @notice It converts the timestamp from milliseconds to seconds. 
   *
   * @param c The `sui::clock::Clock` shared object.  
-  * @return u64. The timestamp in seconds. 
+  * @return u64. The timestamp is in seconds. 
   */
   fun clock_timestamp_s(c: &Clock): u64 {
     clock::timestamp_ms(c) / 1000
@@ -566,7 +566,7 @@ module suitears::farm {
   }
 
   /*
-  * @notice Utility functionto calculte the accrued rewards per share of a {Farm}.  
+  * @notice Utility function to calculate the accrued rewards per share of a {Farm}.  
   * 
   * @param rewards_per_second The amount of rewards the farm can give every second.   
   * @param last_accrued_rewards_per_share The last calculated accrued_rewards_per_share of the {Farm}.    
@@ -600,7 +600,7 @@ module suitears::farm {
   }
 
   /*
-  * @notice Utility functionto calculte the pending rewards of a user.  
+  * @notice Utility function calculates the pending rewards of a user.  
   * 
   * @param account An {Account} associated with a {Farm}. 
   * @param stake_factor The decimal scalar of the stake coin.   
@@ -612,7 +612,7 @@ module suitears::farm {
   }
 
   /*
-  * @notice Utility functionto calculte the reward debt of a user.  
+  * @notice Utility function to calculate the reward debt of a user.  
   * 
   * @param stake_amount The current stake amount of the user.  
   * @param stake_Factor The decimal scalar of the {StakeCoin}.  
