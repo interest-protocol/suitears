@@ -3,7 +3,7 @@
 *
 * @notice Creates a Wallet that allows the holder to claim coins linearly with clawback capability. 
 */
-module suitears::linear_vesting_wallet_with_clawback {
+module suitears::linear_vesting_wallet_clawback {
   // === Imports ===
 
   use sui::transfer;
@@ -13,8 +13,8 @@ module suitears::linear_vesting_wallet_with_clawback {
   use sui::tx_context::TxContext;
   use sui::balance::{Self, Balance};
 
+  use suitears::math64;
   use suitears::owner::{Self, OwnerCap};
-
   use suitears::vesting::linear_vested_amount;
 
   // === Errors ===
@@ -33,6 +33,7 @@ module suitears::linear_vesting_wallet_with_clawback {
     start: u64,
     // The duration of the vesting. 
     duration: u64,
+    clawbacked: u64
   }
 
   // @dev The {OwnerCap<RecipientWitness>} with this witness can claim the coins over time. 
@@ -70,6 +71,7 @@ module suitears::linear_vesting_wallet_with_clawback {
       released: 0,
       start, 
       duration,
+      clawbacked: 0
     };
 
     let clawback_cap = owner::new(ClawBackWitness {}, vector[object::id(&wallet)], ctx);
@@ -128,6 +130,16 @@ module suitears::linear_vesting_wallet_with_clawback {
     self.duration
   }    
 
+  /*
+  * @notice Returns the amount of tokens that were claw backed by the holder of {OwnerCap<ClawBackWitness>} from the `self`.  
+  *
+  * @param self A {Wallet<T>}.
+  * @return u64. 
+  */
+  public fun clawbacked<T>(self: &Wallet<T>): u64 {
+    self.clawbacked
+  }  
+
   // === Public Mutative Functions ===  
 
   /*
@@ -145,11 +157,12 @@ module suitears::linear_vesting_wallet_with_clawback {
     owner::assert_ownership(cap, object::id(self));
 
     // Release amount
-    let (_, releasable) = vesting_status(self, c);
+    let releasable = vesting_status(self, c);
 
-    *&mut self.released = self.released + releasable;
+    self.released = self.released + releasable;
+    let current_balance = balance::value(&self.balance);
 
-    coin::from_balance(balance::split(&mut self.balance, releasable), ctx)
+    coin::from_balance(balance::split(&mut self.balance, math64::min(releasable, current_balance)), ctx)
   }
 
   /*
@@ -163,15 +176,15 @@ module suitears::linear_vesting_wallet_with_clawback {
   * aborts-if:  
   * - `cap` does not own the `self`. 
   */
-  public fun clawback<T>(self: &mut Wallet<T>, cap: &OwnerCap<ClawBackWitness>, c: &Clock, ctx: &mut TxContext): Coin<T> {
-    owner::assert_ownership(cap, object::id(self));
-
+  public fun clawback<T>(self: &mut Wallet<T>, cap: OwnerCap<ClawBackWitness>, c: &Clock, ctx: &mut TxContext): Coin<T> {
+    owner::assert_ownership(&cap, object::id(self));
+    owner::destroy(cap);
     // Release amount
-    let (_, releasable) = vesting_status(self, c);
-
-    *&mut self.released = self.released + releasable;
+    let releasable = vesting_status(self, c);
 
     let remaining_value = balance::value(&self.balance) - releasable;
+
+    self.clawbacked = remaining_value;
 
     coin::from_balance(balance::split(&mut self.balance, remaining_value), ctx)
   }  
@@ -184,16 +197,16 @@ module suitears::linear_vesting_wallet_with_clawback {
   * @return u64. The amount that has vested at the current time. 
   * @return u64. A portion of the amount that has not yet been released
   */
-  public fun vesting_status<T>(self: &Wallet<T>, c: &Clock): (u64, u64) {
+  public fun vesting_status<T>(self: &Wallet<T>, c: &Clock): u64 {
     let vested = linear_vested_amount(
       self.start, 
       self.duration, 
-      balance::value(&self.balance), 
+      balance::value(&self.balance) + self.clawbacked, 
       self.released, 
       clock::timestamp_ms(c)
     );
 
-    (vested, vested - self.released)
+    vested - self.released
   }
 
   /*
@@ -202,7 +215,7 @@ module suitears::linear_vesting_wallet_with_clawback {
   * @param self A {Wallet<T>}.
   */
   public fun destroy_zero<T>(self: Wallet<T>) {
-    let Wallet { id, start: _, duration: _, balance, released: _ } = self;
+    let Wallet { id, start: _, duration: _, balance, released: _, clawbacked: _ } = self;
     object::delete(id);
     balance::destroy_zero(balance);
   }

@@ -110,7 +110,7 @@ module suitears::linear_vesting_wallet {
   */
   public fun claim<T>(self: &mut Wallet<T>, c: &Clock, ctx: &mut TxContext): Coin<T> {
     // Release amount
-    let (_, releasable) = vesting_status(self, c);
+    let releasable = vesting_status(self, c);
 
     *&mut self.released = self.released + releasable;
 
@@ -122,10 +122,9 @@ module suitears::linear_vesting_wallet {
   *
   * @param self A {Wallet<T>}.
   * @param c The `sui::clock::Clock` shared object. 
-  * @return u64. The amount that has vested at the current time. 
-  * @return u64. A portion of the amount that has not yet been released
+  * @return u64. A portion of the amount that can be claimed by the user. 
   */
-  public fun vesting_status<T>(self: &Wallet<T>, c: &Clock): (u64, u64) {
+  public fun vesting_status<T>(self: &Wallet<T>, c: &Clock): u64 {
     let vested = linear_vested_amount(
       self.start, 
       self.duration, 
@@ -134,7 +133,7 @@ module suitears::linear_vesting_wallet {
       clock::timestamp_ms(c)
     );
 
-    (vested, vested - self.released)
+    vested - self.released
   }
 
   /*
