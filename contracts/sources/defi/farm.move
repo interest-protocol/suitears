@@ -1,5 +1,10 @@
-// Credits: https://github.com/pancakeswap/pancake-contracts-move/blob/main/pancake-smart-chef/sources/smart_chef.move
-// ** IMPORTANT ALL TIMESTAMPS IN SECOND
+/*
+* @title Farm
+*
+* @notice A contract to distribute reward tokens to stakers. 
+*
+* @dev All times are in seconds.
+*/
 module suitears::farm {
   use sui::math;
   use sui::event::emit;
@@ -9,19 +14,15 @@ module suitears::farm {
   use sui::tx_context::{Self, TxContext};
   use sui::coin::{Self, Coin, CoinMetadata};
 
+  use suitears::math256;
   use suitears::owner::{Self, OwnerCap};
 
   // Errors
-  const EInvalidStartTime: u64 = 0;
-  const EInvalidEndTime: u64 = 1;
-  const EFarmAlreadyStarted: u64 = 2;
-  const EFarmLimitZero: u64 = 3;
-  const EFarmEnded: u64 = 4;
-  const EStakeAboveLimit: u64 = 5;
-  const EInsufficientStakeAmount: u64 = 6;
-  const ENoLimitSet: u64 = 7;
-  const ELimitPerUserMustBeHigher: u64 = 8;
-  const EAccountHasValue: u64 = 8;
+  const EInsufficientStakeAmount: u64 = 0;
+  const EAccountHasValue: u64 = 1;
+  const ENoPendingRewards: u64 = 2;
+  const EInvalidStartTime: u64 = 3;
+  const EInvalidRewardsPerSecond: u64 = 4;
 
   struct FarmWitness has drop {}
 
@@ -33,15 +34,12 @@ module suitears::farm {
 
   struct Farm<phantom Label, phantom StakeCoin, phantom RewardCoin> has key, store {
     id: UID,
+    rewards_per_second: u64,
+    start_timestamp: u64,
+    last_reward_timestamp: u64,
+    accrued_rewards_per_share: u256,
     balance_stake_coin: Balance<StakeCoin>,
     balance_reward_coin: Balance<RewardCoin>,
-    reward_per_second: u64,
-    start_timestamp: u64,
-    end_timestamp: u64,
-    last_reward_timestamp: u64,
-    seconds_for_user_limit: u64,
-    farm_limit_per_user: u64,
-    account_token_per_share: u256,
     stake_coin_decimal_factor: u64,
     owned_by: ID
   }
@@ -56,7 +54,6 @@ module suitears::farm {
 
   struct AddReward<phantom Label, phantom StakeCoin, phantom RewardCoin> has drop, copy {
     farm: ID,
-    cap: ID,
     value: u64
   }
 
@@ -92,18 +89,11 @@ module suitears::farm {
     sender: address
   }
 
-  struct NewDates<phantom Label, phantom StakeCoin, phantom RewardCoin> has copy, drop {
-    farm: ID,
-    start_timestamp: u64,
-    end_timestamp: u64,
-    sender: address
-  }
-
-  public fun create_cap(ctx: &mut TxContext): OwnerCap<FarmWitness> {
+  public fun new_cap(ctx: &mut TxContext): OwnerCap<FarmWitness> {
     owner::new(FarmWitness {}, vector[], ctx)
   }
 
-  public fun create_account<Label: drop, StakeCoin, RewardCoin>(_: Label, ctx: &mut TxContext): Account<Label, StakeCoin, RewardCoin> {
+  public fun new_account<Label: drop, StakeCoin, RewardCoin>(_: Label, ctx: &mut TxContext): Account<Label, StakeCoin, RewardCoin> {
     Account {
       id: object::new(ctx),
       amount: 0,
@@ -111,39 +101,29 @@ module suitears::farm {
     }
   }
 
-  public fun create_farm<Label: drop, StakeCoin, RewardCoin>(
+  public fun new_farm<Label: drop, StakeCoin, RewardCoin>(
     cap: &mut OwnerCap<FarmWitness>,
     stake_coin_metadata: &CoinMetadata<StakeCoin>,
     c: &Clock,
-    reward_per_second: u64,
+    rewards_per_second: u64,
     start_timestamp: u64,
-    end_timestamp: u64,
-    farm_limit_per_user: u64,
-    seconds_for_user_limit: u64,
     ctx: &mut TxContext
   ): Farm<Label, StakeCoin, RewardCoin> {
     assert!(clock_timestamp_s(c) > start_timestamp, EInvalidStartTime);
-    assert!(end_timestamp > start_timestamp, EInvalidEndTime);
-
-    if (seconds_for_user_limit != 0) {
-      assert!(farm_limit_per_user != 0, EFarmLimitZero);
-    };
+    assert!(rewards_per_second != 0, EInvalidRewardsPerSecond);
 
     let cap_id = object::id(cap);
 
     let farm = Farm {
       id: object::new(ctx),
-      balance_stake_coin: balance::zero(),
-      balance_reward_coin: balance::zero(),
-      reward_per_second,
       start_timestamp,
-      end_timestamp,
       last_reward_timestamp: start_timestamp,
-      seconds_for_user_limit,
-      farm_limit_per_user,
-      account_token_per_share: 0,
+      rewards_per_second,
+      accrued_rewards_per_share: 0,
       stake_coin_decimal_factor: math::pow(10, coin::get_decimals(stake_coin_metadata)),
-      owned_by: cap_id     
+      owned_by: cap_id,
+      balance_stake_coin: balance::zero(),
+      balance_reward_coin: balance::zero(),     
     };
 
     let farm_id = object::id(&farm);
@@ -155,33 +135,31 @@ module suitears::farm {
     farm
   }
 
-  public fun add_reward<Label, StakeCoin, RewardCoin>(cap: &OwnerCap<FarmWitness>, farm: &mut Farm<Label, StakeCoin, RewardCoin>, reward: Coin<RewardCoin>) {
+  public fun add_rewards<Label, StakeCoin, RewardCoin>(farm: &mut Farm<Label, StakeCoin, RewardCoin>, reward: Coin<RewardCoin>) {
     let farm_id = object::id(farm);
-    owner::assert_ownership(cap, farm_id);
-    emit(AddReward<Label, StakeCoin, RewardCoin> { farm: farm_id, cap: object::id(cap), value: coin::value(&reward) });
+    emit(AddReward<Label, StakeCoin, RewardCoin> { farm: farm_id, value: coin::value(&reward) });
     balance::join(&mut farm.balance_reward_coin, coin::into_balance(reward));
   }
 
   public fun stake<Label, StakeCoin, RewardCoin>(
-    c: &Clock,
     farm: &mut Farm<Label, StakeCoin, RewardCoin>, 
     account: &mut Account<Label, StakeCoin, RewardCoin>,
     stake_coin: Coin<StakeCoin>, 
+    c: &Clock,
     ctx: &mut TxContext
   ): Coin<RewardCoin> {
-    let now = clock_timestamp_s(c);
-    assert!(farm.end_timestamp > now, EFarmEnded);
-    
-    update(farm, now);
+    update(farm, clock_timestamp_s(c));
 
     let stake_amount = coin::value(&stake_coin);
-    
-    assert!(farm.farm_limit_per_user >= account.amount + stake_amount || now >= (farm.start_timestamp + farm.seconds_for_user_limit), EStakeAboveLimit);
 
     let reward_coin = coin::zero<RewardCoin>(ctx);
 
     if (account.amount != 0) {
-      let pending_reward = calculate_pending_rewards(account, farm.stake_coin_decimal_factor, farm.account_token_per_share);
+      let pending_reward = calculate_pending_rewards(
+        account, 
+        farm.stake_coin_decimal_factor, 
+        farm.accrued_rewards_per_share
+      );
       if (pending_reward != 0) coin::join(&mut reward_coin, coin::take(&mut farm.balance_reward_coin, pending_reward, ctx));
     };
 
@@ -192,7 +170,11 @@ module suitears::farm {
       coin::destroy_zero(stake_coin);
     };
 
-    account.reward_debt = reward_debt(account.amount, farm.stake_coin_decimal_factor, farm.account_token_per_share);
+    account.reward_debt = calculate_reward_debt(
+      account.amount, 
+      farm.stake_coin_decimal_factor, 
+      farm.accrued_rewards_per_share
+    );
 
     emit(Stake<Label, StakeCoin, RewardCoin> { farm: object::id(farm), stake_amount, reward_amount: coin::value(&reward_coin), sender: tx_context::sender(ctx) });
 
@@ -231,14 +213,6 @@ module suitears::farm {
     emit(Unstake<Label, StakeCoin, RewardCoin> { farm: object::id(farm), unstake_amount: amount, reward_amount: pending_reward, sender: tx_context::sender(ctx) });
 
     (stake_coin, reward_coin)
-  }
-
-  public fun stop_reward<Label, StakeCoin, RewardCoin>(cap: &OwnerCap<FarmWitness>, farm: &mut Farm<Label, StakeCoin, RewardCoin>, c:&Clock, ctx: &mut TxContext) {
-    owner::assert_ownership(cap, object::id(farm));
-    
-    let now = clock_timestamp_s(c);
-    farm.end_timestamp = now;
-    emit(StopReward<Label, StakeCoin, RewardCoin>{ farm: object::id(farm), timestamp: now, sender: tx_context::sender(ctx) });
   }
 
   public fun update_farm_limit_per_user<Label, StakeCoin, RewardCoin>(
@@ -349,13 +323,10 @@ module suitears::farm {
       balance_reward_coin, 
       balance_stake_coin, 
       owned_by: _, 
-      reward_per_second: _,
+      rewards_per_second: _,
       start_timestamp: _,
-      end_timestamp: _,
       last_reward_timestamp: _,
-      seconds_for_user_limit: _,
-      farm_limit_per_user: _,
-      account_token_per_share: _,
+      accrued_rewards_per_share: _,
       stake_coin_decimal_factor: _,
     } = farm;
 
@@ -390,62 +361,51 @@ module suitears::farm {
       return
     };
 
-    let new_account_token_per_share = calculate_account_token_per_share(
-      now,
-      farm.account_token_per_share,
-      total_staked_value,
-      farm.end_timestamp,
-      farm.reward_per_second,
-      farm.stake_coin_decimal_factor,
-      farm.last_reward_timestamp
-    );
+    let total_reward_value = balance::value(&farm.balance_reward_coin);
 
-    if (farm.account_token_per_share != new_account_token_per_share) {
-      farm.account_token_per_share = new_account_token_per_share;
-      farm.last_reward_timestamp = now;
-    };
+    farm.accrued_rewards_per_share = calculate_accrued_rewards_per_share(
+      farm.rewards_per_second,
+      farm.accrued_rewards_per_share,
+      total_staked_value,
+      total_reward_value,
+      farm.stake_coin_decimal_factor,
+      now - farm.last_reward_timestamp
+    );
   }
 
-  fun calculate_account_token_per_share(
-    now: u64,
-    last_account_token_per_share: u256,
+  fun calculate_accrued_rewards_per_share(
+    rewards_per_second: u64,
+    last_accrued_rewards_per_share: u256,
     total_staked_token: u64,
-    end_timestamp: u64,
-    reward_per_second: u64,
+    total_reward_value: u64,
     stake_factor: u64,
-    last_reward_timestamp: u64
+    timestamp_delta: u64
   ): u256 { 
-    let multiplier = get_multiplier(last_reward_timestamp, now, end_timestamp);
-    let (total_staked_token, reward_per_second, stake_factor, multiplier) =
+    
+    let (total_staked_token, total_reward_value, rewards_per_second, stake_factor, timestamp_delta) =
      (
       (total_staked_token as u256),
-      (reward_per_second as u256),
+      (total_reward_value as u256),
+      (rewards_per_second as u256),
       (stake_factor as u256),
-      (multiplier as u256)
+      (timestamp_delta as u256)
      );
     
-    let reward = reward_per_second * multiplier;
-    if (multiplier == 0) return last_account_token_per_share;
+    let reward = math256::min(total_reward_value, rewards_per_second * timestamp_delta);
 
-    last_account_token_per_share + ((reward * stake_factor) / total_staked_token)
+    last_accrued_rewards_per_share + ((reward * stake_factor) / total_staked_token)
   }
 
   fun calculate_pending_rewards<Label, StakeCoin, RewardCoin>(acc: &Account<Label, StakeCoin, RewardCoin>, stake_factor: u64, account_token_per_share: u256): u64 {
-    let stake_factor = (stake_factor as u256);
-
-    ((((acc.amount as u256) * account_token_per_share / stake_factor) - acc.reward_debt) as u64)
+    ((((acc.amount as u256) * account_token_per_share / (stake_factor as u256)) - acc.reward_debt) as u64)
   }
 
-  fun reward_debt(stake_amount: u64, stake_factor: u64, account_token_per_share: u256): u256 {
+  fun calculate_reward_debt(stake_amount: u64, stake_factor: u64, account_token_per_share: u256): u256 {
     let (stake_amount, stake_factor) = (
       (stake_amount as u256),
       (stake_factor as u256)
     );
 
     (stake_amount * account_token_per_share) / stake_factor
-  }
-
-  fun get_multiplier(from: u64, to: u64, end: u64): u64 {
-    if (end >= to) { to - from } else if ( from >= end ) { 0 } else { end - from }
   }
 }

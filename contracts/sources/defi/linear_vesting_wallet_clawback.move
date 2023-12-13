@@ -51,8 +51,8 @@ module suitears::linear_vesting_wallet_clawback {
   * @param c The shared object `sui::clock::Clock`
   * @param start Dictate when the vesting schedule starts.    
   * @param duration The duration of the vesting schedule. 
-  * @return OwnerCap<ClawBackWitness>. The holder of this capability can clawback the coins. 
-  * @return OwnerCap<RecipientWitness>. The holder of this capability can claim tokens according tgo the linear schedule.  
+  * @return OwnerCap<ClawBackWitness>. The holder of this capability can claw back the coins. 
+  * @return OwnerCap<RecipientWitness>. The holder of this capability can claim tokens according to the linear schedule.  
   * @return Wallet<T>.
   *
   * aborts-if:   
@@ -83,6 +83,7 @@ module suitears::linear_vesting_wallet_clawback {
 
   /*
   * @notice It shares the {Wallet<T>} with the network.
+  *
   * @param self A {Wallet<T>}.  
   */
   #[lint_allow(share_owned)]
@@ -133,7 +134,7 @@ module suitears::linear_vesting_wallet_clawback {
   }    
 
   /*
-  * @notice Returns the amount of tokens that were claw backed by the holder of {OwnerCap<ClawBackWitness>} from the `self`.  
+  * @notice Returns the number of tokens that were claw-backed by the holder of {OwnerCap<ClawBackWitness>} from the `self`.  
   *
   * @param self A {Wallet<T>}.
   * @return u64. 
