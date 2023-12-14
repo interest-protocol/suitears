@@ -10,8 +10,9 @@ module suitears::farm_tests {
   use sui::test_scenario::{Self as test, Scenario, next_tx, ctx};
 
   use suitears::eth::{Self, ETH};
-  use suitears::farm::{Self, Farm, Account};
+  use suitears::owner::{Self, OwnerCap};
   use suitears::test_utils::{people, scenario};
+  use suitears::farm::{Self, Farm, FarmWitness, Account};
 
   const START_TIME: u64 = 10;
   const REWARDS_PER_SECOND: u64 = 10_000_000_000;
@@ -472,6 +473,73 @@ module suitears::farm_tests {
 
     clock::destroy_for_testing(c);
     test::end(scenario);      
+  }
+
+  #[test]
+  fun test_update_rewards_per_second() {
+    let scenario = scenario();
+    let (alice, _) = people();
+
+    let test = &mut scenario;
+
+    set_up(test);
+
+    let c = clock::create_for_testing(ctx(test));
+    clock::increment_for_testing(&mut c, 10_000);
+
+    next_tx(test, alice);      
+    {
+      let farm = test::take_shared<Farm<ETH, SUI>>(test);
+      let cap = test::take_from_sender<OwnerCap<FarmWitness>>(test);
+
+      assert_eq(farm::rewards_per_second(&farm), REWARDS_PER_SECOND);
+
+      farm::update_rewards_per_second(
+        &mut farm,
+        &cap,
+        1,
+        &c
+      );
+
+      test::return_to_sender(test, cap);
+      test::return_shared(farm);         
+    }; 
+    clock::destroy_for_testing(c);
+    test::end(scenario);     
+  }
+
+  #[test]
+  #[expected_failure(abort_code = owner::ENotAllowed)] 
+  fun test_wrong_admin_update_rewards() {
+    let scenario = scenario();
+    let (alice, _) = people();
+
+    let test = &mut scenario;
+
+    set_up(test);
+
+    let c = clock::create_for_testing(ctx(test));
+    clock::increment_for_testing(&mut c, 10_000);
+
+    next_tx(test, alice); 
+    {
+      let wrong_cap = farm::new_cap(ctx(test)); 
+      let farm = test::take_shared<Farm<ETH, SUI>>(test);
+
+      assert_eq(farm::rewards_per_second(&farm), REWARDS_PER_SECOND);
+
+      farm::update_rewards_per_second(
+        &mut farm,
+        &wrong_cap,
+        1,
+        &c
+      );
+
+      owner::destroy(wrong_cap);
+      test::return_shared(farm);      
+    };
+    clock::destroy_for_testing(c);
+    test::end(scenario);        
   }
 
   #[test]
