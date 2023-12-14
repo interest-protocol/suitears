@@ -296,6 +296,184 @@ module suitears::farm_tests {
     test::end(scenario);  
   }
 
+  #[test]
+  fun test_no_rewards() {
+    let scenario = scenario();
+    let (alice, bob) = people();
+
+    let test = &mut scenario;
+
+    let c = clock::create_for_testing(ctx(test));
+
+    next_tx(test, alice);
+    {
+      eth::init_for_testing(ctx(test));
+    };   
+
+    next_tx(test, alice);
+    {
+      let eth_metadata = test::take_shared<CoinMetadata<ETH>>(test);
+
+      let cap = farm::new_cap(ctx(test));
+      let farm = farm::new_farm<ETH, SUI>(
+        &mut cap,
+        &eth_metadata,
+        &c,
+        REWARDS_PER_SECOND,
+        1,
+        ctx(test)
+      );
+
+      // Only have 5 seconds of rewards
+      farm::add_rewards(&mut farm, &c, mint_for_testing(10_000_000_000 * 5, ctx(test)));
+      
+      // send accounts to people
+      transfer::public_transfer(farm::new_account(&farm, ctx(test)), alice);
+      transfer::public_transfer(farm::new_account(&farm, ctx(test)), bob);
+
+      transfer::public_share_object(farm);
+      transfer::public_transfer(cap, alice);
+      test::return_shared(eth_metadata);      
+    };
+
+    next_tx(test, alice);
+    {
+      let farm = test::take_shared<Farm<ETH, SUI>>(test);
+      let account = test::take_from_sender<Account<ETH, SUI>>(test);
+      
+      burn_for_testing(farm::stake(
+        &mut farm,
+        &mut account,
+        mint_for_testing(500, ctx(test)),
+        &c,
+        ctx(test)
+      ));
+
+      test::return_to_sender(test, account);
+      test::return_shared(farm);      
+    };
+
+     // Pass 6 seconds to get all rewards
+    clock::increment_for_testing(&mut c, 6001);
+
+    next_tx(test, alice);
+    {
+      let farm = test::take_shared<Farm<ETH, SUI>>(test);
+      let account = test::take_from_sender<Account<ETH, SUI>>(test);
+      
+      let reward_coin = farm::stake(
+        &mut farm,
+        &mut account,
+        coin::zero(ctx(test)),
+        &c,
+        ctx(test)
+      );
+
+      assert_eq(burn_for_testing(reward_coin), 10_000_000_000 * 5);
+      assert_eq(farm::balance_reward_coin(&farm), 0);
+
+      test::return_to_sender(test, account);
+      test::return_shared(farm);      
+    };
+
+    next_tx(test, bob);
+    {
+      let farm = test::take_shared<Farm<ETH, SUI>>(test);
+      let account = test::take_from_sender<Account<ETH, SUI>>(test);
+      
+      burn_for_testing(farm::stake(
+        &mut farm,
+        &mut account,
+        mint_for_testing(250, ctx(test)),
+        &c,
+        ctx(test)
+      ));
+
+      test::return_to_sender(test, account);
+      test::return_shared(farm); 
+    };
+
+    // Pass 6 seconds to get all rewards
+    clock::increment_for_testing(&mut c, 6001);  
+
+    next_tx(test, bob);
+    {
+      let farm = test::take_shared<Farm<ETH, SUI>>(test);
+      let account = test::take_from_sender<Account<ETH, SUI>>(test);
+      
+      let (stake_coin, reward_coin) = farm::unstake(
+        &mut farm,
+        &mut account,
+        100,
+        &c,
+        ctx(test)
+      );
+
+      let accrued_rewards_per_share = farm::accrued_rewards_per_share(&farm);
+
+      assert_eq(burn_for_testing(stake_coin), 100);
+      assert_eq(burn_for_testing(reward_coin), 0);
+      assert_eq(farm::amount(&account), 150);
+      assert_eq(farm::reward_debt(&account), (accrued_rewards_per_share * 150) / (SUI_DECIMAL_SCALAR as u256));
+
+      farm::add_rewards(&mut farm, &c, mint_for_testing(10_000_000_000 * 5, ctx(test)));     
+
+      test::return_to_sender(test, account);
+      test::return_shared(farm); 
+    };      
+
+    // Pass 6 seconds to get all rewards
+    clock::increment_for_testing(&mut c, 6001);  
+
+    next_tx(test, alice);
+    {
+      let farm = test::take_shared<Farm<ETH, SUI>>(test);
+      let account = test::take_from_sender<Account<ETH, SUI>>(test);
+      
+      let reward_coin = farm::stake(
+        &mut farm,
+        &mut account,
+        coin::zero(ctx(test)),
+        &c,
+        ctx(test)
+      );
+
+      assert_eq(burn_for_testing(reward_coin), 10_000_000_000 * 5 * 500 / 650);
+      // bob rewards
+      assert_eq(farm::balance_reward_coin(&farm), (10_000_000_000 * 5 * 150 / 650) + 1);
+
+      test::return_to_sender(test, account);
+      test::return_shared(farm);      
+    };
+
+    // Pass 6 seconds to get all rewards
+    clock::increment_for_testing(&mut c, 6001);  
+
+    next_tx(test, bob);
+    {
+      let farm = test::take_shared<Farm<ETH, SUI>>(test);
+      let account = test::take_from_sender<Account<ETH, SUI>>(test);
+      
+      let reward_coin = farm::stake(
+        &mut farm,
+        &mut account,
+        coin::zero(ctx(test)),
+        &c,
+        ctx(test)
+      );
+
+      assert_eq(burn_for_testing(reward_coin), (10_000_000_000 * 5 * 150 / 650) + 1);
+      // bob rewards
+      assert_eq(farm::balance_reward_coin(&farm), 0);
+
+      test::return_to_sender(test, account);
+      test::return_shared(farm);      
+    };
+
+    clock::destroy_for_testing(c);
+    test::end(scenario);      
+  }
+
   fun set_up(test: &mut Scenario) {
     let (alice, bob) = people();
 
@@ -319,7 +497,7 @@ module suitears::farm_tests {
         ctx(test)
       );
 
-      farm::add_rewards(&mut farm, mint_for_testing(10_000_000_000 * 1_000, ctx(test)));
+      farm::add_rewards(&mut farm, &c, mint_for_testing(10_000_000_000 * 1_000, ctx(test)));
       
       // send accounts to people
       transfer::public_transfer(farm::new_account(&farm, ctx(test)), alice);
@@ -330,5 +508,5 @@ module suitears::farm_tests {
       clock::destroy_for_testing(c);
       test::return_shared(eth_metadata);
     }; 
-  }
+  }  
 }

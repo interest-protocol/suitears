@@ -11,11 +11,12 @@ module suitears::farm {
   use sui::math;
   use sui::event::emit;
   use sui::clock::{Self, Clock};
+  use sui::tx_context::TxContext;
   use sui::object::{Self, UID, ID};
   use sui::balance::{Self, Balance};
-  use sui::tx_context::{Self, TxContext};
   use sui::coin::{Self, Coin, CoinMetadata};
 
+  use suitears::math64;
   use suitears::math256;
   use suitears::owner::{Self, OwnerCap};
 
@@ -67,10 +68,9 @@ module suitears::farm {
 
   // === Events ===  
 
-  struct CreateFarm<phantom StakeCoin, phantom RewardCoin> has drop, copy {
+  struct NewFarm<phantom StakeCoin, phantom RewardCoin> has drop, copy {
     farm: ID,
     cap: ID,
-    sender: address
   }
 
   struct AddReward<phantom StakeCoin, phantom RewardCoin> has drop, copy {
@@ -81,21 +81,18 @@ module suitears::farm {
   struct Stake<phantom StakeCoin, phantom RewardCoin> has copy, drop {
     farm: ID,
     stake_amount: u64,
-    reward_amount: u64,
-    sender: address
+    reward_amount: u64
   }
 
   struct Unstake<phantom StakeCoin, phantom RewardCoin> has copy, drop {
     farm: ID,
     unstake_amount: u64,
-    reward_amount: u64,
-    sender: address
+    reward_amount: u64
   }
 
   struct NewRewardRate<phantom StakeCoin, phantom RewardCoin> has copy, drop {
     farm: ID,
-    rate: u64, 
-    sender: address
+    rate: u64
   }
 
   // === Public Create Functions ===  
@@ -113,13 +110,13 @@ module suitears::farm {
   /*
   * @notice It creares an {Farm<StakeCoin, RewardCoin>}. 
   *
-  * @dev The `start_timestamp` is in milliseconds.
+  * @dev The `start_timestamp` is in seconds.
   *
   * @param cap An {OwnerCap} that will be assigned the admin rights of the newly created {Farm}.  
   * @param stake_coin_metadata The `sui::coin::CoinMetadata` of the `StakeCoin`.  
   * @param c The `sui::clock::Clock` shared object.   
   * @param rewards_per_second The amount of `RewardCoin` the farm can distribute to stakers.  
-  * @param start_timestamp The timestamp in milliseconds that the farm is allowed to start distributing rewards.  
+  * @param start_timestamp The timestamp in seconds that the farm is allowed to start distributing rewards.  
   * @return {Farm<StakeCoin, RewardCoin>}. 
   *
   * aborts-if:  
@@ -153,7 +150,7 @@ module suitears::farm {
 
     owner::add( cap, FarmWitness {}, farm_id);
     
-    emit(CreateFarm<StakeCoin, RewardCoin>{ farm: farm_id, cap: cap_id, sender: tx_context::sender(ctx) });
+    emit(NewFarm<StakeCoin, RewardCoin>{ farm: farm_id, cap: cap_id });
     
     farm
   }
@@ -198,6 +195,8 @@ module suitears::farm {
 
   /*
   * @notice Returns the `self` last reward timestamp. 
+  *
+  * @dev It is in seconds.
   *
   * @param self The {Farm<StakeCoin, RewardCoin>}
   * @return u64. 
@@ -318,9 +317,11 @@ module suitears::farm {
   * @notice It allows anyone to add rewards to the `farm`.
   *
   * @param self The {Farm<StakeCoin, RewardCoin>}.  
+  * @param c The `sui::clock::Clock` shared object.    
   * @param reward The {RewardCoin} to be added to the `self`.    
   */
-  public fun add_rewards<StakeCoin, RewardCoin>(self: &mut Farm<StakeCoin, RewardCoin>, reward: Coin<RewardCoin>) {
+  public fun add_rewards<StakeCoin, RewardCoin>(self: &mut Farm<StakeCoin, RewardCoin>, c: &Clock, reward: Coin<RewardCoin>) {
+    update(self, clock_timestamp_s(c));
     let farm_id = object::id(self);
     emit(AddReward<StakeCoin, RewardCoin> { farm: farm_id, value: coin::value(&reward) });
     balance::join(&mut self.balance_reward_coin, coin::into_balance(reward));
@@ -361,6 +362,7 @@ module suitears::farm {
         farm.stake_coin_decimal_factor, 
         farm.accrued_rewards_per_share
       );
+      let pending_reward = math64::min(pending_reward, balance::value(&farm.balance_reward_coin));
       if (pending_reward != 0) coin::join(&mut reward_coin, coin::take(&mut farm.balance_reward_coin, pending_reward, ctx));
     };
 
@@ -377,7 +379,7 @@ module suitears::farm {
       farm.accrued_rewards_per_share
     );
 
-    emit(Stake<StakeCoin, RewardCoin> { farm: object::id(farm), stake_amount, reward_amount: coin::value(&reward_coin), sender: tx_context::sender(ctx) });
+    emit(Stake<StakeCoin, RewardCoin> { farm: object::id(farm), stake_amount, reward_amount: coin::value(&reward_coin) });
 
     reward_coin
   }
@@ -422,6 +424,7 @@ module suitears::farm {
     };
 
     if (pending_reward != 0) {
+      let pending_reward = math64::min(pending_reward, balance::value(&farm.balance_reward_coin));  
       coin::join(&mut reward_coin, coin::take(&mut farm.balance_reward_coin, pending_reward, ctx));      
     };
 
@@ -431,7 +434,7 @@ module suitears::farm {
       farm.accrued_rewards_per_share
     );
 
-    emit(Unstake<StakeCoin, RewardCoin> { farm: object::id(farm), unstake_amount: amount, reward_amount: pending_reward, sender: tx_context::sender(ctx) });
+    emit(Unstake<StakeCoin, RewardCoin> { farm: object::id(farm), unstake_amount: amount, reward_amount: pending_reward });
 
     (stake_coin, reward_coin)
   }
@@ -465,19 +468,18 @@ module suitears::farm {
   * aborts-if:  
   * - `cap` does not own the `farm`.    
   */
-  public fun update_reward_per_second<StakeCoin, RewardCoin>(
+  public fun update_rewards_per_second<StakeCoin, RewardCoin>(
     farm: &mut Farm<StakeCoin, RewardCoin>,     
     cap: &OwnerCap<FarmWitness>, 
     new_rewards_per_second: u64,
-    c: &Clock,
-    ctx: &mut TxContext
+    c: &Clock
   ) {
     owner::assert_ownership(cap, object::id(farm));
     update(farm, clock_timestamp_s(c));
 
     farm.rewards_per_second = new_rewards_per_second;
 
-    emit(NewRewardRate<StakeCoin, RewardCoin> { farm: object::id(farm), rate: new_rewards_per_second, sender: tx_context::sender(ctx)});
+    emit(NewRewardRate<StakeCoin, RewardCoin> { farm: object::id(farm), rate: new_rewards_per_second });
   }
 
   /*
@@ -544,7 +546,7 @@ module suitears::farm {
   * @param now The current timestamp in seconds.     
   */
   fun update<StakeCoin, RewardCoin>(farm: &mut Farm<StakeCoin, RewardCoin>, now: u64) {
-    if (farm.last_reward_timestamp >= now || farm.start_timestamp / 1000 > now) return;
+    if (farm.last_reward_timestamp >= now || farm.start_timestamp> now) return;
 
     let total_staked_value = balance::value(&farm.balance_stake_coin);
     
