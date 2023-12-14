@@ -54,7 +54,7 @@ module suitears::linear_vesting_airdrop {
 
     bitmap::set(&mut storage.map, index);
 
-    wallet::create(
+    wallet::new(
       coin::take(&mut storage.balance, amount, ctx),
       clock_object,
       storage.start,

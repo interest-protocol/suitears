@@ -9,7 +9,6 @@ module suitears::airdrop {
 
   use suitears::airdrop_utils::verify;
   use suitears::bitmap::{Self, Bitmap};
-  use suitears::timelock::{Self, Timelock};
 
   const EAlreadyClaimed: u64 = 0;
   const EInvalidRoot: u64 = 1;
@@ -23,9 +22,8 @@ module suitears::airdrop {
     map: Bitmap
   }
 
-  public fun create<T>(c: &Clock, airdrop_coin: Coin<T>, root: vector<u8>, start: u64, ctx: &mut TxContext): AirdropStorage<T> {
+  public fun create<T>(airdrop_coin: Coin<T>, root: vector<u8>, start: u64, ctx: &mut TxContext): AirdropStorage<T> {
     assert!(!vector::is_empty(&root), EInvalidRoot);
-    assert!(start > clock::timestamp_ms(c), EInvalidStartTime);
     AirdropStorage {
         id: object::new(ctx),
         balance: coin::into_balance(airdrop_coin),
@@ -40,19 +38,20 @@ module suitears::airdrop {
   }
 
   public fun get_airdrop<T>(
-    c: &Clock,
     storage: &mut AirdropStorage<T>, 
+    c: &Clock,
     proof: vector<vector<u8>>, 
     amount: u64, 
     ctx: &mut TxContext
-  ): Timelock<Coin<T>> {
+  ): Coin<T> {
+    assert!(storage.start > clock::timestamp_ms(c), EInvalidStartTime);
     let index = verify(storage.root, proof, amount, ctx);
 
     assert!(!bitmap::get(&storage.map, index), EAlreadyClaimed);
 
     bitmap::set(&mut storage.map, index);
 
-    timelock::lock(coin::take(&mut storage.balance, amount, ctx), c,  storage.start, ctx)
+    coin::take(&mut storage.balance, amount, ctx)
   }
 
   public fun has_account_claimed<T>(

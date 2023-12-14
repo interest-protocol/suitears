@@ -14,7 +14,6 @@ module suitears::dao_treasury {
   use suitears::fixed_point_roll::mul_up;
   use suitears::request_lock::{Self, destroy, Lock};
   use suitears::linear_vesting_wallet::{Self, Wallet as LinearWallet};
-  use suitears::quadratic_vesting_wallet::{Self, Wallet as QuadraticWallet};
 
   friend suitears::dao;
 
@@ -35,18 +34,6 @@ module suitears::dao_treasury {
 
   struct TransferVestingWalletPayload has store {
     start: u64,
-    duration: u64,
-    type: TypeName,
-    value: u64,
-    publisher_id: ID
-  }
-
-  struct TransferQuadraticWalletPayload has store {
-    vesting_curve_a: u64,
-    vesting_curve_b: u64,
-    vesting_curve_c: u64,
-    start: u64,
-    cliff: u64,
     duration: u64,
     type: TypeName,
     value: u64,
@@ -92,19 +79,6 @@ module suitears::dao_treasury {
     wallet_id: ID,
     start: u64,
     duration: u64
-  }
-
-  struct TransferQuadraticWallet<phantom DaoWitness, phantom CoinType> has copy, drop {
-    value: u64,
-    publisher_id: ID,
-    sender: address,
-    wallet_id: ID,
-    start: u64,
-    duration: u64,
-    cliff: u64,
-    vesting_curve_a: u64,
-    vesting_curve_b: u64,
-    vesting_curve_c: u64,
   }
 
   struct FlashLoanRequest<phantom DaoWitness, phantom CoinType> has copy, drop {
@@ -195,7 +169,7 @@ module suitears::dao_treasury {
     
     let token = coin::take<CoinType>(bag::borrow_mut(&mut treasury.coins, coin_typename), value, ctx);
 
-    let wallet = linear_vesting_wallet::create(token, c, start, duration, ctx);
+    let wallet = linear_vesting_wallet::new(token, c, start, duration, ctx);
 
     emit(TransferLinearWallet<DaoWitness, CoinType> { 
         value, 
@@ -209,63 +183,6 @@ module suitears::dao_treasury {
     
     wallet
   }
-
-  public fun transfer_quadratic_vesting_wallet<DaoWitness: drop, CoinType>(
-    treasury: &mut DaoTreasury<DaoWitness>,
-    c: &Clock,
-    pub: &Publisher,
-    lock: Lock<Issuer<DaoWitness>>,  
-    ctx: &mut TxContext    
-  ): QuadraticWallet<CoinType> {
-    let TransferQuadraticWalletPayload 
-    {
-      type: coin_typename, 
-      publisher_id,
-      vesting_curve_a,
-      vesting_curve_b,
-      vesting_curve_c,
-      start,
-      cliff,
-      duration,
-      value 
-    } = request_lock::complete_with_payload<Issuer<DaoWitness>, TransferTask, TransferQuadraticWalletPayload>( &mut lock, TransferTask {});
-
-    destroy(lock);
-
-    assert!(get<CoinType>() == coin_typename, EMismatchCoinType);
-    assert!(object::id(pub) == publisher_id, EInvalidPublisher);
-    
-    let token = coin::take<CoinType>(bag::borrow_mut(&mut treasury.coins, coin_typename), value, ctx);
-
-    let wallet = quadratic_vesting_wallet::create(
-      token, 
-      c,
-      vesting_curve_a,
-      vesting_curve_b,
-      vesting_curve_c,
-      start,
-      cliff,
-      duration, 
-      ctx
-    );
-
-    emit(TransferQuadraticWallet<DaoWitness, CoinType> {
-        value, 
-        publisher_id, 
-        sender: tx_context::sender(ctx), 
-        duration, 
-        start, 
-        wallet_id: object::id(&wallet), 
-        vesting_curve_a, 
-        vesting_curve_b, 
-        vesting_curve_c, 
-        cliff
-      }
-    );
-    
-    wallet
-  }
-
 
   public fun create_transfer_payload<CoinType>(value: u64, publisher_id: ID): TransferPayload {
     TransferPayload {
@@ -287,29 +204,6 @@ module suitears::dao_treasury {
       publisher_id,
       start,
       duration
-    }
-  }
-
-  public fun create_transfer_quadratic_vesting_wallet_payload<CoinType>(
-    value: u64, 
-    publisher_id: ID,
-    cliff: u64, 
-    start: u64,
-    vesting_curve_a: u64,
-    vesting_curve_b: u64,
-    vesting_curve_c: u64,
-    duration: u64
-  ): TransferQuadraticWalletPayload {
-    TransferQuadraticWalletPayload {
-      type: get<CoinType>(),
-      value,
-      publisher_id,
-      cliff,
-      start,
-      duration,
-      vesting_curve_a,
-      vesting_curve_b,
-      vesting_curve_c
     }
   }
 
