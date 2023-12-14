@@ -10,7 +10,6 @@ module suitears::airdrop_utils {
   
   use sui::bcs;
   use sui::hash;
-  use sui::tx_context::{Self, TxContext};
 
   use suitears::merkle_proof;
 
@@ -36,9 +35,8 @@ module suitears::airdrop_utils {
     root: vector<u8>,
     proof: vector<vector<u8>>, 
     amount: u64, 
-    ctx: &mut TxContext
+    sender: address
   ): u256 {
-    let sender = tx_context::sender(ctx);
     let payload = bcs::to_bytes(&sender);
 
     vector::append(&mut payload, bcs::to_bytes(&amount));

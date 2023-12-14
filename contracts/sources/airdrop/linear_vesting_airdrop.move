@@ -4,8 +4,8 @@ module suitears::linear_vesting_airdrop {
   use sui::coin::{Self, Coin};
   use sui::object::{Self, UID};
   use sui::clock::{Self, Clock};
-  use sui::tx_context::TxContext;
   use sui::balance::{Self, Balance}; 
+  use sui::tx_context::{Self, TxContext};
 
   use suitears::airdrop_utils::verify;
   use suitears::bitmap::{Self, Bitmap};
@@ -48,7 +48,7 @@ module suitears::linear_vesting_airdrop {
     amount: u64, 
     ctx: &mut TxContext
   ): Wallet<T> {
-    let index = verify(storage.root, proof, amount, ctx);
+    let index = verify(storage.root, proof, amount, tx_context::sender(ctx));
 
     assert!(!bitmap::get(&storage.map, index), EAlreadyClaimed);
 
@@ -67,9 +67,9 @@ module suitears::linear_vesting_airdrop {
     storage: &AirdropStorage<T>,
     proof: vector<vector<u8>>, 
     amount: u64, 
-    ctx: &mut TxContext
+    user: address
   ): bool {
-    bitmap::get(&storage.map, verify(storage.root, proof, amount, ctx))
+    bitmap::get(&storage.map, verify(storage.root, proof, amount, user))
   }
 
   #[test_only]

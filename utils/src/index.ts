@@ -1,3 +1,5 @@
-import { createTree } from './airdrop-tree';
+import { makeFile } from './make-csv';
 
-createTree();
+makeFile(2300).then(() => {
+  console.log('done');
+});
