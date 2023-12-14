@@ -1,8 +1,8 @@
 module suitears::airdrop_utils {
-  use std::hash;
   use std::vector;
   
   use sui::bcs;
+  use sui::hash;
   use sui::tx_context::{Self, TxContext};
 
   use suitears::merkle_proof;
@@ -20,7 +20,7 @@ module suitears::airdrop_utils {
 
     vector::append(&mut payload, bcs::to_bytes(&amount));
 
-    let leaf = hash::sha3_256(payload);
+    let leaf = hash::keccak256(&payload);
     let (pred, index) = merkle_proof::verify_with_index(&proof, root, leaf);
     
     assert!(pred, EInvalidProof);

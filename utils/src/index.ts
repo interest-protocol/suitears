@@ -1,3 +1,3 @@
-import { validVerify } from './merkle-proof';
+import { createTree } from './airdrop-tree';
 
-validVerify();
+createTree();

@@ -19,6 +19,7 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
+    "@mysten/sui.js": "^0.48.1",
     "@openzeppelin/merkle-tree": "^1.0.5",
     "ethers": "^6.9.0",
     "keccak256": "^1.0.6"
