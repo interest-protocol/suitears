@@ -526,8 +526,6 @@ module suitears::farm_tests {
       let wrong_cap = farm::new_cap(ctx(test)); 
       let farm = test::take_shared<Farm<ETH, SUI>>(test);
 
-      assert_eq(farm::rewards_per_second(&farm), REWARDS_PER_SECOND);
-
       farm::update_rewards_per_second(
         &mut farm,
         &wrong_cap,
@@ -541,6 +539,70 @@ module suitears::farm_tests {
     clock::destroy_for_testing(c);
     test::end(scenario);        
   }
+
+  #[test]
+  #[expected_failure(abort_code = owner::ENotAllowed)] 
+  fun test_wrong_admin_borrow_uid() {
+    let scenario = scenario();
+    let (alice, _) = people();
+
+    let test = &mut scenario;
+
+    set_up(test);
+
+    let c = clock::create_for_testing(ctx(test));
+    clock::increment_for_testing(&mut c, 10_000);
+
+    next_tx(test, alice); 
+    {
+      let wrong_cap = farm::new_cap(ctx(test)); 
+      let farm = test::take_shared<Farm<ETH, SUI>>(test);
+
+      farm::borrow_mut_uid(&mut farm, &wrong_cap);
+
+      owner::destroy(wrong_cap);
+      test::return_shared(farm);      
+    };
+    clock::destroy_for_testing(c);
+    test::end(scenario);        
+  }
+
+  #[test]
+  #[expected_failure(abort_code = owner::ENotAllowed)] 
+  fun test_wrong_admin_destroy_farm() {
+    let scenario = scenario();
+    let (alice, _) = people();
+
+    let test = &mut scenario;
+
+    set_up(test);
+
+    let c = clock::create_for_testing(ctx(test));
+
+    next_tx(test, alice); 
+    {
+      let wrong_cap = farm::new_cap(ctx(test)); 
+      let eth_metadata = test::take_shared<CoinMetadata<ETH>>(test);
+
+      let cap = farm::new_cap(ctx(test));
+      let farm = farm::new_farm<ETH, SUI>(
+        &mut cap,
+        &eth_metadata,
+        &c,
+        REWARDS_PER_SECOND,
+        1,
+        ctx(test)
+      );
+
+      farm::destroy_zero_farm(farm, &wrong_cap);
+  
+      transfer::public_transfer(cap, alice);
+      test::return_shared(eth_metadata);
+      owner::destroy(wrong_cap);     
+    };
+    clock::destroy_for_testing(c);
+    test::end(scenario);        
+  }  
 
   #[test]
   #[expected_failure(abort_code = farm::EInvalidStartTime)] 
