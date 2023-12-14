@@ -15,7 +15,7 @@ module suitears::farm_tests {
 
   const START_TIME: u64 = 10;
   const REWARDS_PER_SECOND: u64 = 10_000_000_000;
-  const SUI_DECIMAL_SCALAR: u64 = 1_000_000_000;
+  const ETH_DECIMAL_SCALAR: u64 = 1_000_000_000;
 
   #[test]
   fun test_stake() {
@@ -70,7 +70,7 @@ module suitears::farm_tests {
 
       assert_eq(burn_for_testing(reward_coin), 5 * REWARDS_PER_SECOND);
       assert_eq(farm::amount(&account), 1000);
-      assert_eq(farm::reward_debt(&account), (accrued_rewards_per_share * 1000) / (SUI_DECIMAL_SCALAR as u256));
+      assert_eq(farm::reward_debt(&account), (accrued_rewards_per_share * 1000) / (ETH_DECIMAL_SCALAR as u256));
       assert_eq(farm::balance_stake_coin(&farm), 1000);
       assert_eq(farm::last_reward_timestamp(&farm), 15_000 / 1000);
 
@@ -99,10 +99,10 @@ module suitears::farm_tests {
 
       let accrued_rewards_per_share = farm::accrued_rewards_per_share(&farm);
 
-      assert_eq((burn_for_testing(reward_coin) as u256), ((1000 * accrued_rewards_per_share) / (SUI_DECIMAL_SCALAR as u256)) - rewards_debt);
-      assert_eq((pending_rewards as u256), ((1000 * accrued_rewards_per_share) / (SUI_DECIMAL_SCALAR as u256)) - rewards_debt);
+      assert_eq((burn_for_testing(reward_coin) as u256), ((1000 * accrued_rewards_per_share) / (ETH_DECIMAL_SCALAR as u256)) - rewards_debt);
+      assert_eq((pending_rewards as u256), ((1000 * accrued_rewards_per_share) / (ETH_DECIMAL_SCALAR as u256)) - rewards_debt);
       assert_eq(farm::amount(&account), 1000);
-      assert_eq(farm::reward_debt(&account), (accrued_rewards_per_share * 1000) / (SUI_DECIMAL_SCALAR as u256));
+      assert_eq(farm::reward_debt(&account), (accrued_rewards_per_share * 1000) / (ETH_DECIMAL_SCALAR as u256));
       assert_eq(farm::balance_stake_coin(&farm), 1000);
       assert_eq(farm::last_reward_timestamp(&farm), (15_000 * 2) / 1000);
 
@@ -166,10 +166,10 @@ module suitears::farm_tests {
       assert_eq(burn_for_testing(reward_coin), REWARDS_PER_SECOND * 5);
       assert_eq(pending_rewards, REWARDS_PER_SECOND * 5);             
       assert_eq(farm::amount(&account), 200);
-      assert_eq(farm::reward_debt(&account), (accrued_rewards_per_share * 200) / (SUI_DECIMAL_SCALAR as u256));
+      assert_eq(farm::reward_debt(&account), (accrued_rewards_per_share * 200) / (ETH_DECIMAL_SCALAR as u256));
       assert_eq(farm::balance_stake_coin(&farm), 200);
       assert_eq(farm::last_reward_timestamp(&farm), 15_000 / 1000);
-      assert_eq(accrued_rewards_per_share, (SUI_DECIMAL_SCALAR as u256) * ((REWARDS_PER_SECOND as u256) * 5) / 500);
+      assert_eq(accrued_rewards_per_share, (ETH_DECIMAL_SCALAR as u256) * ((REWARDS_PER_SECOND as u256) * 5) / 500);
 
       test::return_to_sender(test, account);
       test::return_shared(farm);           
@@ -228,7 +228,7 @@ module suitears::farm_tests {
       test::return_shared(farm);         
     };
 
-    let accrued_rewards_per_share = (REWARDS_PER_SECOND as u256) * 4 * (SUI_DECIMAL_SCALAR as u256) / 800  + (REWARDS_PER_SECOND as u256) * 5 * (SUI_DECIMAL_SCALAR as u256) / 500;
+    let accrued_rewards_per_share = (REWARDS_PER_SECOND as u256) * 4 * (ETH_DECIMAL_SCALAR as u256) / 800  + (REWARDS_PER_SECOND as u256) * 5 * (ETH_DECIMAL_SCALAR as u256) / 500;
 
     next_tx(test, alice);  
     {
@@ -243,7 +243,7 @@ module suitears::farm_tests {
       assert_eq(farm::reward_debt(&account), 0);
       assert_eq(farm::balance_stake_coin(&farm), 800);
       assert_eq(farm::last_reward_timestamp(&farm), 15_000 / 1000);
-      assert_eq(farm::accrued_rewards_per_share(&farm), (REWARDS_PER_SECOND as u256) * 5 * (SUI_DECIMAL_SCALAR as u256) / 500);
+      assert_eq(farm::accrued_rewards_per_share(&farm), (REWARDS_PER_SECOND as u256) * 5 * (ETH_DECIMAL_SCALAR as u256) / 500);
 
       let (stake_coin, reward_coin) = farm::unstake(
         &mut farm,
@@ -254,10 +254,10 @@ module suitears::farm_tests {
       );
 
       assert_eq(burn_for_testing(stake_coin), 300);
-      assert_eq((burn_for_testing(reward_coin) as u256), accrued_rewards_per_share * 500 / (SUI_DECIMAL_SCALAR as u256));
+      assert_eq((burn_for_testing(reward_coin) as u256), accrued_rewards_per_share * 500 / (ETH_DECIMAL_SCALAR as u256));
       assert_eq(farm::accrued_rewards_per_share(&farm), accrued_rewards_per_share);
       assert_eq(farm::amount(&account), 200);
-      assert_eq(farm::reward_debt(&account), 200 * accrued_rewards_per_share / (SUI_DECIMAL_SCALAR as u256));
+      assert_eq(farm::reward_debt(&account), 200 * accrued_rewards_per_share / (ETH_DECIMAL_SCALAR as u256));
       assert_eq(farm::balance_stake_coin(&farm), 500);
       assert_eq(farm::last_reward_timestamp(&farm), 19_000 / 1000);
 
@@ -271,7 +271,7 @@ module suitears::farm_tests {
       let account = test::take_from_sender<Account<ETH, SUI>>(test);
 
       assert_eq(farm::amount(&account), 300);
-      assert_eq(farm::reward_debt(&account), (300 * (REWARDS_PER_SECOND as u256) * 5 * (SUI_DECIMAL_SCALAR as u256) / 500) / (SUI_DECIMAL_SCALAR as u256));
+      assert_eq(farm::reward_debt(&account), (300 * (REWARDS_PER_SECOND as u256) * 5 * (ETH_DECIMAL_SCALAR as u256) / 500) / (ETH_DECIMAL_SCALAR as u256));
 
       let reward_coin = farm::stake(
         &mut farm,
@@ -281,10 +281,10 @@ module suitears::farm_tests {
         ctx(test)
       );
 
-      assert_eq((burn_for_testing(reward_coin) as u256), (300 * (REWARDS_PER_SECOND as u256) * 4 * (SUI_DECIMAL_SCALAR as u256) / 800) / (SUI_DECIMAL_SCALAR as u256));
+      assert_eq((burn_for_testing(reward_coin) as u256), (300 * (REWARDS_PER_SECOND as u256) * 4 * (ETH_DECIMAL_SCALAR as u256) / 800) / (ETH_DECIMAL_SCALAR as u256));
 
       assert_eq(farm::amount(&account), 400);
-      assert_eq(farm::reward_debt(&account), 400 * accrued_rewards_per_share / (SUI_DECIMAL_SCALAR as u256));
+      assert_eq(farm::reward_debt(&account), 400 * accrued_rewards_per_share / (ETH_DECIMAL_SCALAR as u256));
       assert_eq(farm::balance_stake_coin(&farm), 600);
       assert_eq(farm::last_reward_timestamp(&farm), 19_000 / 1000);
 
@@ -414,7 +414,7 @@ module suitears::farm_tests {
       assert_eq(burn_for_testing(stake_coin), 100);
       assert_eq(burn_for_testing(reward_coin), 0);
       assert_eq(farm::amount(&account), 150);
-      assert_eq(farm::reward_debt(&account), (accrued_rewards_per_share * 150) / (SUI_DECIMAL_SCALAR as u256));
+      assert_eq(farm::reward_debt(&account), (accrued_rewards_per_share * 150) / (ETH_DECIMAL_SCALAR as u256));
 
       farm::add_rewards(&mut farm, &c, mint_for_testing(10_000_000_000 * 5, ctx(test)));     
 
@@ -473,6 +473,249 @@ module suitears::farm_tests {
     clock::destroy_for_testing(c);
     test::end(scenario);      
   }
+
+  #[test]
+  #[expected_failure(abort_code = farm::EInvalidStartTime)] 
+  fun test_invalid_start_time() {
+    let scenario = scenario();
+    let (alice, _) = people();
+
+    let test = &mut scenario;
+
+    let c = clock::create_for_testing(ctx(test));
+
+    next_tx(test, alice);
+    {
+      eth::init_for_testing(ctx(test));
+    };   
+
+    next_tx(test, alice);
+    {
+      let eth_metadata = test::take_shared<CoinMetadata<ETH>>(test);
+
+      let cap = farm::new_cap(ctx(test));
+      let farm = farm::new_farm<ETH, SUI>(
+        &mut cap,
+        &eth_metadata,
+        &c,
+        REWARDS_PER_SECOND,
+        0,
+        ctx(test)
+      );
+  
+      // send accounts to people
+      transfer::public_transfer(farm::new_account(&farm, ctx(test)), alice);
+
+      transfer::public_share_object(farm);
+      transfer::public_transfer(cap, alice);
+      test::return_shared(eth_metadata);      
+    }; 
+    
+    clock::destroy_for_testing(c);
+    test::end(scenario);      
+  }
+
+  #[test]
+  #[expected_failure(abort_code = farm::EAccountHasValue)]   
+  fun test_destroy_non_zero_account() {
+    let scenario = scenario();
+    let (alice, _) = people();
+
+    let test = &mut scenario;
+
+    set_up(test);
+
+    let c = clock::create_for_testing(ctx(test));
+
+    next_tx(test, alice);  
+    {
+      let farm = test::take_shared<Farm<ETH, SUI>>(test);
+      let account = test::take_from_sender<Account<ETH, SUI>>(test);
+      
+      let reward_coin = farm::stake(
+        &mut farm,
+        &mut account,
+        mint_for_testing(500, ctx(test)),
+        &c,
+        ctx(test)
+      );
+
+      burn_for_testing(reward_coin);
+      farm::destroy_zero_account(account);
+
+      test::return_shared(farm);
+    };
+    clock::destroy_for_testing(c);
+    test::end(scenario);           
+  }
+
+  #[test]
+  #[expected_failure(abort_code = farm::EInsufficientStakeAmount)]   
+  fun test_invalid_unstake_amount() {
+    let scenario = scenario();
+    let (alice, _) = people();
+
+    let test = &mut scenario;
+
+    set_up(test);
+
+    let c = clock::create_for_testing(ctx(test));
+
+    next_tx(test, alice);  
+    {
+      let farm = test::take_shared<Farm<ETH, SUI>>(test);
+      let account = test::take_from_sender<Account<ETH, SUI>>(test);
+      
+      let reward_coin = farm::stake(
+        &mut farm,
+        &mut account,
+        mint_for_testing(500, ctx(test)),
+        &c,
+        ctx(test)
+      );
+
+      burn_for_testing(reward_coin);
+      test::return_to_sender(test, account);
+      test::return_shared(farm);
+    };
+
+    next_tx(test, alice);
+    {
+      let farm = test::take_shared<Farm<ETH, SUI>>(test);
+      let account = test::take_from_sender<Account<ETH, SUI>>(test);
+
+      let (stake_coin, reward_coin) = farm::unstake(
+        &mut farm,
+        &mut account,
+        501,
+        &c,
+        ctx(test)
+      );
+
+      burn_for_testing(stake_coin);
+      burn_for_testing(reward_coin);
+
+      test::return_to_sender(test, account);
+      test::return_shared(farm);           
+    };    
+
+    clock::destroy_for_testing(c);
+    test::end(scenario);           
+  }  
+
+  #[test]
+  #[expected_failure(abort_code = farm::EInvalidAccount)]   
+  fun test_stake_invalid_account() {
+    let scenario = scenario();
+    let (alice, _) = people();
+
+    let test = &mut scenario;
+
+    set_up(test);
+
+    let c = clock::create_for_testing(ctx(test));
+
+    next_tx(test, alice);  
+    {
+      let farm = test::take_shared<Farm<ETH, SUI>>(test);
+      let cap = farm::new_cap(ctx(test));
+      let eth_metadata = test::take_shared<CoinMetadata<ETH>>(test);
+
+      let farm2 = farm::new_farm<ETH, SUI>(
+        &mut cap,
+        &eth_metadata,
+        &c,
+        REWARDS_PER_SECOND,
+        START_TIME,
+        ctx(test)
+      );
+
+      let wrong_account = farm::new_account(&farm2, ctx(test));
+      
+      let reward_coin = farm::stake(
+        &mut farm,
+        &mut wrong_account,
+        mint_for_testing(500, ctx(test)),
+        &c,
+        ctx(test)
+      );
+
+      burn_for_testing(reward_coin);
+      transfer::public_transfer(wrong_account, alice);
+      transfer::public_transfer(cap, alice);
+      test::return_shared(farm);
+      test::return_shared(farm2);
+      test::return_shared(eth_metadata);
+    };
+    clock::destroy_for_testing(c);
+    test::end(scenario);           
+  } 
+
+  #[test]
+  #[expected_failure(abort_code = farm::EInvalidAccount)]   
+  fun test_unstake_invalid_account() {
+    let scenario = scenario();
+    let (alice, _) = people();
+
+    let test = &mut scenario;
+
+    set_up(test);
+
+    let c = clock::create_for_testing(ctx(test));
+
+    next_tx(test, alice);
+    {
+      let farm = test::take_shared<Farm<ETH, SUI>>(test);
+      let account = test::take_from_sender<Account<ETH, SUI>>(test);
+      
+      burn_for_testing(farm::stake(
+        &mut farm,
+        &mut account,
+        mint_for_testing(250, ctx(test)),
+        &c,
+        ctx(test)
+      ));
+
+      test::return_to_sender(test, account);
+      test::return_shared(farm); 
+    };
+
+    next_tx(test, alice);  
+    {
+      let farm = test::take_shared<Farm<ETH, SUI>>(test);
+      let cap = farm::new_cap(ctx(test));
+      let eth_metadata = test::take_shared<CoinMetadata<ETH>>(test);
+
+      let farm2 = farm::new_farm<ETH, SUI>(
+        &mut cap,
+        &eth_metadata,
+        &c,
+        REWARDS_PER_SECOND,
+        START_TIME,
+        ctx(test)
+      );
+
+      let wrong_account = farm::new_account(&farm2, ctx(test));
+      
+      let (stake_coin, reward_coin) = farm::unstake(
+        &mut farm,
+        &mut wrong_account,
+        100,
+        &c,
+        ctx(test)
+      );
+
+      burn_for_testing(stake_coin);
+      burn_for_testing(reward_coin);
+      transfer::public_transfer(wrong_account, alice);
+      transfer::public_transfer(cap, alice);
+      test::return_shared(farm);
+      test::return_shared(farm2);
+      test::return_shared(eth_metadata);
+    };
+    clock::destroy_for_testing(c);
+    test::end(scenario);           
+  }    
 
   fun set_up(test: &mut Scenario) {
     let (alice, bob) = people();
