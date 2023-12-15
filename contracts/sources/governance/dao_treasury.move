@@ -10,9 +10,7 @@ module suitears::dao_treasury {
   use sui::balance::{Self, Balance};
   use sui::tx_context::{Self, TxContext};
 
-  use suitears::dao_request_lock::Issuer;
   use suitears::fixed_point_roll::mul_up;
-  use suitears::request_lock::{Self, destroy, Lock};
   use suitears::linear_vesting_wallet::{Self, Wallet as LinearWallet};
 
   friend suitears::dao;
@@ -118,71 +116,71 @@ module suitears::dao_treasury {
     balance::value(bag::borrow<TypeName, Balance<CoinType>>(&treasury.coins, get<CoinType>()))
   }
 
-  public fun transfer<DaoWitness: drop, CoinType>(
-    treasury: &mut DaoTreasury<DaoWitness>,
-    pub: &Publisher,
-    lock: Lock<Issuer<DaoWitness>>, 
-    ctx: &mut TxContext
-  ): Coin<CoinType> {
-    let TransferPayload { 
-      type: coin_typename, 
-      publisher_id, 
-      value
-    } = request_lock::complete_with_payload<Issuer<DaoWitness>, TransferTask, TransferPayload>(&mut lock, TransferTask {});
+  // public fun transfer<DaoWitness: drop, CoinType>(
+  //   treasury: &mut DaoTreasury<DaoWitness>,
+  //   pub: &Publisher,
+  //   lock: Lock<Issuer<DaoWitness>>, 
+  //   ctx: &mut TxContext
+  // ): Coin<CoinType> {
+  //   let TransferPayload { 
+  //     type: coin_typename, 
+  //     publisher_id, 
+  //     value
+  //   } = request_lock::complete_with_payload<Issuer<DaoWitness>, TransferTask, TransferPayload>(&mut lock, TransferTask {});
     
-    destroy(lock);
+  //   destroy(lock);
 
-    assert!(get<CoinType>() == coin_typename, EMismatchCoinType);
-    assert!(object::id(pub) == publisher_id, EInvalidPublisher);
+  //   assert!(get<CoinType>() == coin_typename, EMismatchCoinType);
+  //   assert!(object::id(pub) == publisher_id, EInvalidPublisher);
     
-    let token = coin::take(bag::borrow_mut(&mut treasury.coins, coin_typename), value, ctx);
+  //   let token = coin::take(bag::borrow_mut(&mut treasury.coins, coin_typename), value, ctx);
 
-    emit(Transfer<DaoWitness, CoinType> { 
-        value: value, 
-        publisher_id, 
-        sender: tx_context::sender(ctx) 
-      }
-    );
+  //   emit(Transfer<DaoWitness, CoinType> { 
+  //       value: value, 
+  //       publisher_id, 
+  //       sender: tx_context::sender(ctx) 
+  //     }
+  //   );
 
-    token
-  }
+  //   token
+  // }
 
-  public fun transfer_linear_vesting_wallet<DaoWitness: drop, CoinType>(
-    treasury: &mut DaoTreasury<DaoWitness>,
-    c: &Clock,
-    pub: &Publisher,
-    lock: Lock<Issuer<DaoWitness>>, 
-    ctx: &mut TxContext    
-  ): LinearWallet<CoinType> {
-    let TransferVestingWalletPayload { 
-      publisher_id, 
-      start, 
-      duration, 
-      value, 
-      type: coin_typename 
-    } = request_lock::complete_with_payload<Issuer<DaoWitness>, TransferTask, TransferVestingWalletPayload>(&mut lock, TransferTask {});
+  // public fun transfer_linear_vesting_wallet<DaoWitness: drop, CoinType>(
+  //   treasury: &mut DaoTreasury<DaoWitness>,
+  //   c: &Clock,
+  //   pub: &Publisher,
+  //   lock: Lock<Issuer<DaoWitness>>, 
+  //   ctx: &mut TxContext    
+  // ): LinearWallet<CoinType> {
+  //   let TransferVestingWalletPayload { 
+  //     publisher_id, 
+  //     start, 
+  //     duration, 
+  //     value, 
+  //     type: coin_typename 
+  //   } = request_lock::complete_with_payload<Issuer<DaoWitness>, TransferTask, TransferVestingWalletPayload>(&mut lock, TransferTask {});
 
-    destroy(lock);
+  //   destroy(lock);
 
-    assert!(get<CoinType>() == coin_typename, EMismatchCoinType);
-    assert!(object::id(pub) == publisher_id, EInvalidPublisher);
+  //   assert!(get<CoinType>() == coin_typename, EMismatchCoinType);
+  //   assert!(object::id(pub) == publisher_id, EInvalidPublisher);
     
-    let token = coin::take<CoinType>(bag::borrow_mut(&mut treasury.coins, coin_typename), value, ctx);
+  //   let token = coin::take<CoinType>(bag::borrow_mut(&mut treasury.coins, coin_typename), value, ctx);
 
-    let wallet = linear_vesting_wallet::new(token, c, start, duration, ctx);
+  //   let wallet = linear_vesting_wallet::new(token, c, start, duration, ctx);
 
-    emit(TransferLinearWallet<DaoWitness, CoinType> { 
-        value, 
-        publisher_id, 
-        sender: tx_context::sender(ctx), 
-        duration, 
-        start, 
-        wallet_id: object::id(&wallet) 
-      }
-    );
+  //   emit(TransferLinearWallet<DaoWitness, CoinType> { 
+  //       value, 
+  //       publisher_id, 
+  //       sender: tx_context::sender(ctx), 
+  //       duration, 
+  //       start, 
+  //       wallet_id: object::id(&wallet) 
+  //     }
+  //   );
     
-    wallet
-  }
+  //   wallet
+  // }
 
   public fun create_transfer_payload<CoinType>(value: u64, publisher_id: ID): TransferPayload {
     TransferPayload {

@@ -1,24 +1,27 @@
-// Based from https://github.com/starcoinorg/starcoin-framework/blob/main/sources/Dao.move
-// Before creating a DAO make sure your tokens are properly distributed
-// Do not add capabilities to hot potatoes (see https://docs.sui.io/concepts/sui-move-concepts/patterns/hot-potato)
+/*
+* @title Decentralized Autonomous Organization
+*
+* @notice It allows anyone to create a DAO, submit proposals and execute actions on-chain.    
+*
+* @dev It was inspired from https://github.com/starcoinorg/starcoin-framework/blob/main/sources/Dao.move.  
+*/
 module suitears::dao {
   use std::vector;
   use std::option::{Self, Option};
   use std::type_name::{Self, TypeName};
 
-  use sui::vec_set;
   use sui::event::emit;
   use sui::coin::{Self, Coin};
   use sui::clock::{Self, Clock};
   use sui::object::{Self, ID, UID};
   use sui::balance::{Self, Balance};
   use sui::types::is_one_time_witness;
+  use sui::transfer::{Self, Receiving};
   use sui::tx_context::{Self, TxContext};
 
-  use suitears::fixed_point_roll::div_down;
-  use suitears::dao_request_lock::{Self, Issuer};
+  use suitears::fixed_point_roll::div_down; 
+  use suitears::dao_admin::{Self, DaoAdmin};
   use suitears::dao_treasury::{Self, DaoTreasury};
-  use suitears::request_lock::{Self, Lock, Request};
 
   /// Proposal state
   const PENDING: u8 = 1;
@@ -42,6 +45,10 @@ module suitears::dao {
   const EEmptyHash: u64 = 14;
   const EProposalNotPassed: u64 = 15;
   const EInvalidCoinType: u64 = 16;
+  const EInvalidExecuteWitness: u64 = 17;
+  const EInvalidExecuiteCapability: u64 = 18;
+  const EInvalidReturnCapability: u64 = 19;
+  const EInvalidReturnDAO: u64 = 20;
 
   struct Config has store {
     voting_delay: Option<u64>,
@@ -81,9 +88,15 @@ module suitears::dao {
     action_delay: u64, // after how long, the agreed proposal can be executed.
     quorum_votes: u64, // the number of votes to pass the proposal.
     voting_quorum_rate: u64, 
-    requests: vector<Request>,
     hash: vector<u8>,
+    authorized_witness: TypeName,
+    capability_id: Option<ID>,
     coin_type: TypeName
+  }
+
+  struct CapabilityReceipt {
+    capability_id: ID,
+    dao_id: ID
   }
 
   struct Vote<phantom DaoWitness: drop, phantom CoinType> has  key, store {
@@ -174,6 +187,10 @@ module suitears::dao {
       coin_type: type_name::get<CoinType>()
     };
 
+    let admin = dao_admin::new<OTW>(ctx);
+
+    transfer::public_transfer(admin, object::uid_to_address(&dao.id));
+
     emit(
       CreateDao<OTW, CoinType> {
         dao_id: object::id(&dao),
@@ -205,14 +222,15 @@ module suitears::dao {
     let treasury = dao_treasury::create<OTW>(object::id(&dao), allow_flashloan, ctx);
 
     option::fill(&mut dao.treasury, object::id(&treasury));
-    
+
     (dao, treasury)
   }
 
   public fun propose<DaoWitness: drop>(
     dao: &mut Dao<DaoWitness>,
     c: &Clock,
-    requests: vector<Request>,
+    authorized_witness: TypeName,
+    capability_id: Option<ID>,
     action_delay: u64,
     quorum_votes: u64,
     hash: vector<u8>,// hash proposal title/content
@@ -221,20 +239,6 @@ module suitears::dao {
     assert!(action_delay >= dao.min_action_delay, EActionDelayTooSmall);
     assert!(quorum_votes >= dao.min_quorum_votes, EMinQuorumVotesTooSmall);
     assert!(vector::length(&hash) != 0, EEmptyHash);
-
-    // @dev To make sure the tasks are unique
-    let num_of_requests = vector::length(&requests);
-    let index = 0;
-    let set = vec_set::empty();
-
-
-    while (num_of_requests > index) {
-      let req = vector::borrow(&requests, index);
-
-      vec_set::insert(&mut set, request_lock::name(req));  
-
-      index = index + 1;
-    };
 
     let start_time = clock::timestamp_ms(c) + dao.voting_delay;
 
@@ -250,7 +254,8 @@ module suitears::dao {
       quorum_votes,
       voting_quorum_rate: dao.voting_quorum_rate,
       hash,
-      requests,
+      authorized_witness,
+      capability_id,
       coin_type: dao.coin_type
     };
     
@@ -355,26 +360,39 @@ module suitears::dao {
     proposal.eta = now + proposal.action_delay;
   }
 
-  public fun execute_proposal<DaoWitness: drop>(
+  public fun execute_proposal<DaoWitness: drop, AuhorizedWitness: drop, Capability: key + store>(
+    dao: &mut Dao<DaoWitness>,
     proposal: &mut Proposal<DaoWitness>, 
+    _: AuhorizedWitness,
+    receive_ticket: Receiving<Capability>,
     c: &Clock
-  ): Lock<Issuer<DaoWitness>> {
+  ): (Capability, CapabilityReceipt) {
     let now = clock::timestamp_ms(c);
     assert!(get_proposal_state(proposal, now) == EXECUTABLE, ECannotExecuteThisProposal);
     assert!(now >= proposal.end_time + proposal.action_delay, ETooEarlyToExecute);
+    assert!(type_name::get<AuhorizedWitness>() == proposal.authorized_witness, EInvalidExecuteWitness);
 
-    let lock = dao_request_lock::new();
+    let proposal_capability_id = option::extract(&mut proposal.capability_id);
 
-    let num_of_requests = vector::length(&proposal.requests);
-    let index = 0;
+    assert!(transfer::receiving_object_id(&receive_ticket) == proposal_capability_id, EInvalidExecuiteCapability);
 
-    while (num_of_requests > index) {
-      request_lock::add(&mut lock, vector::remove(&mut proposal.requests, 0));
+    let capability = transfer::public_receive(&mut dao.id, receive_ticket);
 
-      index = index + 1;
+    let receipt = CapabilityReceipt {
+      capability_id: proposal_capability_id,
+      dao_id: object::id(dao)
     };
 
-    lock
+    (capability, receipt)
+  }
+
+  public fun return_capability<DaoWitness: drop, Capability: key + store>(dao: &Dao<DaoWitness>, cap: Capability, receipt: CapabilityReceipt) {
+    let CapabilityReceipt { dao_id, capability_id } = receipt;
+
+    assert!(dao_id == object::id(dao), EInvalidReturnDAO);
+    assert!(capability_id == object::id(&cap), EInvalidReturnCapability);
+
+    transfer::public_transfer(cap, object::uid_to_address(&dao.id));
   }
 
   public fun proposal_state<DaoWitness: drop>(proposal: &Proposal<DaoWitness>, c: &Clock): u8 {
@@ -385,13 +403,6 @@ module suitears::dao {
     vote: &Vote<DaoWitness, CoinType>
   ): (ID, ID, u64, bool, u64) {
     (object::id(vote), vote.proposal_id, balance::value(&vote.balance), vote.agree, vote.end_time)
-  }
-
-  public fun view_proposal<DaoWitness: drop>(
-    proposal: &Proposal<DaoWitness>, 
-    c: &Clock
-  ): (ID, address, u8, u64, u64, u64, u64, u64, u64, u64, vector<u8>, &vector<Request>, TypeName) {
-    (object::id(proposal), proposal.proposer, proposal_state(proposal, c), proposal.start_time, proposal.end_time, proposal.for_votes, proposal.against_votes, proposal.eta, proposal.action_delay, proposal.quorum_votes, proposal.hash, &proposal.requests, proposal.coin_type)
   }
 
   fun destroy_vote<DaoWitness: drop, CoinType>(vote: Vote<DaoWitness, CoinType>, ctx: &mut TxContext): Coin<CoinType> {
@@ -424,7 +435,7 @@ module suitears::dao {
     } else if (current_time < proposal.eta) {
       // Queued, waiting to execute
       QUEUED
-    } else if (!vector::is_empty(&proposal.requests)) {
+    } else if (option::is_some(&proposal.capability_id)) {
       EXECUTABLE
     } else {
       EXTRACTED
@@ -433,35 +444,15 @@ module suitears::dao {
   
    // Only Proposal can update Dao settings
 
-  public fun make_dao_config(
+  public fun update_dao_config<DaoWitness: drop>(
+    dao: &mut Dao<DaoWitness>,
+    _: DaoAdmin<DaoWitness>,
     voting_delay: Option<u64>, 
     voting_period: Option<u64>, 
     voting_quorum_rate: Option<u64>, 
     min_action_delay: Option<u64>, 
     min_quorum_votes: Option<u64>
-  ): Config {
-    Config { 
-      voting_delay, 
-      voting_period, 
-      voting_quorum_rate, 
-      min_action_delay, 
-      min_quorum_votes 
-    }
-  } 
-
-  public fun update_dao_config<DaoWitness: drop>(
-    dao: &mut Dao<DaoWitness>,
-    lock: Lock<Issuer<DaoWitness>>, 
   ) {
-    let Config { 
-      voting_delay, 
-      voting_period, 
-      voting_quorum_rate, 
-      min_action_delay, 
-      min_quorum_votes  
-    } = request_lock::complete_with_payload<Issuer<DaoWitness>, ConfigTask, Config>(&mut lock, ConfigTask {});
-
-    request_lock::destroy(lock);
 
     dao.voting_delay = option::destroy_with_default(voting_delay, dao.voting_delay);
     dao.voting_period = option::destroy_with_default(voting_period, dao.voting_period);

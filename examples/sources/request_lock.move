@@ -9,7 +9,7 @@
 * @dev It is possible to create a {Lock} with no Requests!
 * @dev A Request might contain a payload. 
 */
-module suitears::request_lock {
+module examples::request_lock {
   // === Imports ===
 
   use std::vector;

@@ -1,5 +1,5 @@
 #[test_only]
-module suitears::request_lock_tests {
+module examples::request_lock_tests {
   use std::vector;
   use std::type_name;
 
