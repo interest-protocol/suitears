@@ -111,6 +111,7 @@ module suitears::dao {
 
   struct CreateDao<phantom OTW, phantom CoinType> has copy, drop {
     dao_id: ID,
+    admin_id: ID,
     creator: address,
     voting_delay: u64, 
     voting_period: u64, 
@@ -164,7 +165,7 @@ module suitears::dao {
     value: u64
   }
 
-  public fun create<OTW: drop, CoinType>(
+  public fun new<OTW: drop, CoinType>(
     otw: OTW, 
     voting_delay: u64, 
     voting_period: u64, 
@@ -189,11 +190,10 @@ module suitears::dao {
 
     let admin = dao_admin::new<OTW>(ctx);
 
-    transfer::public_transfer(admin, object::uid_to_address(&dao.id));
-
     emit(
       CreateDao<OTW, CoinType> {
         dao_id: object::id(&dao),
+        admin_id: object::id(&admin),
         creator: tx_context::sender(ctx),
         voting_delay,
         voting_period,
@@ -203,12 +203,14 @@ module suitears::dao {
       }
     );
 
+    transfer::public_transfer(admin, object::uid_to_address(&dao.id));
+
     dao
   }
 
   // ** Important Make sure the voting_period and min_quorum_votes is adequate because a large holder can vote to withdraw all coins from the treasury.
   // ** Also major stakeholders should monitor all proposals to ensure they vote against malicious proposals.
-  public fun create_with_treasury<OTW: drop, CoinType>(
+  public fun new_with_treasury<OTW: drop, CoinType>(
     otw: OTW, 
     voting_delay: u64, 
     voting_period: u64, 
@@ -218,13 +220,85 @@ module suitears::dao {
     allow_flashloan: bool,
     ctx: &mut TxContext
   ): (Dao<OTW>, DaoTreasury<OTW>) {
-    let dao = create<OTW, CoinType>(otw, voting_delay, voting_period, voting_quorum_rate, min_action_delay, min_quorum_votes, ctx);
+    let dao = new<OTW, CoinType>(otw, voting_delay, voting_period, voting_quorum_rate, min_action_delay, min_quorum_votes, ctx);
     let treasury = dao_treasury::create<OTW>(object::id(&dao), allow_flashloan, ctx);
 
     option::fill(&mut dao.treasury, object::id(&treasury));
 
     (dao, treasury)
   }
+
+  //
+
+  public fun proposer<DaoWitness: drop>(proposal: &Proposal<DaoWitness>): address {
+    proposal.proposer
+  }
+
+  public fun start_time<DaoWitness: drop>(proposal: &Proposal<DaoWitness>): u64 {
+    proposal.start_time
+  } 
+
+  public fun end_time<DaoWitness: drop>(proposal: &Proposal<DaoWitness>): u64 {
+    proposal.end_time
+  }     
+
+  public fun for_votes<DaoWitness: drop>(proposal: &Proposal<DaoWitness>): u64 {
+    proposal.for_votes
+  }   
+
+  public fun against_votes<DaoWitness: drop>(proposal: &Proposal<DaoWitness>): u64 {
+    proposal.against_votes
+  }  
+
+  public fun eta<DaoWitness: drop>(proposal: &Proposal<DaoWitness>): u64 {
+    proposal.eta
+  }   
+
+  public fun action_delay<DaoWitness: drop>(proposal: &Proposal<DaoWitness>): u64 {
+    proposal.action_delay
+  }
+
+  public fun quorum_votes<DaoWitness: drop>(proposal: &Proposal<DaoWitness>): u64 {
+    proposal.quorum_votes
+  }           
+
+  public fun voting_quorum_rate<DaoWitness: drop>(proposal: &Proposal<DaoWitness>): u64 {
+    proposal.voting_quorum_rate
+  }
+
+  public fun hash<DaoWitness: drop>(proposal: &Proposal<DaoWitness>): vector<u8> {
+    proposal.hash
+  }    
+
+  public fun authorized_witness<DaoWitness: drop>(proposal: &Proposal<DaoWitness>): TypeName {
+    proposal.authorized_witness
+  }  
+
+  public fun capability_id<DaoWitness: drop>(proposal: &Proposal<DaoWitness>): Option<ID> {
+    proposal.capability_id
+  }    
+
+  public fun coin_type<DaoWitness: drop>(proposal: &Proposal<DaoWitness>): TypeName {
+    proposal.coin_type
+  }   
+
+  public fun balance<DaoWitness: drop, CoinType>(vote: &Vote<DaoWitness,  CoinType>): u64 {
+    balance::value(&vote.balance)
+  } 
+
+  public fun proposal_id<DaoWitness: drop, CoinType>(vote: &Vote<DaoWitness,  CoinType>): ID {
+    vote.proposal_id
+  }   
+
+  public fun vote_end_time<DaoWitness: drop, CoinType>(vote: &Vote<DaoWitness,  CoinType>): u64 {
+    vote.end_time
+  } 
+
+  public fun agree<DaoWitness: drop, CoinType>(vote: &Vote<DaoWitness,  CoinType>): bool {
+    vote.agree
+  } 
+
+  //
 
   public fun propose<DaoWitness: drop>(
     dao: &mut Dao<DaoWitness>,
@@ -446,7 +520,7 @@ module suitears::dao {
 
   public fun update_dao_config<DaoWitness: drop>(
     dao: &mut Dao<DaoWitness>,
-    _: DaoAdmin<DaoWitness>,
+    _: &DaoAdmin<DaoWitness>,
     voting_delay: Option<u64>, 
     voting_period: Option<u64>, 
     voting_quorum_rate: Option<u64>, 
