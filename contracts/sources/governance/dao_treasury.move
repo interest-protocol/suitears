@@ -4,7 +4,6 @@ module suitears::dao_treasury {
   use sui::event::emit;
   use sui::clock::Clock;
   use sui::bag::{Self, Bag};
-  use sui::package::Publisher;
   use sui::coin::{Self, Coin};
   use sui::object::{Self, UID, ID};
   use sui::balance::{Self, Balance};

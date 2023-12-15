@@ -211,7 +211,7 @@ module suitears::ascii_utils {
 
     let i: u128 = 0;
     while (i < length * 2) {
-      vector::push_back(&mut buffer, *vector::borrow(&mut HEX_SYMBOLS, (value & 0xf as u64)));
+      vector::push_back(&mut buffer, *vector::borrow(&HEX_SYMBOLS, (value & 0xf as u64)));
       value = value >> 4;
       i = i + 1;
     };
@@ -236,8 +236,8 @@ module suitears::ascii_utils {
     let i: u64 = 0;
     while (i < length) {
       let byte = *vector::borrow(&bytes, i);
-      vector::push_back(&mut buffer, *vector::borrow(&mut HEX_SYMBOLS, (byte >> 4 & 0xf as u64)));
-      vector::push_back(&mut buffer, *vector::borrow(&mut HEX_SYMBOLS, (byte & 0xf as u64)));
+      vector::push_back(&mut buffer, *vector::borrow(&HEX_SYMBOLS, (byte >> 4 & 0xf as u64)));
+      vector::push_back(&mut buffer, *vector::borrow(&HEX_SYMBOLS, (byte & 0xf as u64)));
       i = i + 1;
     };
     ascii::string(buffer)

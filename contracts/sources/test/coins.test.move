@@ -1,15 +1,15 @@
 #[test_only]
-module suitears::eth {
+module suitears::s_eth {
   use std::option;
 
   use sui::coin;
   use sui::transfer;
   use sui::tx_context::{Self, TxContext};
 
-  struct ETH has drop {}
+  struct S_ETH has drop {}
 
-  fun init(witness: ETH, ctx: &mut TxContext) {
-      let (treasury_cap, metadata) = coin::create_currency<ETH>(
+  fun init(witness: S_ETH, ctx: &mut TxContext) {
+      let (treasury_cap, metadata) = coin::create_currency<S_ETH>(
             witness, 
             9, 
             b"ETH",
@@ -25,22 +25,22 @@ module suitears::eth {
 
   #[test_only]
   public fun init_for_testing(ctx: &mut TxContext) {
-    init(ETH {}, ctx);
+    init(S_ETH {}, ctx);
   }
 }
 
 #[test_only]
-module suitears::btc {
+module suitears::s_btc {
   use std::option;
 
   use sui::coin;
   use sui::transfer;
   use sui::tx_context::{Self, TxContext};
 
-  struct BTC has drop {}
+  struct S_BTC has drop {}
 
-  fun init(witness: BTC, ctx: &mut TxContext) {
-      let (treasury_cap, metadata) = coin::create_currency<BTC>(
+  fun init(witness: S_BTC, ctx: &mut TxContext) {
+      let (treasury_cap, metadata) = coin::create_currency<S_BTC>(
             witness, 
             6, 
             b"BTC",
@@ -56,6 +56,6 @@ module suitears::btc {
 
   #[test_only]
   public fun init_for_testing(ctx: &mut TxContext) {
-    init(BTC {}, ctx);
+    init(S_BTC {}, ctx);
   }
 }

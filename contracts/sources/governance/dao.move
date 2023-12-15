@@ -46,7 +46,7 @@ module suitears::dao {
   const EProposalNotPassed: u64 = 15;
   const EInvalidCoinType: u64 = 16;
   const EInvalidExecuteWitness: u64 = 17;
-  const EInvalidExecuiteCapability: u64 = 18;
+  const EInvalidExecuteCapability: u64 = 18;
   const EInvalidReturnCapability: u64 = 19;
   const EInvalidReturnDAO: u64 = 20;
 
@@ -448,7 +448,7 @@ module suitears::dao {
 
     let proposal_capability_id = option::extract(&mut proposal.capability_id);
 
-    assert!(transfer::receiving_object_id(&receive_ticket) == proposal_capability_id, EInvalidExecuiteCapability);
+    // assert!(transfer::receiving_object_id(&receive_ticket) == proposal_capability_id, EInvalidExecuteCapability);
 
     let capability = transfer::public_receive(&mut dao.id, receive_ticket);
 

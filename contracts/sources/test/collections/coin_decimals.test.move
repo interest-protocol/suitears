@@ -7,8 +7,8 @@ module suitears::coin_decimals_tests {
   use sui::test_scenario::{Self as test, Scenario, next_tx, ctx};
 
   use suitears::coin_decimals;
-  use suitears::btc::{Self, BTC};
-  use suitears::eth::{Self, ETH};
+  use suitears::s_btc::{Self, S_BTC};
+  use suitears::s_eth::{Self, S_ETH};
   use suitears::test_utils::{people, scenario};
   
   #[test]
@@ -22,23 +22,23 @@ module suitears::coin_decimals_tests {
 
     next_tx(test, alice);
     { 
-      let btc_metadata = test::take_shared<CoinMetadata<BTC>>(test);
-      let eth_metadata = test::take_shared<CoinMetadata<ETH>>(test);
+      let btc_metadata = test::take_shared<CoinMetadata<S_BTC>>(test);
+      let eth_metadata = test::take_shared<CoinMetadata<S_ETH>>(test);
 
       let obj = coin_decimals::new(ctx(test));
 
-      assert_eq(coin_decimals::contains<BTC>(&obj), false);
-      assert_eq(coin_decimals::contains<ETH>(&obj), false);
+      assert_eq(coin_decimals::contains<S_BTC>(&obj), false);
+      assert_eq(coin_decimals::contains<S_ETH>(&obj), false);
 
       coin_decimals::add(&mut obj, &btc_metadata);
       coin_decimals::add(&mut obj, &eth_metadata);
 
-      assert_eq(coin_decimals::decimals<BTC>(&obj), 6);
-      assert_eq(coin_decimals::scalar<BTC>(&obj), 1_000_000);
+      assert_eq(coin_decimals::decimals<S_BTC>(&obj), 6);
+      assert_eq(coin_decimals::scalar<S_BTC>(&obj), 1_000_000);
 
 
-      assert_eq(coin_decimals::decimals<ETH>(&obj), 9);
-      assert_eq(coin_decimals::scalar<ETH>(&obj), 1_000_000_000);
+      assert_eq(coin_decimals::decimals<S_ETH>(&obj), 9);
+      assert_eq(coin_decimals::scalar<S_ETH>(&obj), 1_000_000_000);
 
       // Does not throw
       coin_decimals::add(&mut obj, &eth_metadata);
@@ -54,8 +54,8 @@ module suitears::coin_decimals_tests {
     let (alice, _) = people();
     next_tx(test, alice);
     {
-      btc::init_for_testing(ctx(test));
-      eth::init_for_testing(ctx(test));
+      s_btc::init_for_testing(ctx(test));
+      s_eth::init_for_testing(ctx(test));
     };   
   }
 }

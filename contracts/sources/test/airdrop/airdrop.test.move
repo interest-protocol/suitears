@@ -43,7 +43,7 @@ module suitears::airdrop_tests {
       
       assert_eq(burn_for_testing(reward), 55);
       assert_eq(airdrop::has_account_claimed(
-        &mut airdrop,
+        &airdrop,
         vector[x"f99692a8fccf12eb2bf6399f23bf9379e38a98367a75e250d53eb727c1385624"],
         55,
         alice
@@ -65,7 +65,7 @@ module suitears::airdrop_tests {
       
       assert_eq(burn_for_testing(reward), 27);
       assert_eq(airdrop::has_account_claimed(
-        &mut airdrop,
+        &airdrop,
         vector[x"45db79b20469c3d6b3c40ea3e4e76603cca6981e7765382ffa4cb1336154efe5"],
         27,
         bob
