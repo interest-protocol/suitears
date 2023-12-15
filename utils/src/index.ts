@@ -1,7 +1,7 @@
-import { invalidVerify } from './merkle-proof';
+import { createTree } from './airdrop-tree';
 
 // makeFile(2300).then(() => {
 //   console.log('done');
 // });
 
-invalidVerify();
+createTree();

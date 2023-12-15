@@ -1,5 +1,5 @@
-import { StandardMerkleTree } from '@openzeppelin/merkle-tree';
-import { ethers } from 'ethers';
+import { sha3_256 } from 'js-sha3';
+import { MerkleTree } from 'merkletreejs';
 
 import { bcs } from '@mysten/sui.js/bcs';
 
@@ -26,21 +26,27 @@ export const createTree = () => {
     Buffer.from(bcs.ser(bcs.u64.name, AMOUNT_TWO).toBytes()),
   ]);
 
-  const leaves = [DATA_ONE, DATA_TWO].map((x) => [ethers.keccak256(x)]);
+  const leaves = [DATA_ONE, DATA_TWO].map((x) => sha3_256(x));
 
-  const merkleTree = StandardMerkleTree.of(leaves, ['string']);
+  const tree = new MerkleTree(leaves, sha3_256, { sortPairs: true });
+  const root = tree.getHexRoot();
 
-  const root = merkleTree.root;
-  const hashOne = merkleTree.leafHash(leaves[0]);
-  const hashTwo = merkleTree.leafHash(leaves[1]);
-  const proofOne = merkleTree.getProof(leaves[0]);
-  const proofTwo = merkleTree.getProof(leaves[1]);
+  const leaf = sha3_256(DATA_ONE);
+  const proof = tree.getHexProof(leaf);
+  const proof2 = tree.getHexProof(sha3_256(DATA_TWO));
+
+  const wrongLeaf = sha3_256(
+    Buffer.concat([
+      Buffer.from(bcs.ser(bcs.Address.name, ADDRESS_TWO).toBytes()),
+      Buffer.from(bcs.ser(bcs.u64.name, AMOUNT_TWO + 1).toBytes()),
+    ]),
+  );
 
   console.log({
     root,
-    hashOne,
-    hashTwo,
-    proofOne,
-    proofTwo,
+    leaf,
+    proof,
+    proof2,
+    wrongLeaf,
   });
 };

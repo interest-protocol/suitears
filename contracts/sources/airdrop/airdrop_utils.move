@@ -2,14 +2,16 @@
 * @title Airdrop Utils
 *
 * @notice Provides a verify function to validate if a leaf belongs in the tree. 
+*
+* @dev This is safe because the leaf before hasing is 40 bytes long. 32 bytes address + 8 bytes u64.  
 */
 module suitears::airdrop_utils {
   // === Imports ===  
-  use std::debug::print;
+  use std::hash;
   use std::vector;
-  
+
+
   use sui::bcs;
-  use sui::hash;
 
   use suitears::merkle_proof;
 
@@ -29,7 +31,7 @@ module suitears::airdrop_utils {
   * @return u256. The index of the leaf to register in the bitmap.  
   *
   * aborts-if: 
-  * - keccak256([address, amount]) is not in the tree. 
+  * - sha3_256([address, amount]) is not in the tree. 
   */
   public fun verify(
     root: vector<u8>,
@@ -40,9 +42,7 @@ module suitears::airdrop_utils {
     let payload = bcs::to_bytes(&sender);
 
     vector::append(&mut payload, bcs::to_bytes(&amount));
-    print(&payload);
-    let leaf = hash::keccak256(&payload);
-    print(&hash::keccak256(&leaf));
+    let leaf = hash::sha3_256(payload);
    
     let (pred, index) = merkle_proof::verify_with_index(&proof, root, leaf);
     
