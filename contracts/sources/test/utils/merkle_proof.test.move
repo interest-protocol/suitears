@@ -2,65 +2,70 @@
 module suitears::merkle_proof_tests {
   use sui::test_utils::assert_eq;
   
-  use suitears::merkle_proof::{verify, verify_with_index, multi_proof_verify};
+  use suitears::merkle_proof::{verify, verify_with_index};
 
   #[test]
   fun test_verify() {
-    // Check utils/src/merkle-proof.ts
-    // https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/test/utils/cryptography/MerkleProof.test.js
     let proof = vector[
-      x"7051e21dd45e25ed8c605a53da6f77de151dcbf47b0e3ced3c5d8b61f4a13dbc",
-      x"1629d3b5b09b30449d258e35bbd09dd5e8a3abb91425ef810dc27eef995f7490",
-      x"633d21baee4bbe5ed5c51ac0c68f7946b8f28d2937f0ca7ef5e1ea9dbda52e7a",
-      x"8a65d3006581737a3bab46d9e4775dbc1821b1ea813d350a13fcd4f15a8942ec",
-      x"d6c3f3e36cd23ba32443f6a687ecea44ebfe2b8759a62cccf7759ec1fb563c76",
-      x"276141cd72b9b81c67f7182ff8a550b76eb96de9248a3ec027ac048c79649115",                              
+      x"521ec18851e17bbba961bc46c70baf03ee67ebdea11a8306de39c15a90e9d2e5",
+      x"8aa5d28b6ad4365d6b18f58b34fd9d6c1f9b5b830c7ba40d42175835088e1926",
+      x"dd7bae5904a09a9ffb8a54e360a1f7a71de53dfbfee7776995909716627ef949",
+      x"fa463ec4701e11a4b3b92c2d97f590931f870d5e98a5e304bd79b7f7fb262c63",
+      x"cd0c0ee75d17e89ead6a2dedefc1d50f6a63a989f30ffe7965f477438ffe2b83",
+      x"8581393ada8ba3187514cf0a30e3ccae54b024d05eacb31e5d3e49a45a8082a8",
+      x"ef95447405babdf85baa7c4f0059e687df4e4ff1dfb90f62be64d406301e4317"
     ];
 
-    let root = x"b89eb120147840e813a77109b44063488a346b4ca15686185cf314320560d3f3";
-    let leaf = x"6efbf77e320741a027b50f02224545461f97cd83762d5fbfeb894b9eb3287c16";
+    let root = x"d5852c8cb4936ab82010fafae6015d1975349c15ae06acb79c1cf95bbbbd4e23";
+    let leaf = x"1c9ebd6caf02840a5b2b7f0fc870ec1db154886ae9fe621b822b14fd0bf513d6";
     assert_eq(verify(&proof, root, leaf), true);
 
     let proof = vector[
-      x"1629d3b5b09b30449d258e35bbd09dd5e8a3abb91425ef810dc27eef995f7490",
-      x"633d21baee4bbe5ed5c51ac0c68f7946b8f28d2937f0ca7ef5e1ea9dbda52e7a",
-      x"8a65d3006581737a3bab46d9e4775dbc1821b1ea813d350a13fcd4f15a8942ec",
-      x"d6c3f3e36cd23ba32443f6a687ecea44ebfe2b8759a62cccf7759ec1fb563c76",
-      x"276141cd72b9b81c67f7182ff8a550b76eb96de9248a3ec027ac048c79649115",                              
+      x"1c9ebd6caf02840a5b2b7f0fc870ec1db154886ae9fe621b822b14fd0bf513d6",
+      x"8aa5d28b6ad4365d6b18f58b34fd9d6c1f9b5b830c7ba40d42175835088e1926",
+      x"dd7bae5904a09a9ffb8a54e360a1f7a71de53dfbfee7776995909716627ef949",
+      x"fa463ec4701e11a4b3b92c2d97f590931f870d5e98a5e304bd79b7f7fb262c63",
+      x"cd0c0ee75d17e89ead6a2dedefc1d50f6a63a989f30ffe7965f477438ffe2b83",
+      x"8581393ada8ba3187514cf0a30e3ccae54b024d05eacb31e5d3e49a45a8082a8",
+      x"ef95447405babdf85baa7c4f0059e687df4e4ff1dfb90f62be64d406301e4317"
+
     ];
-    let leaf = x"a68bdd3859f39d4723bb3e83e33ae8205e6c8004c7df8a420db5f84280f63ba0";
+    let leaf = x"521ec18851e17bbba961bc46c70baf03ee67ebdea11a8306de39c15a90e9d2e5";
     assert_eq(verify(&proof, root, leaf), true);
   }
 
   #[test]
   fun test_verify_with_index() {
-      let proof = vector[
-      x"7051e21dd45e25ed8c605a53da6f77de151dcbf47b0e3ced3c5d8b61f4a13dbc",
-      x"1629d3b5b09b30449d258e35bbd09dd5e8a3abb91425ef810dc27eef995f7490",
-      x"633d21baee4bbe5ed5c51ac0c68f7946b8f28d2937f0ca7ef5e1ea9dbda52e7a",
-      x"8a65d3006581737a3bab46d9e4775dbc1821b1ea813d350a13fcd4f15a8942ec",
-      x"d6c3f3e36cd23ba32443f6a687ecea44ebfe2b8759a62cccf7759ec1fb563c76",
-      x"276141cd72b9b81c67f7182ff8a550b76eb96de9248a3ec027ac048c79649115",                              
+    let proof = vector[
+      x"521ec18851e17bbba961bc46c70baf03ee67ebdea11a8306de39c15a90e9d2e5",
+      x"8aa5d28b6ad4365d6b18f58b34fd9d6c1f9b5b830c7ba40d42175835088e1926",
+      x"dd7bae5904a09a9ffb8a54e360a1f7a71de53dfbfee7776995909716627ef949",
+      x"fa463ec4701e11a4b3b92c2d97f590931f870d5e98a5e304bd79b7f7fb262c63",
+      x"cd0c0ee75d17e89ead6a2dedefc1d50f6a63a989f30ffe7965f477438ffe2b83",
+      x"8581393ada8ba3187514cf0a30e3ccae54b024d05eacb31e5d3e49a45a8082a8",
+      x"ef95447405babdf85baa7c4f0059e687df4e4ff1dfb90f62be64d406301e4317"
     ];
 
-    let root = x"b89eb120147840e813a77109b44063488a346b4ca15686185cf314320560d3f3";
-    let leaf = x"6efbf77e320741a027b50f02224545461f97cd83762d5fbfeb894b9eb3287c16";
+    let root = x"d5852c8cb4936ab82010fafae6015d1975349c15ae06acb79c1cf95bbbbd4e23";
+    let leaf = x"1c9ebd6caf02840a5b2b7f0fc870ec1db154886ae9fe621b822b14fd0bf513d6";
 
     let (pred, index) = verify_with_index(&proof, root, leaf);   
     assert_eq(pred, true);
-    assert_eq(index, 19);
+    assert_eq(index, 2);
 
     let proof = vector[
-      x"6efbf77e320741a027b50f02224545461f97cd83762d5fbfeb894b9eb3287c16",
-      x"1629d3b5b09b30449d258e35bbd09dd5e8a3abb91425ef810dc27eef995f7490",
-      x"633d21baee4bbe5ed5c51ac0c68f7946b8f28d2937f0ca7ef5e1ea9dbda52e7a",
-      x"8a65d3006581737a3bab46d9e4775dbc1821b1ea813d350a13fcd4f15a8942ec",
-      x"d6c3f3e36cd23ba32443f6a687ecea44ebfe2b8759a62cccf7759ec1fb563c76",
-      x"276141cd72b9b81c67f7182ff8a550b76eb96de9248a3ec027ac048c79649115",                              
-    ];
+      x"1c9ebd6caf02840a5b2b7f0fc870ec1db154886ae9fe621b822b14fd0bf513d6",
+      x"8aa5d28b6ad4365d6b18f58b34fd9d6c1f9b5b830c7ba40d42175835088e1926",
+      x"dd7bae5904a09a9ffb8a54e360a1f7a71de53dfbfee7776995909716627ef949",
+      x"fa463ec4701e11a4b3b92c2d97f590931f870d5e98a5e304bd79b7f7fb262c63",
+      x"cd0c0ee75d17e89ead6a2dedefc1d50f6a63a989f30ffe7965f477438ffe2b83",
+      x"8581393ada8ba3187514cf0a30e3ccae54b024d05eacb31e5d3e49a45a8082a8",
+      x"ef95447405babdf85baa7c4f0059e687df4e4ff1dfb90f62be64d406301e4317"
 
-    let leaf = x"7051e21dd45e25ed8c605a53da6f77de151dcbf47b0e3ced3c5d8b61f4a13dbc";
-    let (pred, index2) = verify_with_index(&proof, root, leaf);   
+    ];
+    let leaf = x"521ec18851e17bbba961bc46c70baf03ee67ebdea11a8306de39c15a90e9d2e5";
+    let (pred, index2) = verify_with_index(&proof, root, leaf);
+    assert_eq(index2, 66);   
     assert_eq(pred, true);
     assert_eq(index != index2, true);
     assert_eq(index2 >  index, true);
@@ -78,117 +83,22 @@ module suitears::merkle_proof_tests {
   #[test]
   fun test_verify_bad_root() {
     let proof = vector[
-      x"19ba6c6333e0e9a15bf67523e0676e2f23eb8e574092552d5e888c64a4bb3681",
-      x"9cf5a63718145ba968a01c1d557020181c5b252f665cf7386d370eddb176517b"
+      x"b039179a8a4ce2c252aa6f2f25798251c19b75fc1508d9d511a191e0487d64a7",
+      x"263ab762270d3b73d3e2cddf9acc893bb6bd41110347e5d5e4bd1d3c128ea90a"
     ];
-    let root = x"736a8b2b04d5e692a88f2d85a89b2c821bd69e2a6d58fbc6c789bdb94c86da41";
-    let leaf = x"9c15a6a0eaeed500fd9eed4cbeab71f797cefcc67bfd46683e4d2e6ff7f06d1c";
+    let root = x"d2c57229e0e7b9b837ebf512d2d8415c2acb5b7025498144960bec86b570a8d2";
+    let leaf = x"80084bf2fba02475726feb2cab2d8215eab14bc6bdd8bfb2c8151257032ecd8b";
     assert_eq(verify(&proof, root, leaf), false);
   }
 
   #[test]
   fun test_verify_bad_leaf() {
-    let proof = vector[
-      x"19ba6c6333e0e9a15bf67523e0676e2f23eb8e574092552d5e888c64a4bb3681",
-      x"9cf5a63718145ba968a01c1d557020181c5b252f665cf7386d370eddb176517b"
+   let proof = vector[
+      x"b039179a8a4ce2c252aa6f2f25798251c19b75fc1508d9d511a191e0487d64a7",
+      x"263ab762270d3b73d3e2cddf9acc893bb6bd41110347e5d5e4bd1d3c128ea90a"
     ];
-    let root = x"f2129b5a697531ef818f644564a6552b35c549722385bc52aa7fe46c0b5f46b1";
-    let leaf = x"eba909cf4bb90c6922771d7f126ad0fd11dfde93f3937a196274e1ac20fd2f5b";
+    let root = x"d97d99ede070cf7d31e58fcd5421d7e380d4512946c1feed44df378cf2e70791";
+    let leaf = x"4ce8765e720c576f6f5a34ca380b3de5f0912e6e3cc5355542c363891e54594b";
     assert_eq(verify(&proof, root, leaf), false);
-  }
-
-  #[test]
-  fun test_multi_proof_verify() {
-    let root = x"6deb52b5da8fd108f79fab00341f38d2587896634c646ee52e49f845680a70c8";
-    let proof_flags = vector[false, true, false, true];
-    let leaves = vector[
-      x"19ba6c6333e0e9a15bf67523e0676e2f23eb8e574092552d5e888c64a4bb3681",
-      x"c62a8cfa41edc0ef6f6ae27a2985b7d39c7fea770787d7e104696c6e81f64848",
-      x"eba909cf4bb90c6922771d7f126ad0fd11dfde93f3937a196274e1ac20fd2f5b"
-    ];
-    let proof =  vector[
-      x"9a4f64e953595df82d1b4f570d34c4f4f0cfaf729a61e9d60e83e579e1aa283e",
-      x"8076923e76cf01a7c048400a2304c9a9c23bbbdac3a98ea3946340fdafbba34f"
-    ];
-
-    assert_eq(multi_proof_verify(&proof, &proof_flags, root, &leaves), true);
-  }  
-
-  #[test]
-  fun test_multi_proof_verify_empty_proof() {
-    let root = x"6deb52b5da8fd108f79fab00341f38d2587896634c646ee52e49f845680a70c8";
-    let proof_flags = vector[true, true];
-    let leaves = vector[
-      x"34e6ce3d0d73f6bff2ee1e865833d58e283570976d70b05f45c989ef651ef742",
-      x"aa28358fb75b314c899e16d7975e029d18b4457fd8fd831f2e6c17ffd17a1d7e",
-      x"e0fd7e6916ff95d933525adae392a17e247819ebecc2e63202dfec7005c60560"
-    ];
-    let proof =  vector[];    
-    assert_eq(multi_proof_verify(&proof, &proof_flags, root, &leaves), false);
-  }
-
-  #[test]
-  #[expected_failure(abort_code = suitears::merkle_proof::EInvalidMultiProof)]
-  fun test_multi_proof_verify_error() {
-    let root = x"8f7234e8cfe39c08ca84a3a3e3274f574af26fd15165fe29e09cbab742daccd9";
-    let proof_flags = vector[false, false, false];
-    let leaves = vector[
-      x"19ba6c6333e0e9a15bf67523e0676e2f23eb8e574092552d5e888c64a4bb3681",
-      x"9a4f64e953595df82d1b4f570d34c4f4f0cfaf729a61e9d60e83e579e1aa283e"
-    ];
-    let proof =  vector[
-      x"19ba6c6333e0e9a15bf67523e0676e2f23eb8e574092552d5e888c64a4bb3681", 
-      x"58ed0d8354dd14fce77cba278da20ef4b8baabbc12868158322dfd004b2f46d3",
-      x"03707d7802a71ca56a8ad8028da98c4f1dbec55b31b4a25d536b5309cc20eda9"
-    ];   
-    multi_proof_verify(&proof, &proof_flags, root, &leaves);    
-  }
-
-  #[test]
-  fun test_multi_proof_verify_empty_leaves() {
-    let root = x"6deb52b5da8fd108f79fab00341f38d2587896634c646ee52e49f845680a70c8";
-    assert_eq(multi_proof_verify(&vector[root], &vector[], root, &vector[]), true);
-  }
-
-  #[test]
-  fun test_multi_proof_verify_one_leaf_tree() {
-    let root = x"9c15a6a0eaeed500fd9eed4cbeab71f797cefcc67bfd46683e4d2e6ff7f06d1c";
-    let proof_flags = vector[];
-    let leaves = vector[root];
-    let proof =  vector[];   
-     assert_eq(multi_proof_verify(&proof, &proof_flags, root, &leaves), true);
-  }
-
-  #[test]
-  #[expected_failure]
-  fun test_multi_proof_verify_error_2() {
-    let root = x"8f7234e8cfe39c08ca84a3a3e3274f574af26fd15165fe29e09cbab742daccd9";
-    let proof_flags = vector[false, false, false, false];
-    let leaves = vector[
-      x"19ba6c6333e0e9a15bf67523e0676e2f23eb8e574092552d5e888c64a4bb3681",
-      x"9a4f64e953595df82d1b4f570d34c4f4f0cfaf729a61e9d60e83e579e1aa283e"
-    ];
-    let proof =  vector[
-      x"19ba6c6333e0e9a15bf67523e0676e2f23eb8e574092552d5e888c64a4bb3681", 
-      x"58ed0d8354dd14fce77cba278da20ef4b8baabbc12868158322dfd004b2f46d3",
-      x"03707d7802a71ca56a8ad8028da98c4f1dbec55b31b4a25d536b5309cc20eda9"
-    ];   
-    multi_proof_verify(&proof, &proof_flags, root, &leaves);    
-  }  
-
-  #[test]
-  #[expected_failure]
-  fun test_multi_proof_verify_malicious_proofs() {
-    let root = x"f2d552e1e4c59d4f0fa2b80859febc9e4bdc915dff37c56c858550d8b64659a5";
-    let proof_flags = vector[true, true, false];
-    let leaves = vector[
-      x"1f23ad5fc0ee6ccbe2f3d30df856758f05ad9d03408a51a99c1c9f0854309db2",
-      x"613994f4e324d0667c07857cd5d147994bc917da5d07ee63fc3f0a1fe8a18e34"
-    ];
-    let proof =  vector[
-      x"5e941ddd8f313c0b39f92562c0eca709c3d91360965d396aaef584b3fa76889a", 
-      x"5e941ddd8f313c0b39f92562c0eca709c3d91360965d396aaef584b3fa76889a",
-    ];   
-    multi_proof_verify(&proof, &proof_flags, root, &leaves);        
   }
 }
