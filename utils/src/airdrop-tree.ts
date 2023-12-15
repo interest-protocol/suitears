@@ -19,6 +19,8 @@ export const createTree = () => {
     Buffer.from(bcs.ser(bcs.u64.name, AMOUNT_ONE).toBytes()),
   ]);
 
+  console.log(DATA_ONE.toString());
+
   const DATA_TWO = Buffer.concat([
     Buffer.from(bcs.ser(bcs.Address.name, ADDRESS_TWO).toBytes()),
     Buffer.from(bcs.ser(bcs.u64.name, AMOUNT_TWO).toBytes()),

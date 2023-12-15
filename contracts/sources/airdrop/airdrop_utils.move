@@ -5,7 +5,7 @@
 */
 module suitears::airdrop_utils {
   // === Imports ===  
-
+  use std::debug::print;
   use std::vector;
   
   use sui::bcs;
@@ -40,8 +40,10 @@ module suitears::airdrop_utils {
     let payload = bcs::to_bytes(&sender);
 
     vector::append(&mut payload, bcs::to_bytes(&amount));
-
+    print(&payload);
     let leaf = hash::keccak256(&payload);
+    print(&hash::keccak256(&leaf));
+   
     let (pred, index) = merkle_proof::verify_with_index(&proof, root, leaf);
     
     assert!(pred, EInvalidProof);
