@@ -162,9 +162,9 @@ module suitears::linear_vesting_airdrop {
   * - The user already claimed it
   */
   public fun get_airdrop<T>(
-    self: &mut Airdrop<T>, 
+    self: &mut Airdrop<T>,
+    proof: vector<vector<u8>>,  
     clock_object: &Clock,
-    proof: vector<vector<u8>>, 
     amount: u64, 
     ctx: &mut TxContext
   ): Wallet<T> {
