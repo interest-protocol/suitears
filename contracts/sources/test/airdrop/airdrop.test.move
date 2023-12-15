@@ -77,4 +77,52 @@ module suitears::airdrop_tests {
     clock::destroy_for_testing(c);
     test::end(scenario); 
   }
+
+  #[test]
+  #[expected_failure(abort_code = airdrop::EAlreadyClaimed)]
+  fun test_error_trying_to_claim_again() {
+    let scenario = scenario();
+    let alice = @0x94fbcf49867fd909e6b2ecf2802c4b2bba7c9b2d50a13abbb75dbae0216db82a;
+
+    let test = &mut scenario;
+
+    let c = clock::create_for_testing(ctx(test));
+
+    next_tx(test, alice); 
+    {
+      let airdrop = airdrop::new(
+        mint_for_testing<SUI>(1000, ctx(test)),
+        x"59d3298db60c8c3ea35d3de0f43e297df7f27d8c3ba02555bcd7a2eee106aace",
+        1,
+        &c, 
+        ctx(test)
+      );
+
+      clock::increment_for_testing(&mut c, 1);
+
+      let reward = airdrop::get_airdrop(
+        &mut airdrop, 
+        vector[x"f99692a8fccf12eb2bf6399f23bf9379e38a98367a75e250d53eb727c1385624"],
+        &c,
+        55,
+        ctx(test)
+      );
+      
+      burn_for_testing(reward);
+
+      let reward = airdrop::get_airdrop(
+        &mut airdrop, 
+        vector[x"f99692a8fccf12eb2bf6399f23bf9379e38a98367a75e250d53eb727c1385624"],
+        &c,
+        55,
+        ctx(test)
+      );
+      
+      burn_for_testing(reward);
+
+      transfer::public_share_object(airdrop);
+    };
+    clock::destroy_for_testing(c);
+    test::end(scenario);     
+  }
 }
