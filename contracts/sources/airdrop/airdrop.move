@@ -36,7 +36,7 @@ module suitears::airdrop {
 
   struct Airdrop<phantom T> has key, store { 
     id: UID,
-    // Toal amount of airdrop coins
+    // Total amount of airdrop coins
     balance: Balance<T>,
     // Root of the Merkle tree
     root: vector<u8>,
@@ -46,7 +46,7 @@ module suitears::airdrop {
     map: Bitmap
   }
 
-  // === Public Create Functions ===    
+  // === Public Create Function ===    
 
   /*
   * @notice Creates an airdrop.  
