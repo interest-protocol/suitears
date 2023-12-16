@@ -50,14 +50,6 @@ module suitears::dao {
   const EInvalidReturnCapability: u64 = 19;
   const EInvalidReturnDAO: u64 = 20;
 
-  struct Config has store {
-    voting_delay: Option<u64>,
-    voting_period: Option<u64>,
-    voting_quorum_rate: Option<u64>,
-    min_action_delay: Option<u64>,
-    min_quorum_votes: Option<u64>    
-  }
-
   struct ConfigTask has drop {}
 
   struct Dao<phantom OTW> has key, store {
@@ -448,9 +440,9 @@ module suitears::dao {
 
     let proposal_capability_id = option::extract(&mut proposal.capability_id);
 
-    // assert!(transfer::receiving_object_id(&receive_ticket) == proposal_capability_id, EInvalidExecuteCapability);
-
     let capability = transfer::public_receive(&mut dao.id, receive_ticket);
+
+    assert!(object::id(&capability) == proposal_capability_id, EInvalidExecuteCapability);
 
     let receipt = CapabilityReceipt {
       capability_id: proposal_capability_id,

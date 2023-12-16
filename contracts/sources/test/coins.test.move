@@ -8,6 +8,7 @@ module suitears::s_eth {
 
   struct S_ETH has drop {}
 
+  #[lint_allow(share_owned)]
   fun init(witness: S_ETH, ctx: &mut TxContext) {
       let (treasury_cap, metadata) = coin::create_currency<S_ETH>(
             witness, 
@@ -39,6 +40,7 @@ module suitears::s_btc {
 
   struct S_BTC has drop {}
 
+  #[lint_allow(share_owned)]
   fun init(witness: S_BTC, ctx: &mut TxContext) {
       let (treasury_cap, metadata) = coin::create_currency<S_BTC>(
             witness, 

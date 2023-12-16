@@ -296,8 +296,10 @@ module suitears::farm_tests {
     clock::destroy_for_testing(c);
     test::end(scenario);  
   }
-
+  
+    
   #[test]
+  #[lint_allow(share_owned)]
   fun test_no_rewards() {
     let scenario = scenario();
     let (alice, bob) = people();
@@ -605,6 +607,7 @@ module suitears::farm_tests {
   }  
 
   #[test]
+  #[lint_allow(share_owned)]
   #[expected_failure(abort_code = farm::EInvalidStartTime)] 
   fun test_invalid_start_time() {
     let scenario = scenario();
@@ -846,7 +849,8 @@ module suitears::farm_tests {
     clock::destroy_for_testing(c);
     test::end(scenario);           
   }    
-
+  
+  #[lint_allow(share_owned)]
   fun set_up(test: &mut Scenario) {
     let (alice, bob) = people();
 
