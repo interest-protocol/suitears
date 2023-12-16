@@ -1,11 +1,38 @@
 /*
 * @title Decentralized Autonomous Organization
 *
-* @notice It allows anyone to create a DAO, submit proposals and execute actions on-chain.    
+* @notice It allows anyone to create a DAO, submit proposals and execute actions on-chain.  
+* Proposals are voted by deposting coins. 1 Coin is 1 Vote.  
+* Daos only supports 1 Coin type. 
 *
-* @dev It was inspired from https://github.com/starcoinorg/starcoin-framework/blob/main/sources/Dao.move.  
+* @dev The idea is to send capabilities to the DAO via `sui::transfer::transfer`.  
+* Users can borrow the capabilities via successful proposals.    
+* Developers must write custom modules that pass the `AuthorizedWitness` to borrow the capability when executing proposals. 
+* {Dao} relies on open source code to make sure the Modules that are executing proposals do what they agreed to do.    
+*
+* @dev Proposal Life Cycle
+* Create -> Voting Delay -> Voting Period -> 
+*
+* Failure Route -> Ending
+* Success Route -> Executing Delay -> Execution -> Ending 
+*
+* @dev A Success {Proposal} requires: 
+* - for_votes > agaisnt_votes  
+* - for_votes / total_votes > quorum rate  
+* - for_votes >= min_quorum_votes
+*
+* @dev {Vote} Life Cycie 
+* Deposit Coin -> Vote -> Wait for Proposal to Finish -> Withdraw
+*
+* @dev The {Vote} struct belongs to a specific {Proposal}.  
+* A voter can only recover his `sui::coin::Coin` once the {Proposal} ends.  
+* A {Vote} created from {ProposalA} cannot be used in {ProposalB}.  
+*
+* @dev It was inspired by https://github.com/starcoinorg/starcoin-framework/blob/main/sources/Dao.move.  
 */
 module suitears::dao {
+  // === Imports ===
+
   use std::vector;
   use std::option::{Self, Option};
   use std::type_name::{Self, TypeName};
@@ -23,79 +50,142 @@ module suitears::dao {
   use suitears::dao_admin::{Self, DaoAdmin};
   use suitears::dao_treasury::{Self, DaoTreasury};
 
-  /// Proposal state
+  // === Constants ===
+
+  // @dev Proposal has not started yet. 
   const PENDING: u8 = 1;
+  // @dev Proposal has started. Users can start voting.  
   const ACTIVE: u8 = 2;
+  // @dev The proposal has ended and failed to pass.  
   const DEFEATED: u8 = 3;
+  // @dev The proposal has ended and it was successful. It will now be queued.  
   const AGREED: u8 = 4;
+  // @dev The proposal was successful and now it is in a queue to be executed if it is executable. 
+  // @dev This gives time for people to adjust to the upcoming change.   
   const QUEUED: u8 = 5;
+  // @dev This proposal is ready to be executed.  
   const EXECUTABLE: u8 = 6;
+  // @dev The proposal is considered finalized.  
   const EXTRACTED: u8 = 7;
 
-  const EInvalidOTW: u64 = 0;
-  const EInvalidQuorumRate: u64 = 1;
-  const EActionDelayTooSmall: u64 = 5;
-  const EMinQuorumVotesTooSmall: u64 = 7;
-  const EProposalMustBeActive: u64 = 8;
-  const ECannotVoteWithZeroCoinValue: u64 = 9;
-  const ECannotUnstakeFromAnActiveProposal: u64 = 10;
-  const EVoteAndProposalIdMismatch: u64 = 11;
-  const ECannotExecuteThisProposal: u64 = 12;
-  const ETooEarlyToExecute: u64 = 13;
-  const EEmptyHash: u64 = 14;
-  const EProposalNotPassed: u64 = 15;
-  const EInvalidCoinType: u64 = 16;
-  const EInvalidExecuteWitness: u64 = 17;
-  const EInvalidExecuteCapability: u64 = 18;
-  const EInvalidReturnCapability: u64 = 19;
-  const EInvalidReturnDAO: u64 = 20;
+  // === Errors ===
 
-  struct ConfigTask has drop {}
+  // @dev When a DAO is created without a One Time Witness.  
+  // {Dao<OTW>} must be created in a fun init to make sure they are unique.   
+  const EInvalidOTW: u64 = 0;
+  // @dev The rate has to be between 0 < rate < 1_000_000_000. 
+  // 1_000_000_000 represents 100%.  
+  // It is thrown when a DAO is created with a rate out of bounds.  
+  const EInvalidQuorumRate: u64 = 1;
+  // @dev Thrown when a {Proposal} is created with a time delay lower than the {Dao}'s minimum voting delay. 
+  const EActionDelayTooSmall: u64 = 2;
+  // @dev Thrown when a {Proposal} is created with a votes quorum lower than the {Dao}'s minimum votes quorum.  
+  const EMinQuorumVotesTooSmall: u64 = 3;
+  // @dev Thrown when someone tries to vote on a {Proposal} that is pending. 
+  const EProposalMustBeActive: u64 = 4; 
+  // @dev Thrown when someone tries to vote with a zero value `sui::coin::Coin`.  
+  const ECannotVoteWithZeroCoinValue: u64 = 5; 
+  // @dev When a user tries to destroy their {Vote} before the {Proposal} ends.  
+  // Once a user votes, he has to wait until the {Proposal} ends to get back his coins.  
+  const ECannotUnstakeFromAnActiveProposal: u64 = 6;
+  // @dev A user cannot use a {Proposal} {Vote} on another {Proposal}.  
+  const EVoteAndProposalIdMismatch: u64 = 7; 
+  // @dev When a user tries to execute a proposal that cannot be executable.   
+  const ECannotExecuteThisProposal: u64 = 8;
+  // @dev Thrown if a {Proposal} is executed before the the time delay.  
+  const ETooEarlyToExecute: u64 = 9;
+  // @dev Thrown if a {Proposal} is created without a hash. 
+  // @dev Hash suppose to be the hash of the the description of the proposal.  
+  const EEmptyHash: u64 = 10;
+  // @dev Thrown when someone tries to queue {Proposal} that has been defeated.  
+  const EProposalNotPassed: u64 = 11;  
+  // @dev User tries to vote for a {Proposal} with the wrong coin.  
+  const EInvalidCoinType: u64 = 12;
+  // @dev An unauthorized Module tries to execute a {Proposal} by passing the wrong witness.  
+  const EInvalidExecuteWitness: u64 = 13; 
+  // @dev When a Module tries to borrow the wrong Capability when executing a {Proposal}.  
+  const EInvalidExecuteCapability: u64 = 14;
+  // @dev When a user tries to return the wrong Capability to the {DAO}.  
+  const EInvalidReturnCapability: u64 = 15;
+  // @dev When a user tries to return the right Capability to the wrong {DAO}.  
+  const EInvalidReturnDAO: u64 = 16;
+
+  // === Structs ===
 
   struct Dao<phantom OTW> has key, store {
     id: UID,
-    /// after proposal created, how long user should wait before being able to vote (in milliseconds)
+    // Voters must wait `voting_delay` in milliseconds to start voting on new proposals.
     voting_delay: u64,
-    /// how long the voting window is (in milliseconds).
+    // The voting duration of a proposal.  
     voting_period: u64,
     /// the quorum rate to agree on the proposal.
     /// if 50% votes needed, then the voting_quorum_rate should be 50.
     /// it should between (0, 100 * 1e9].
     voting_quorum_rate: u64,
     /// how long the proposal should wait before it can be executed (in milliseconds).
-    min_action_delay: u64,
+    min_action_delay: u64, 
+    // minimum amount of votes for a {Proposal} to be successful even if it higher than the agaisnt votes and the quorum rate.  
     min_quorum_votes: u64,
+    // The `sui::object::ID` of the Treasury.  
+    // Not all {Dao}s have treasuries. 
     treasury: Option<ID>,
-    coin_type: TypeName
+    // The CoinType that can vote on this DAO's proposal.  
+    coin_type: TypeName,
+    // The {DaoAdmin}
+    admin_id: ID
   }
 
   struct Proposal<phantom DaoWitness: drop> has key, store {
     id: UID,
+    // The user who created the proposal
     proposer: address,
-    start_time: u64, // when voting begins
-    end_time: u64, // when voting ends
+    // When the users can start voting
+    start_time: u64,
+    // Users can no longer vote after the `end_time`. 
+    end_time: u64,
+    // How many votes support the {Proposal}.  
     for_votes: u64,
+    // How many votes disagree with the {Proposal}.  
     against_votes: u64,
-    eta: u64, // executable after this time
-    action_delay: u64, // after how long, the agreed proposal can be executed.
-    quorum_votes: u64, // the number of votes to pass the proposal.
+    // It is calculated by adding `end_time` and `action_delay`. It assumes the {Proposal} will be executed as soon as possible.  
+    // Estimated Time of Arrival.  
+    eta: u64, 
+    // Time Delay between a sucessful {Proposal} `end_time` and when it is allowed to be executed. 
+    // It allows users who disagree with the proposal to make changes. 
+    action_delay: u64, 
+    // The minimum amount of `for_votes` for a {Proposal} to pass. 
+    quorum_votes: u64, 
+    // The minimum support rate for a {Proposal} to pass. 
     voting_quorum_rate: u64, 
+    // The hash of the description of this proposal 
     hash: vector<u8>,
+    // The Witness that is allowed to call {execute}
     authorized_witness: TypeName,
+    // The `sui::object::ID` that this proposal needs to execute. 
+    // Not all proposals are executable.  
     capability_id: Option<ID>,
+    // The CoinType of the {Dao}
     coin_type: TypeName
   }
 
+  // @dev A Hot Potato to ensure that the borrowed Capability is returned to the {Dao}. 
   struct CapabilityReceipt {
+    // @dev The `sui::object::ID` of the borrowed Capability.   
     capability_id: ID,
+    // @dev The {DAO} that owns said Capability.  
     dao_id: ID
   }
 
   struct Vote<phantom DaoWitness: drop, phantom CoinType> has  key, store {
     id: UID,
+    // The amount of Coin the user has used to vote for the {Proposal}. 
     balance: Balance<CoinType>,
+    // The `sui::object::ID` of the {Proposal}.  
     proposal_id: ID,
+    // The end_time of the {Proposal}.  
+    // User can redeem back his `balance` after this timestamp.  
     end_time: u64,
+    // If it is a for or agaisnt vote. 
     agree: bool
   } 
 
@@ -157,6 +247,25 @@ module suitears::dao {
     value: u64
   }
 
+  // === Public Create Function ===  
+
+  /*
+  * @notice Creates a new {DAO<OTW>}.  
+  *
+  * @dev {Dao} can only be created in an init function.  
+  *
+  * @param otw A One Time Witness to ensure that the {Dao<OTW>} is unique.  
+  * @param voting_delay The minimum waiting period between the creation of a proposal and the voting period.  
+  * @param voting_period The duration of the voting period.  
+  * @param voting_quorum_rate The minimum percentage of for votes. E.g. for_votes / total_votes. keep in mint (0, 1_000_000_000]  
+  * @param min_quorum_votes The minimum votes required for a {Proposal} to be sucessful.   
+  * @return Dao<OTW>  
+  *
+  * aborts-if:   
+  * - `otw` is not a One Time Witness.   
+  * - `voting_quorum_rate` is larger than 1_000_000_000 
+  * - `voting_quorum_rate` is zero.  
+  */
   public fun new<OTW: drop, CoinType>(
     otw: OTW, 
     voting_delay: u64, 
@@ -167,7 +276,10 @@ module suitears::dao {
     ctx: &mut TxContext
   ): Dao<OTW> {
     assert!(is_one_time_witness(&otw), EInvalidOTW);
-    assert!(100 * 1_000_000_000 >= voting_quorum_rate && voting_quorum_rate != 0, EInvalidQuorumRate);
+    assert!(1_000_000_000 >= voting_quorum_rate && voting_quorum_rate != 0, EInvalidQuorumRate);
+
+    let admin = dao_admin::new<OTW>(ctx);
+    let admin_id = object::id(&admin);
 
     let dao = Dao<OTW> {
       id: object::new(ctx),
@@ -177,15 +289,14 @@ module suitears::dao {
       min_action_delay,
       min_quorum_votes,
       treasury: option::none(),
-      coin_type: type_name::get<CoinType>()
+      coin_type: type_name::get<CoinType>(),
+      admin_id
     };
-
-    let admin = dao_admin::new<OTW>(ctx);
 
     emit(
       CreateDao<OTW, CoinType> {
         dao_id: object::id(&dao),
-        admin_id: object::id(&admin),
+        admin_id,
         creator: tx_context::sender(ctx),
         voting_delay,
         voting_period,
@@ -200,8 +311,27 @@ module suitears::dao {
     dao
   }
 
-  // ** Important Make sure the voting_period and min_quorum_votes is adequate because a large holder can vote to withdraw all coins from the treasury.
-  // ** Also major stakeholders should monitor all proposals to ensure they vote against malicious proposals.
+  /*
+  * @notice Creates a new {DAO<OTW>} with a {DaoTreasury<OTW>}.  
+  *
+  * @dev {Dao} can only be created in an init function.  
+  * @dev Important Make sure the voting_period and min_quorum_votes is adequate because a large holder can vote to withdraw all coins from the treasury.
+  * @dev Also major stakeholders should monitor all proposals to ensure they vote against malicious proposals.
+  *
+  * @param otw A One Time Witness to ensure that the {Dao<OTW>} is unique.  
+  * @param voting_delay The minimum waiting period between the creation of a proposal and the voting period.  
+  * @param voting_period The duration of the voting period.  
+  * @param voting_quorum_rate The minimum percentage of for votes. E.g. for_votes / total_votes. keep in mint (0, 1_000_000_000]  
+  * @param min_quorum_votes The minimum votes required for a {Proposal} to be sucessful.   
+  * @param allow_flashloan If the {DaoTreasury<OTW>} should allow flash loans.  
+  * @return Dao<OTW>  
+  * @return Treasury<OTW>
+  *
+  * aborts-if:   
+  * - `otw` is not a One Time Witness.   
+  * - `voting_quorum_rate` is larger than 1_000_000_000 
+  * - `voting_quorum_rate` is zero.  
+  */  
   public fun new_with_treasury<OTW: drop, CoinType>(
     otw: OTW, 
     voting_delay: u64, 
@@ -220,7 +350,7 @@ module suitears::dao {
     (dao, treasury)
   }
 
-  //
+  // === Public View Functions ===  
 
   public fun proposer<DaoWitness: drop>(proposal: &Proposal<DaoWitness>): address {
     proposal.proposer
@@ -426,7 +556,7 @@ module suitears::dao {
     proposal.eta = now + proposal.action_delay;
   }
 
-  public fun execute_proposal<DaoWitness: drop, AuhorizedWitness: drop, Capability: key + store>(
+  public fun execute<DaoWitness: drop, AuhorizedWitness: drop, Capability: key + store>(
     dao: &mut Dao<DaoWitness>,
     proposal: &mut Proposal<DaoWitness>, 
     _: AuhorizedWitness,
