@@ -350,7 +350,99 @@ module suitears::dao {
     (dao, treasury)
   }
 
-  // === Public View Functions ===  
+  // === Public Dao View Functions ===  
+
+  /*
+  * @notice Returns the minimum voting delay of the Dao. 
+  *
+  * @param self a {Dao<OTW>}
+  * @return u64
+  */
+  public fun voting_delay<DaoWitness>(self: &Dao<DaoWitness>): u64 {
+    self.voting_delay
+  }
+
+  /*
+  * @notice Returns the minimum voting period of the Dao. 
+  *
+  * @param self a {Dao<OTW>}
+  * @return u64
+  */
+  public fun voting_period<DaoWitness>(self: &Dao<DaoWitness>): u64 {
+    self.voting_period
+  }  
+
+  /*
+  * @notice Returns the minimum voting quorum rate of the Dao. 
+  *
+  * @param self a {Dao<OTW>}
+  * @return u64
+  */
+  public fun dao_voting_quorum_rate<DaoWitness>(self: &Dao<DaoWitness>): u64 {
+    self.voting_quorum_rate
+  }    
+
+  /*
+  * @notice Returns the minimum execution delay of the Dao. 
+  *
+  * @param self a {Dao<OTW>}
+  * @return u64
+  */
+  public fun min_action_delay<DaoWitness>(self: &Dao<DaoWitness>): u64 {
+    self.min_action_delay
+  }    
+
+  /*
+  * @notice Returns the minimum execution delay of the Dao. 
+  *
+  * @param self a {Dao<OTW>}
+  * @return u64
+  */
+  public fun min_quorum_votes<DaoWitness>(self: &Dao<DaoWitness>): u64 {
+    self.min_quorum_votes
+  }   
+
+  /*
+  * @notice Returns the minimum execution delay of the Dao. 
+  *
+  * @param self a {Dao<OTW>}
+  * @return u64
+  */
+  public fun dao_min_quorum_votes<DaoWitness>(self: &Dao<DaoWitness>): u64 {
+    self.min_quorum_votes
+  }  
+
+  /*
+  * @notice Returns the `sui::object::id` of the Dao wrapped in an `std::option`. Not all {Dao}s have treasuries.   
+  *
+  * @param self a {Dao<OTW>}
+  * @return Option<ID>
+  */
+  public fun treasury<DaoWitness>(self: &Dao<DaoWitness>): Option<ID> {
+    self.treasury
+  }    
+
+  /*
+  * @notice Returns the `std::type_name` of the Dao's coin type. This is the Coin<Type> that can be used to vote on proposals. 
+  *
+  * @param self a {Dao<OTW>}
+  * @return Option<ID>
+  */
+  public fun dao_coin_type<DaoWitness>(self: &Dao<DaoWitness>): TypeName {
+    self.coin_type
+  }
+
+  /*
+  * @notice Returns the `sui::object::ID` of Dao's admin capability. 
+  *
+  * @param self a {Dao<OTW>}
+  * @return ID
+  */
+  public fun admin<DaoWitness>(self: &Dao<DaoWitness>): ID {
+    self.admin_id
+  } 
+
+  // === Public Proposal View Functions ===        
 
   public fun proposer<DaoWitness: drop>(proposal: &Proposal<DaoWitness>): address {
     proposal.proposer
@@ -404,6 +496,8 @@ module suitears::dao {
     proposal.coin_type
   }   
 
+  // === Public Vote View Functions ===     
+
   public fun balance<DaoWitness: drop, CoinType>(vote: &Vote<DaoWitness,  CoinType>): u64 {
     balance::value(&vote.balance)
   } 
@@ -420,8 +514,25 @@ module suitears::dao {
     vote.agree
   } 
 
-  //
+  // === Public Mutative Functions ===     
 
+  /*
+  * @notice Creates a {Proposal} 
+  *
+  * @param dao The {Dao<OTW>} 
+  * @param c The shared `sui::clock::Clock` object.  
+  * @param authorized_witness The Witness required to execute this proposal.  
+  * @param capability_id The `sui::object::ID` of the Capability that this proposal needs to be executed. If a proposal is not executable pass option::none(),
+  * @param action_delay The minimum waiting period between the creation of a proposal and the voting period.  
+  * @param quorum_votes The minimum votes required for a {Proposal} to be sucessful.   
+  * @param hash The hash of the proposal's description.  
+  * @return Proposal<DaoWitness> 
+  *
+  * aborts-if:   
+  * - `action_delay` < `dao.min_action_delay`.  
+  * - `quorum_votes` < `dao.min_quorum_votes`.  
+  * - `hash` is empty.
+  */
   public fun propose<DaoWitness: drop>(
     dao: &mut Dao<DaoWitness>,
     c: &Clock,
