@@ -60,17 +60,23 @@ module suitears::dao {
 
   // @dev Proposal has not started yet. 
   const PENDING: u8 = 1;
+
   // @dev Proposal has started. Users can start voting.  
   const ACTIVE: u8 = 2;
+
   // @dev The proposal has ended and failed to pass.  
   const DEFEATED: u8 = 3;
+
   // @dev The proposal has ended and it was successful. It will now be queued.  
   const AGREED: u8 = 4;
+
   // @dev The proposal was successful and now it is in a queue to be executed if it is executable. 
   // @dev This gives time for people to adjust to the upcoming change.   
   const QUEUED: u8 = 5;
+
   // @dev This proposal is ready to be executed.  
   const EXECUTABLE: u8 = 6;
+
   // @dev The proposal is considered finalized.  
   const EXTRACTED: u8 = 7;
 
@@ -79,40 +85,56 @@ module suitears::dao {
   // @dev When a DAO is created without a One Time Witness.  
   // {Dao<OTW>} must be created in a fun init to make sure they are unique.   
   const EInvalidOTW: u64 = 0;
+
   // @dev The rate has to be between 0 < rate < 1_000_000_000. 
   // 1_000_000_000 represents 100%.  
   // It is thrown when a DAO is created with a rate out of bounds.  
   const EInvalidQuorumRate: u64 = 1;
+
   // @dev Thrown when a {Proposal} is created with a time delay lower than the {Dao}'s minimum voting delay. 
   const EActionDelayTooSmall: u64 = 2;
+
   // @dev Thrown when a {Proposal} is created with a votes quorum lower than the {Dao}'s minimum votes quorum.  
   const EMinQuorumVotesTooSmall: u64 = 3;
+
   // @dev Thrown when someone tries to vote on a {Proposal} that is pending. 
   const EProposalMustBeActive: u64 = 4; 
+
   // @dev Thrown when someone tries to vote with a zero value `sui::coin::Coin`.  
   const ECannotVoteWithZeroCoinValue: u64 = 5; 
+
   // @dev When a user tries to destroy their {Vote} before the {Proposal} ends.  
-  // Once a user votes, he has to wait until the {Proposal} ends to get back his coins.  
+  // User has to revoke his vote if he wishes to get his `sui::coin::Coin` back before the end of the {Proposal}.   
   const ECannotUnstakeFromAnActiveProposal: u64 = 6;
+
   // @dev A user cannot use a {Proposal} {Vote} on another {Proposal}.  
   const EVoteAndProposalIdMismatch: u64 = 7; 
+
   // @dev When a user tries to execute a proposal that cannot be executable.   
   const ECannotExecuteThisProposal: u64 = 8;
+
   // @dev Thrown if a {Proposal} is executed before the the time delay.  
   const ETooEarlyToExecute: u64 = 9;
+
   // @dev Thrown if a {Proposal} is created without a hash. 
-  // @dev Hash suppose to be the hash of the the description of the proposal.  
+  // @dev Hash is supposed to be the hash of the description of the proposal.  
   const EEmptyHash: u64 = 10;
+
   // @dev Thrown when someone tries to queue {Proposal} that has been defeated.  
   const EProposalNotPassed: u64 = 11;  
+
   // @dev User tries to vote for a {Proposal} with the wrong coin.  
   const EInvalidCoinType: u64 = 12;
+
   // @dev An unauthorized Module tries to execute a {Proposal} by passing the wrong witness.  
   const EInvalidExecuteWitness: u64 = 13; 
+
   // @dev When a Module tries to borrow the wrong Capability when executing a {Proposal}.  
   const EInvalidExecuteCapability: u64 = 14;
+
   // @dev When a user tries to return the wrong Capability to the {DAO}.  
   const EInvalidReturnCapability: u64 = 15;
+
   // @dev When a user tries to return the right Capability to the wrong {DAO}.  
   const EInvalidReturnDAO: u64 = 16;
 
