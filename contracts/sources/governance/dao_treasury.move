@@ -44,8 +44,11 @@ module suitears::dao_treasury {
 
   // * IMPORTANT do not add abilities 
   struct FlashLoan<phantom DaoWitness, phantom CoinType> {
+    // The amount being borrowed
     amount: u64,
+    // The fee amount to be repaid
     fee: u64,
+    // The `std::type_name::TypeName` of the CoinType to repay the loan.  
     type: TypeName
   }
 
@@ -100,7 +103,7 @@ module suitears::dao_treasury {
   * @param treasury A {DaoTreasury<DaoWitness>}
   * @return ID
   */
-  public fun dao<DaoWitness: drop, CoinType>(treasury: &DaoTreasury<DaoWitness>): ID {
+  public fun dao<DaoWitness: drop>(treasury: &DaoTreasury<DaoWitness>): ID {
     treasury.dao
   }  
 

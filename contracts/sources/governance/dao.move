@@ -307,43 +307,15 @@ module suitears::dao {
     ctx: &mut TxContext
   ): (Dao<OTW>, DaoTreasury<OTW>) {
     assert!(is_one_time_witness(&otw), EInvalidOTW);
-    assert!(1_000_000_000 >= voting_quorum_rate && voting_quorum_rate != 0, EInvalidQuorumRate);
 
-    let admin = dao_admin::new<OTW>(ctx);
-    let admin_id = object::id(&admin);
-
-    let dao_id = object::new(ctx);
-
-    let treasury = dao_treasury::new<OTW>(*object::uid_as_inner(&dao_id), ctx);
-
-    let dao = Dao<OTW> {
-      id: dao_id,
-      voting_delay,
-      voting_period,
-      voting_quorum_rate,
-      min_action_delay,
-      min_quorum_votes,
-      treasury: object::id(&treasury),
-      coin_type: type_name::get<CoinType>(),
-      admin_id
-    };
-
-    emit(
-      CreateDao<OTW, CoinType> {
-        dao_id: object::id(&dao),
-        admin_id,
-        creator: tx_context::sender(ctx),
-        voting_delay,
-        voting_period,
-        voting_quorum_rate,
-        min_action_delay,
-        min_quorum_votes
-      }
-    );
-
-    transfer::public_transfer(admin, object::uid_to_address(&dao.id));
-
-    (dao, treasury)
+    new_impl<OTW, CoinType>(
+      voting_delay, 
+      voting_period, 
+      voting_quorum_rate, 
+      min_action_delay, 
+      min_quorum_votes, 
+      ctx
+    )
   }
 
   // === Public Dao View Functions ===  
@@ -890,7 +862,57 @@ module suitears::dao {
     transfer::public_transfer(cap, object::uid_to_address(&dao.id));
   }
 
-  // === Private Functions ===       
+  // === Private Functions ===   
+
+  /*
+  * @dev The implementation of the {new} function.
+  */   
+  fun new_impl<OTW: drop, CoinType>( 
+    voting_delay: u64, 
+    voting_period: u64, 
+    voting_quorum_rate: u64, 
+    min_action_delay: u64, 
+    min_quorum_votes: u64,
+    ctx: &mut TxContext
+  ): (Dao<OTW>, DaoTreasury<OTW>) {
+    assert!(1_000_000_000 >= voting_quorum_rate && voting_quorum_rate != 0, EInvalidQuorumRate);
+    
+    let admin = dao_admin::new<OTW>(ctx);
+    let admin_id = object::id(&admin);
+
+    let dao_id = object::new(ctx);
+
+    let treasury = dao_treasury::new<OTW>(*object::uid_as_inner(&dao_id), ctx);
+
+    let dao = Dao<OTW> {
+      id: dao_id,
+      voting_delay,
+      voting_period,
+      voting_quorum_rate,
+      min_action_delay,
+      min_quorum_votes,
+      treasury: object::id(&treasury),
+      coin_type: type_name::get<CoinType>(),
+      admin_id
+    };
+
+    emit(
+      CreateDao<OTW, CoinType> {
+        dao_id: object::id(&dao),
+        admin_id,
+        creator: tx_context::sender(ctx),
+        voting_delay,
+        voting_period,
+        voting_quorum_rate,
+        min_action_delay,
+        min_quorum_votes
+      }
+    );
+
+    transfer::public_transfer(admin, object::uid_to_address(&dao.id));
+
+    (dao, treasury)
+  }   
 
   /*
   * @notice Destroys the `vote` and returns the coin deposited.  
@@ -986,4 +1008,25 @@ module suitears::dao {
       }
     );
   }
+
+    // === Test Only Functions ===
+
+  #[test_only]
+  public fun new_for_testing<OTW: drop, CoinType>(
+    voting_delay: u64, 
+    voting_period: u64, 
+    voting_quorum_rate: u64, 
+    min_action_delay: u64, 
+    min_quorum_votes: u64,
+    ctx: &mut TxContext    
+  ): (Dao<OTW>, DaoTreasury<OTW>) {
+    new_impl<OTW, CoinType>(
+      voting_delay,
+      voting_period,
+      voting_quorum_rate,
+      min_action_delay,
+      min_quorum_votes,
+      ctx
+    )
+  }   
 }
