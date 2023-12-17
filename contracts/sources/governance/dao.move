@@ -120,7 +120,7 @@ module suitears::dao {
   // @dev Hash is supposed to be the hash of the description of the proposal.  
   const EEmptyHash: u64 = 10;
 
-  // @dev Thrown when someone tries to queue {Proposal} that has been defeated.  
+  // @dev Thrown when someone tries to queue a {Proposal} that has been defeated.  
   const EProposalNotPassed: u64 = 11;  
 
   // @dev User tries to vote for a {Proposal} with the wrong coin.  
@@ -146,16 +146,15 @@ module suitears::dao {
     voting_delay: u64,
     // The voting duration of a proposal.  
     voting_period: u64,
-    /// the quorum rate to agree on the proposal.
-    /// if 50% votes needed, then the voting_quorum_rate should be 50.
-    /// it should between (0, 100 * 1e9].
+    // The minimum quorum rate to pass a proposal.
+    // If 50% votes are needed, then the voting_quorum_rate should be 5_00_000_000.
+    // It should be between (0, 1e9].
     voting_quorum_rate: u64,
-    /// how long the proposal should wait before it can be executed (in milliseconds).
+    // How long the proposal should wait before it can be executed (in milliseconds).
     min_action_delay: u64, 
-    // minimum amount of votes for a {Proposal} to be successful even if it higher than the agaisnt votes and the quorum rate.  
+    // Minimum amount of votes for a {Proposal} to be successful even if it is higher than the against votes and the quorum rate.  
     min_quorum_votes: u64,
     // The `sui::object::ID` of the Treasury.  
-    // Not all {Dao}s have treasuries. 
     treasury: ID,
     // The CoinType that can vote on this DAO's proposal.  
     coin_type: TypeName,
@@ -196,8 +195,8 @@ module suitears::dao {
     coin_type: TypeName
   }
 
-  // @dev A Hot Potato to ensure that the borrowed Capability is returned to the {Dao}. 
-  struct CapabilityReceipt {
+ // @dev A Hot Potato to ensure that the borrowed Capability is returned to the {Dao}. 
+  struct CapabilityRequest {
     // @dev The `sui::object::ID` of the borrowed Capability.   
     capability_id: ID,
     // @dev The {DAO} that owns said Capability.  
@@ -213,7 +212,7 @@ module suitears::dao {
     // The end_time of the {Proposal}.  
     // User can redeem back his `balance` after this timestamp.  
     end_time: u64,
-    // If it is a for or agaisnt vote. 
+    // If it is a for or against vote. 
     agree: bool
   } 
 
@@ -281,16 +280,15 @@ module suitears::dao {
   * @notice Creates a new {DAO<OTW>} with a {DaoTreasury<OTW>}.  
   *
   * @dev {Dao} can only be created in an init function.  
-  * @dev Important Make sure the voting_period and min_quorum_votes is adequate because a large holder can vote to withdraw all coins from the treasury.
-  * @dev Also major stakeholders should monitor all proposals to ensure they vote against malicious proposals.
+  * @dev Make sure that the voting_period and min_quorum_votes are adequate because a large holder can vote to withdraw all coins from the treasury.
+  * @dev Stakeholders should monitor all proposals to ensure they vote against malicious proposals.
   *
   * @param otw A One Time Witness to ensure that the {Dao<OTW>} is unique.  
   * @param voting_delay The minimum waiting period between the creation of a proposal and the voting period.  
   * @param voting_period The duration of the voting period.  
-  * @param voting_quorum_rate The minimum percentage of for votes. E.g. for_votes / total_votes. keep in mint (0, 1_000_000_000]  
-  * @param min_action_delay The delay required to execute a proposal after it passes.  
+  * @param voting_quorum_rate The minimum percentage of votes to pass a proposal. E.g. for_votes / total_votes. keep in mint (0, 1_000_000_000]  
+  * @param min_action_delay The minimum delay required to execute a proposal after it passes.  
   * @param min_quorum_votes The minimum votes required for a {Proposal} to be sucessful.   
-  * @param allow_flashloan If the {DaoTreasury<OTW>} should allow flash loans.  
   * @return Dao<OTW>  
   * @return Treasury<OTW>
   *
@@ -298,7 +296,7 @@ module suitears::dao {
   * - `otw` is not a One Time Witness.   
   * - `voting_quorum_rate` is larger than 1_000_000_000 
   * - `voting_quorum_rate` is zero.  
-  */  
+  */   
   public fun new<OTW: drop, CoinType>(
     otw: OTW, 
     voting_delay: u64, 
@@ -306,7 +304,6 @@ module suitears::dao {
     voting_quorum_rate: u64, 
     min_action_delay: u64, 
     min_quorum_votes: u64,
-    allow_flashloan: bool,
     ctx: &mut TxContext
   ): (Dao<OTW>, DaoTreasury<OTW>) {
     assert!(is_one_time_witness(&otw), EInvalidOTW);
@@ -317,7 +314,7 @@ module suitears::dao {
 
     let dao_id = object::new(ctx);
 
-    let treasury = dao_treasury::create<OTW>(*object::uid_as_inner(&dao_id), allow_flashloan, ctx);
+    let treasury = dao_treasury::create<OTW>(*object::uid_as_inner(&dao_id), ctx);
 
     let dao = Dao<OTW> {
       id: dao_id,
@@ -382,7 +379,7 @@ module suitears::dao {
   }    
 
   /*
-  * @notice Returns the minimum execution delay of the Dao. 
+  * @notice Returns the minimum action delay of the Dao. 
   *
   * @param self a {Dao<OTW>}
   * @return u64
@@ -392,7 +389,7 @@ module suitears::dao {
   }    
 
   /*
-  * @notice Returns the minimum execution delay of the Dao. 
+  * @notice Returns the minimum quorum votes of the Dao. 
   *
   * @param self a {Dao<OTW>}
   * @return u64
@@ -402,17 +399,7 @@ module suitears::dao {
   }   
 
   /*
-  * @notice Returns the minimum execution delay of the Dao. 
-  *
-  * @param self a {Dao<OTW>}
-  * @return u64
-  */
-  public fun dao_min_quorum_votes<DaoWitness>(self: &Dao<DaoWitness>): u64 {
-    self.min_quorum_votes
-  }  
-
-  /*
-  * @notice Returns the `sui::object::id` of the Dao wrapped in an `std::option`. Not all {Dao}s have treasuries.   
+  * @notice Returns the `sui::object::id` of the Dao wrapped in an `std::option`.  
   *
   * @param self a {Dao<OTW>}
   * @return Option<ID>
@@ -464,7 +451,7 @@ module suitears::dao {
   } 
 
   /*
-  * @notice Returns start timestamp of the `proposal`. 
+  * @notice Returns end timestamp of the `proposal`. 
   *
   * @param proposal The {Proposal<DaoWitness>}
   * @return u64
@@ -484,7 +471,7 @@ module suitears::dao {
   }   
 
   /*
-  * @notice Returns the number of votes agaisnt this `proposal`. 
+  * @notice Returns the number of votes against this `proposal`. 
   *
   * @param proposal The {Proposal<DaoWitness>}
   * @return u64
@@ -494,7 +481,7 @@ module suitears::dao {
   }  
 
   /*
-  * @notice Returns an estimation between when a proposal is successful and can be executed. 
+  * @notice Returns an estimation of when a proposal is successful and can be executed. 
   *
   * @param proposal The {Proposal<DaoWitness>}
   * @return u64
@@ -504,7 +491,7 @@ module suitears::dao {
   }   
 
   /*
-  * @notice Returns the minimum time a `proposal` can be executed. 
+  * @notice Returns the minimum time a successful `proposal` has to wait before it can be executed. 
   *
   * @param proposal The {Proposal<DaoWitness>}
   * @return u64
@@ -524,7 +511,9 @@ module suitears::dao {
   }           
 
   /*
-  * @notice Returns the minimum rate for a `proposal` to pass - for_votes / total_votes. 
+  * @notice Returns the minimum rate for a `proposal` to pass. Formula:  for_votes / total_votes. 
+  *
+  * @dev 100% is represented by 1_000_000_000. 
   *
   * @param proposal The {Proposal<DaoWitness>}
   * @return u64
@@ -556,6 +545,8 @@ module suitears::dao {
   /*
   * @notice Returns the `sui::object::ID` of the Capability that the `proposal` requires to execute.   
   *
+  * @dev A proposal without a `capability_id` is not executable on chain.  
+  *
   * @param proposal The {Proposal<DaoWitness>}
   * @return Option<ID>
   */
@@ -576,9 +567,9 @@ module suitears::dao {
   // === Public Vote View Functions ===     
 
   /*
-  * @notice Represents the number of votes a user casted.  
+  * @notice Returns the number of votes.  
   *
-  * @dev The coin amount if the number of votes.     
+  * @dev The coin amount is the number of votes.     
   *
   * @param vote The {Vote<DaoWitness,  CoinType>}
   * @return u64
@@ -588,21 +579,17 @@ module suitears::dao {
   } 
 
   /*
-  * @notice Represents the number of votes a user casted.  
-  *
-  * @dev The coin amount if the number of votes.     
+  * @notice Returns the {Proposal} `sui::object::ID`.     
   *
   * @param vote The {Vote<DaoWitness,  CoinType>}
-  * @return u64
+  * @return ID
   */
   public fun proposal_id<DaoWitness: drop, CoinType>(vote: &Vote<DaoWitness,  CoinType>): ID {
     vote.proposal_id
   }   
 
   /*
-  * @notice Represents the ending timestamp of the proposal. Users can withdraw their deposited coins afterwards.
-  *
-  * @dev The coin amount if the number of votes.     
+  * @notice Returns the ending timestamp of the proposal. Users can withdraw their deposited coins afterward.   
   *
   * @param vote The {Vote<DaoWitness,  CoinType>}
   * @return u64
@@ -612,7 +599,7 @@ module suitears::dao {
   } 
 
   /*
-  * @notice Returns if it is a for or agaisnt vote.    
+  * @notice Returns if it is a for or against vote.    
   *
   * @param vote The {Vote<DaoWitness,  CoinType>}
   * @return bool
@@ -620,6 +607,16 @@ module suitears::dao {
   public fun agree<DaoWitness: drop, CoinType>(vote: &Vote<DaoWitness,  CoinType>): bool {
     vote.agree
   } 
+
+  /*
+  * @notice Returns the `proposal` state.  
+  * 
+  * @param proposal A {Proposal}.  
+  * @return u8. It represents a Proposal State. 
+  */
+  public fun proposal_state<DaoWitness: drop>(proposal: &Proposal<DaoWitness>, c: &Clock): u8 {
+    proposal_state_impl(proposal, clock::timestamp_ms(c))
+  }  
 
   // === Public Mutative Functions ===     
 
@@ -629,8 +626,8 @@ module suitears::dao {
   * @param dao The {Dao<OTW>} 
   * @param c The shared `sui::clock::Clock` object.  
   * @param authorized_witness The Witness required to execute this proposal.  
-  * @param capability_id The `sui::object::ID` of the Capability that this proposal needs to be executed. If a proposal is not executable pass option::none(),
-  * @param action_delay The minimum waiting period between the creation of a proposal and the voting period.  
+  * @param capability_id The `sui::object::ID` of the Capability that this proposal needs to be executed. If a proposal is not executable pass `option::none()`,
+  * @param action_delay The minimum waiting period for a successful {Proposal} to be executed.  
   * @param quorum_votes The minimum votes required for a {Proposal} to be sucessful.   
   * @param hash The hash of the proposal's description.  
   * @return Proposal<DaoWitness> 
@@ -679,17 +676,17 @@ module suitears::dao {
   }
 
  /*
- * @notice Allows a user to vote for a `proposal`, either agaisnt or for depending on `agree`.  
+ * @notice Allows a user to use coins to vote for a `proposal`, either against or for depending on `agree`.  
  *
  * @param proposal The proposal the user is voting for. 
  * @param c The `sui::clock::Clock`
  * @param stake The coin that the user will deposit to vote.  
- * @param agree Determines if the vote is for or agaisnt.  
+ * @param agree Determines if the vote is for or against.  
  * @return Vote<DaoWitness, CoinType>  
  *
  * aborts-if:  
  * - if the proposal is not `ACTIVE` 
- * - if the `stake` type does not matc the `proposal.coin_type`
+ * - if the `stake` type does not match the `proposal.coin_type`
  * - if a user tries to vote with a zero coin `stake`.  
  */
   public fun cast_vote<DaoWitness: drop, CoinType>(
@@ -796,7 +793,7 @@ module suitears::dao {
   *
   * aborts-if:  
   * - if the proposal has not ended. 
-  * - if the `stake` type does not matc the `proposal.coin_type` 
+  * - if the `stake` type does not match the `proposal.coin_type` 
   */
   public fun unstake_vote<DaoWitness: drop, CoinType>(
     proposal: &Proposal<DaoWitness>,
@@ -843,7 +840,7 @@ module suitears::dao {
   * @param receive_ticket A receipt struct to borrow the Capability.     
   * @param c The `sui::clock::Clock`
   * @return Capability required to execute the proposal 
-  * @return CapabilityReceipt A hot potato to ensure that the borrower returns the Capability to the `dao`. 
+  * @return CapabilityRequest A hot potato to ensure that the borrower returns the Capability to the `dao`. 
   *
   * aborts-if:  
   * - if the `proposal` state is not EXECUTABLE 
@@ -857,7 +854,7 @@ module suitears::dao {
     _: AuhorizedWitness,
     receive_ticket: Receiving<Capability>,
     c: &Clock
-  ): (Capability, CapabilityReceipt) {
+  ): (Capability, CapabilityRequest) {
     let now = clock::timestamp_ms(c);
     assert!(proposal_state_impl(proposal, now) == EXECUTABLE, ECannotExecuteThisProposal);
     assert!(now >= proposal.end_time + proposal.action_delay, ETooEarlyToExecute);
@@ -869,7 +866,7 @@ module suitears::dao {
 
     assert!(object::id(&capability) == proposal_capability_id, EInvalidExecuteCapability);
 
-    let receipt = CapabilityReceipt {
+    let receipt = CapabilityRequest {
       capability_id: proposal_capability_id,
       dao_id: object::id(dao)
     };
@@ -878,12 +875,14 @@ module suitears::dao {
   }
 
   /*
-  * @notice Executes a `proposal`.  
+  * @notice Returns the borrowed `cap` to the `dao`.  
   *
-  * @param proposal The proposal that will be executed. 
+  * @param dao The {Dao<OTW>}   
+  * @param cap The capability that will be returned to the `dao`. 
+  * @param receipt The request hot potato.  
   */
-  public fun return_capability<DaoWitness: drop, Capability: key + store>(dao: &Dao<DaoWitness>, cap: Capability, receipt: CapabilityReceipt) {
-    let CapabilityReceipt { dao_id, capability_id } = receipt;
+  public fun return_capability<DaoWitness: drop, Capability: key + store>(dao: &Dao<DaoWitness>, cap: Capability, receipt: CapabilityRequest) {
+    let CapabilityRequest { dao_id, capability_id } = receipt;
 
     assert!(dao_id == object::id(dao), EInvalidReturnDAO);
     assert!(capability_id == object::id(&cap), EInvalidReturnCapability);
@@ -891,18 +890,10 @@ module suitears::dao {
     transfer::public_transfer(cap, object::uid_to_address(&dao.id));
   }
 
-  /*
-  * @notice Returns the `proposal` state.  
-  * 
-  * @param proposal The proposal that will be executed.
-  * @return u8. It represents a Proposal State. 
-  */
-  public fun proposal_state<DaoWitness: drop>(proposal: &Proposal<DaoWitness>, c: &Clock): u8 {
-    proposal_state_impl(proposal, clock::timestamp_ms(c))
-  }
+  // === Private Functions ===       
 
   /*
-  * @notice Returns the coin deposited in the `vote`.  
+  * @notice Destroys the `vote` and returns the coin deposited.  
   * 
   * @param vote the vote that will be destroyed.  
   * @return Coin<CoinType>.  
@@ -918,7 +909,7 @@ module suitears::dao {
   * @notice Returns the state of the `proposal`.  
   * 
   * @param proposal The proposal that will be executed.
-  * @param current_time The current time in Sui Network in milliseconds.    
+  * @param current_time The current time in Sui Network is in milliseconds.    
   */
   fun proposal_state_impl<DaoWitness: drop>(
     proposal: &Proposal<DaoWitness>,
@@ -950,6 +941,8 @@ module suitears::dao {
     }
   }
 
+  // === Private Functions ===     
+
   /*
   * @notice updates the configuration settings of the `dao`. 
   *
@@ -960,7 +953,7 @@ module suitears::dao {
   * @param _ Immutable reference to the {DaoAdmin}.  
   * @param voting_delay The minimum waiting period between the creation of a proposal and the voting period.  
   * @param voting_period The duration of the voting period.  
-  * @param voting_quorum_rate The minimum percentage of for votes. E.g. for_votes / total_votes. keep in mint (0, 1_000_000_000]  
+  * @param voting_quorum_rate The minimum percentage of votes. E.g. for_votes / total_votes. Range = (0, 1_000_000_000]  
   * @param min_action_delay The delay required to execute a proposal after it passes.    
   * @param min_quorum_votes The minimum votes required for a {Proposal} to be sucessful.    
   */
@@ -980,7 +973,7 @@ module suitears::dao {
     dao.min_action_delay = option::destroy_with_default(min_action_delay, dao.min_action_delay);
     dao.min_quorum_votes = option::destroy_with_default(min_quorum_votes, dao.min_quorum_votes);
 
-    assert!(100 * 1_000_000_000 >= dao.voting_quorum_rate && dao.voting_quorum_rate != 0, EInvalidQuorumRate);
+    assert!(1_000_000_000 >= dao.voting_quorum_rate && dao.voting_quorum_rate != 0, EInvalidQuorumRate);
 
     emit(
       UpdateDao<DaoWitness> {

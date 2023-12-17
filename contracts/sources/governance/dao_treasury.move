@@ -17,16 +17,12 @@ module suitears::dao_treasury {
 
   const FLASH_LOAN_FEE: u64 = 5000000; // 0.5%
 
-  const EFlashloanNotAllowed: u64 = 0;
-  const ERepayAmountTooLow: u64 = 1;
-
-  struct TransferTask has drop {}
+  const ERepayAmountTooLow: u64 = 0;
 
   struct DaoTreasury<phantom DaoWitness: drop> has key, store {
     id: UID,
     coins: Bag,
     dao: ID,
-    allow_flashloan: bool
   }
 
   // * IMPORTANT do not add abilities 
@@ -37,11 +33,6 @@ module suitears::dao_treasury {
   }
 
   // Events
-
-  struct CreateDaoTreasury<phantom DaoWitness> has copy, drop {
-    treasury_id: ID,
-    dao_id: ID
-  }
 
   struct Donate<phantom DaoWitness, phantom CoinType> has copy, drop {
     value: u64,
@@ -68,17 +59,12 @@ module suitears::dao_treasury {
     type: TypeName
   } 
 
-  public(friend) fun create<DaoWitness: drop>(dao: ID, allow_flashloan: bool, ctx: &mut TxContext): DaoTreasury<DaoWitness> {
-    let treasury = DaoTreasury {
+  public(friend) fun create<DaoWitness: drop>(dao: ID, ctx: &mut TxContext): DaoTreasury<DaoWitness> {
+    DaoTreasury {
       id: object::new(ctx),
       coins: bag::new(ctx),
-      dao,
-      allow_flashloan
-    };
-
-    emit(CreateDaoTreasury<DaoWitness> { treasury_id: object::id(&treasury), dao_id: dao });
-
-    treasury
+      dao
+    }
   }
 
   public fun donate<DaoWitness: drop, CoinType>(treasury: &mut DaoTreasury<DaoWitness>, token: Coin<CoinType>, ctx: &mut TxContext) {
@@ -149,7 +135,6 @@ module suitears::dao_treasury {
     value: u64, 
     ctx: &mut TxContext
   ): (Coin<CoinType>, FlashLoan<DaoWitness, CoinType>) {
-    assert!(treasury.allow_flashloan, EFlashloanNotAllowed);
 
     let type = type_name::get<CoinType>();
     let initial_balance = balance::value(bag::borrow<TypeName, Balance<CoinType>>(&treasury.coins, type));
