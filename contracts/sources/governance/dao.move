@@ -314,7 +314,7 @@ module suitears::dao {
 
     let dao_id = object::new(ctx);
 
-    let treasury = dao_treasury::create<OTW>(*object::uid_as_inner(&dao_id), ctx);
+    let treasury = dao_treasury::new<OTW>(*object::uid_as_inner(&dao_id), ctx);
 
     let dao = Dao<OTW> {
       id: dao_id,
