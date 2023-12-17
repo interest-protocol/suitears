@@ -1,32 +1,37 @@
 /*
 * @title Decentralized Autonomous Organization
 *
-* @notice It allows anyone to create a DAO, submit proposals and execute actions on-chain.  
-* Proposals are voted by deposting coins. 1 Coin is 1 Vote.  
+* @notice It allows anyone to create a DAO, submit proposals, and execute actions on-chain.  
+* Proposals are voted by depositing coins. 1 Coin is 1 Vote.  
 * Daos only supports 1 Coin type. 
 *
 * @dev The idea is to send capabilities to the DAO via `sui::transfer::transfer`.  
 * Users can borrow the capabilities via successful proposals.    
 * Developers must write custom modules that pass the `AuthorizedWitness` to borrow the capability when executing proposals. 
-* {Dao} relies on open source code to make sure the Modules that are executing proposals do what they agreed to do.    
+* {Dao} relies on open-source code to make sure the Modules that are executing proposals do what they agreed to do. 
+*   
+* @dev Proposal Life Cycle   
 *
-* @dev Proposal Life Cycle
-* Create -> Voting Delay -> Voting Period -> 
-*
-* Failure Route -> Ending
-* Success Route -> Executing Delay -> Execution -> Ending 
+*                                                         Finished
+*                                             Success -> 
+*                                                         Action Delay -> Execution -> Finished 
+* Create -> Voting Delay -> Voting Period ->             
+*                                             Failed -> Finished
+* 
 *
 * @dev A Success {Proposal} requires: 
 * - for_votes > agaisnt_votes  
 * - for_votes / total_votes > quorum rate  
 * - for_votes >= min_quorum_votes
 *
-* @dev {Vote} Life Cycie 
-* Deposit Coin -> Vote -> Wait for Proposal to Finish -> Withdraw
+* @dev {Vote} Life Cycle 
 *
-* @dev The {Vote} struct belongs to a specific {Proposal}.  
-* A voter can revoke his vote and recovers `sui::coin::Coin` if the {Proposal} is active.  
-* A voter can recover his coins once the proposal is passed.  
+* Deposit Coin -> Vote (Agaisnt or For) -> Wait for Proposal to Finish -> Withdraw
+*
+* @dev Each {Vote} struct belongs to a specific {Proposal} via the `vote.proposal_id` field.
+*  
+* A voter can revoke his vote and recover his `sui::coin::Coin` if the {Proposal} is active.  
+* A voter can recover his coins once the voting period ends.  
 * A {Vote} created from {ProposalA} cannot be used in {ProposalB}.  
 *
 * @dev It was inspired by https://github.com/starcoinorg/starcoin-framework/blob/main/sources/Dao.move.  
