@@ -16,6 +16,7 @@ module suitears::fixed_point64 {
 
   // @dev Natural log 2 in 32-bit fixed point. ln(2) in fixed 64 representation. 
   const LN2: u256 = 12786308645202655660; 
+  
   // @dev Maximum Unsigned 128 Bit number
   const MAX_U128: u256 =  340282366920938463463374607431768211455;
 

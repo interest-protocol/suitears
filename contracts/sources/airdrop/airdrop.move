@@ -23,12 +23,16 @@ module suitears::airdrop {
 
   // @dev Thrown if a user tries to claim his airdrop twice. 
   const EAlreadyClaimed: u64 = 0;
+
   // @dev Thrown if the airdrop creator tries provides an empty Merkle tree. 
   const EInvalidRoot: u64 = 1;
+
   // @dev Thrown if the airdrop creator tries create an airdrop in the past.  
   const EInvalidStartTime: u64 = 2;
+
   // @dev Thrown if a user tries to claim the airdrop before it starts.
   const EHasNotStarted: u64 = 3;
+  
   // @dev Thrown if a user submits an empty proof.
   const EInvalidProof: u64 = 4;
 

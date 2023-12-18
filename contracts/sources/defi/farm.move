@@ -24,10 +24,13 @@ module suitears::farm {
 
   // @dev Thrown when the user tries to unstake more than his total stake amount. 
   const EInsufficientStakeAmount: u64 = 0;
+
   // @dev Thrown when the user tries to destroy an {Account} that still has a deposit in the {Farm}. 
   const EAccountHasValue: u64 = 1;
+  
   // @dev Thrown when the user tries to create a {Farm} that starts in the past. 
   const EInvalidStartTime: u64 = 3;
+  
   // @dev Thrown when the user uses the wrong {Account}. 
   const EInvalidAccount: u64 = 5;
 

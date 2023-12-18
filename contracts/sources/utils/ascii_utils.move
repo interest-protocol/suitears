@@ -21,7 +21,10 @@ module suitears::ascii_utils {
 
   // === Errors ===
 
+  // @dev If the user tries to slice a string with out-of-bounds indices. 
   const EInvalidSlice: u64 = 0;
+
+  // @dev If the user tries to convert a u8 into an invalid ASCII. 
   const EInvalidAsciiCharacter: u64 = 2;
 
   // === Public Functions to manipulate strings ===

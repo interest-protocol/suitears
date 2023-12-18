@@ -38,6 +38,7 @@ module suitears::int {
 
   // @dev It occurs if an operation results in a value higher than `MAX_I256_U256`.   
   const EConversionFromU256Overflow: u64 = 0;
+  
   // @dev It occurs if a negative Int is converted to an unsigned integer. 
   const EConversionUnderflow: u64 = 1;
 

@@ -15,7 +15,9 @@ module suitears::comparator {
   // === Constants ===
   
   const EQUAL: u8 = 0;
+
   const SMALLER: u8 = 1;
+  
   const GREATER: u8 = 2;
 
   // === Structs ===  

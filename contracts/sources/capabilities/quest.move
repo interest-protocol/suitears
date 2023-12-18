@@ -21,6 +21,7 @@ module suitears::quest {
 
   // @dev Thrown if a {Quest<Reward>} is created without tasks
   const EQuestMustHaveTasks: u64 = 0;
+  
   // @dev Thrown if a {Quest<Reward>} is missing a Task Witness or has a wrong Witness. 
   const EWrongTasks: u64 = 1;
 

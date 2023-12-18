@@ -16,6 +16,7 @@ module suitears::timelock {
 
   // @dev Thrown if one tries to lock an object in the past. 
   const EInvalidTime: u64 = 0;
+  
   // @dev Thrown if one tries to {unlock} the {Timelock} before the `unlock_time`. 
   const ETooEarly: u64 = 1;
 
