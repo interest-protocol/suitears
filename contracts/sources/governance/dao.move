@@ -1012,7 +1012,7 @@ module suitears::dao {
     );
   }
 
-    // === Test Only Functions ===
+  // === Test Only Functions ===
 
   #[test_only]
   public fun new_for_testing<OTW: drop, CoinType>(
