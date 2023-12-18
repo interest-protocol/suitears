@@ -947,6 +947,7 @@ module suitears::dao {
       // Active
       ACTIVE
     } else if (
+      proposal.for_votes + proposal.against_votes == 0 ||
       proposal.for_votes <= proposal.against_votes ||
       proposal.for_votes + proposal.against_votes < proposal.quorum_votes || 
       proposal.voting_quorum_rate > div_down(proposal.for_votes, proposal.for_votes + proposal.against_votes)
