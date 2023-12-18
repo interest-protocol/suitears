@@ -235,6 +235,105 @@ module suitears::dao_tests {
 
   #[test]
   #[lint_allow(share_owned)]
+  fun test_end_to_end_defeated_proposal() {
+  let scenario = scenario();
+    let (alice, bob) = people();
+
+    let test = &mut scenario;
+
+    let c = clock::create_for_testing(ctx(test));
+
+    set_up(test);
+
+    next_tx(test, alice);  
+    {
+      let dao = test::take_shared<Dao<InterestDAO>>(test);
+      
+      clock::increment_for_testing(&mut c, 123);
+
+      let proposal = dao::propose(
+        &mut dao,
+        &c,
+        option::none(),
+        option::none(),
+        PROPOSAL_ACTION_DELAY,
+        PROPOSAL_QUORUM_VOTES,
+        vector[1],
+        ctx(test)
+      );
+
+      assert_eq(dao::state(&proposal, &c), PENDING);
+
+      transfer::public_share_object(proposal);
+      test::return_shared(dao);      
+    };
+
+    // 30 NO votes
+    next_tx(test, bob);
+    {
+      let proposal = test::take_shared<Proposal<InterestDAO>>(test);
+
+      clock::increment_for_testing(&mut c, DAO_VOTING_DELAY + 1);
+
+      assert_eq(dao::state(&proposal, &c), ACTIVE);
+
+      let vote = dao::cast_vote<InterestDAO, S_ETH>(
+        &mut proposal,
+        &c,
+        mint_for_testing(900, ctx(test)),
+        false,
+        ctx(test)
+      );
+
+      transfer::public_transfer(vote, bob);
+
+      test::return_shared(proposal);      
+    };
+
+    next_tx(test, alice);
+    {
+      let proposal = test::take_shared<Proposal<InterestDAO>>(test);
+
+      clock::increment_for_testing(&mut c, DAO_VOTING_DELAY + 1);
+
+      assert_eq(dao::state(&proposal, &c), ACTIVE);
+
+      let vote = dao::cast_vote<InterestDAO, S_ETH>(
+        &mut proposal,
+        &c,
+        mint_for_testing(2000, ctx(test)),
+        true,
+        ctx(test)
+      );
+
+      transfer::public_transfer(vote, bob);
+
+      test::return_shared(proposal);      
+    };    
+
+    next_tx(test, alice);
+    {
+      let proposal = test::take_shared<Proposal<InterestDAO>>(test);
+
+      clock::increment_for_testing(&mut c, DAO_VOTING_PERIOD);
+
+      assert_eq(dao::state(&proposal, &c), DEFEATED);
+
+      clock::increment_for_testing(&mut c, PROPOSAL_ACTION_DELAY);
+
+      assert_eq(dao::state(&proposal, &c), DEFEATED);
+      assert_eq(dao::for_votes(&proposal), 2000);
+      assert_eq(dao::against_votes(&proposal), 900);
+
+      test::return_shared(proposal);      
+    };
+
+    clock::destroy_for_testing(c);
+    test::end(scenario);    
+  }  
+
+  #[test]
+  #[lint_allow(share_owned)]
   fun test_vote_mechanisms() {
     let scenario = scenario();
     let (alice, bob) = people();
