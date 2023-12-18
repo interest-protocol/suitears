@@ -13,6 +13,8 @@
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^20.10.3",
+    "@types/tmp": "^0.2.6",
+    "@types/ws": "^8.5.10",
     "nodemon": "^3.0.1",
     "prettier": "^3.0.3",
     "ts-node": "^10.9.1",
@@ -22,6 +24,10 @@
     "@mysten/sui.js": "^0.48.1",
     "js-sha3": "^0.9.2",
     "keccak256": "^1.0.6",
-    "merkletreejs": "^0.3.11"
+    "merkletreejs": "^0.3.11",
+    "tmp": "^0.2.1",
+    "ts-retry-promise": "^0.7.1",
+    "vitest": "^1.0.4",
+    "ws": "^8.15.1"
   }
 }

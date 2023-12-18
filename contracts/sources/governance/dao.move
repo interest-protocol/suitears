@@ -1,4 +1,6 @@
+// TODO - Mysten Labs is working so we can test Receiving Object in move modules. We need to test it once it is live.  
 /*
+*
 * @title Decentralized Autonomous Organization
 *
 * @notice It allows anyone to create a DAO, submit proposals, and execute actions on-chain.  
