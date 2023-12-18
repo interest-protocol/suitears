@@ -3,10 +3,10 @@ module suitears::dao_tests {
   use std::option;
   use std::type_name;
 
-  use sui::clock;
   use sui::object;
   use sui::transfer;
   use sui::sui::SUI;
+  use sui::clock::{Self, Clock};
   use sui::test_utils::assert_eq;
   use sui::coin::{Self, burn_for_testing, mint_for_testing};
   use sui::test_scenario::{Self as test, Scenario, next_tx, ctx};
@@ -336,32 +336,13 @@ module suitears::dao_tests {
   #[lint_allow(share_owned)]
   fun test_vote_mechanisms() {
     let scenario = scenario();
-    let (alice, bob) = people();
+    let (_, bob) = people();
 
     let test = &mut scenario;
 
     let c = clock::create_for_testing(ctx(test));
 
-    set_up(test);
-
-    next_tx(test, alice);  
-    {
-      let dao = test::take_shared<Dao<InterestDAO>>(test);
-
-      let proposal = dao::propose(
-        &mut dao,
-        &c,
-        option::none(),
-        option::none(),
-        PROPOSAL_ACTION_DELAY,
-        PROPOSAL_QUORUM_VOTES,
-        vector[1],
-        ctx(test)
-      );
-
-      transfer::public_share_object(proposal);
-      test::return_shared(dao);      
-    };
+    set_up_with_proposal(test, &c);
 
     next_tx(test, bob);
     {
@@ -674,26 +655,7 @@ module suitears::dao_tests {
 
     let c = clock::create_for_testing(ctx(test));
 
-    set_up(test);
-
-    next_tx(test, alice);  
-    {
-      let dao = test::take_shared<Dao<InterestDAO>>(test);
-
-      let proposal = dao::propose(
-        &mut dao,
-        &c,
-        option::none(),
-        option::none(),
-        PROPOSAL_ACTION_DELAY,
-        PROPOSAL_QUORUM_VOTES,
-        vector[1],
-        ctx(test)
-      );
-
-      transfer::public_share_object(proposal);
-      test::return_shared(dao);  
-    };
+    set_up_with_proposal(test, &c);
 
     next_tx(test, alice);
     {
@@ -727,26 +689,7 @@ module suitears::dao_tests {
 
     let c = clock::create_for_testing(ctx(test));
 
-    set_up(test);
-
-    next_tx(test, alice);  
-    {
-      let dao = test::take_shared<Dao<InterestDAO>>(test);
-
-      let proposal = dao::propose(
-        &mut dao,
-        &c,
-        option::none(),
-        option::none(),
-        PROPOSAL_ACTION_DELAY,
-        PROPOSAL_QUORUM_VOTES,
-        vector[1],
-        ctx(test)
-      );
-
-      transfer::public_share_object(proposal);
-      test::return_shared(dao);  
-    };
+    set_up_with_proposal(test, &c);
 
     next_tx(test, alice);
     {
@@ -801,26 +744,7 @@ module suitears::dao_tests {
 
     let c = clock::create_for_testing(ctx(test));
 
-    set_up(test);
-
-    next_tx(test, alice);  
-    {
-      let dao = test::take_shared<Dao<InterestDAO>>(test);
-
-      let proposal = dao::propose(
-        &mut dao,
-        &c,
-        option::none(),
-        option::none(),
-        PROPOSAL_ACTION_DELAY,
-        PROPOSAL_QUORUM_VOTES,
-        vector[1],
-        ctx(test)
-      );
-
-      transfer::public_share_object(proposal);
-      test::return_shared(dao);  
-    };
+    set_up_with_proposal(test, &c);
 
     next_tx(test, alice);
     {
@@ -856,26 +780,7 @@ module suitears::dao_tests {
 
     let c = clock::create_for_testing(ctx(test));
 
-    set_up(test);
-
-    next_tx(test, alice);  
-    {
-      let dao = test::take_shared<Dao<InterestDAO>>(test);
-
-      let proposal = dao::propose(
-        &mut dao,
-        &c,
-        option::none(),
-        option::none(),
-        PROPOSAL_ACTION_DELAY,
-        PROPOSAL_QUORUM_VOTES,
-        vector[1],
-        ctx(test)
-      );
-
-      transfer::public_share_object(proposal);
-      test::return_shared(dao);  
-    };
+    set_up_with_proposal(test, &c);
 
     next_tx(test, alice);
     {
@@ -911,30 +816,7 @@ module suitears::dao_tests {
 
     let c = clock::create_for_testing(ctx(test));
 
-    set_up(test);
-
-    next_tx(test, alice);  
-    {
-      let dao = test::take_shared<Dao<InterestDAO>>(test);
-      
-      clock::increment_for_testing(&mut c, 123);
-
-      let proposal = dao::propose(
-        &mut dao,
-        &c,
-        option::none(),
-        option::none(),
-        PROPOSAL_ACTION_DELAY,
-        PROPOSAL_QUORUM_VOTES,
-        vector[1],
-        ctx(test)
-      );
-
-      assert_eq(dao::state(&proposal, &c), PENDING);
-
-      transfer::public_share_object(proposal);
-      test::return_shared(dao);      
-    };
+    set_up_with_proposal(test, &c);
 
     // 30 NO votes
     next_tx(test, bob);
@@ -1118,6 +1000,155 @@ module suitears::dao_tests {
     test::end(scenario);    
   }
 
+  #[test]  
+  #[lint_allow(share_owned)]
+  #[expected_failure(abort_code = dao::EProposalMustBeActive)]
+  fun test_revoke_vote_on_pending_proposal() {
+    let scenario = scenario();
+    let (alice, _) = people();
+
+    let test = &mut scenario;
+
+    let c = clock::create_for_testing(ctx(test));
+
+    set_up_with_proposal(test, &c);
+
+    next_tx(test, alice);
+    {
+      let proposal = test::take_shared<Proposal<InterestDAO>>(test);
+
+      let vote = dao::cast_vote<InterestDAO, S_ETH>(
+        &mut proposal,
+        &c,
+        mint_for_testing(2100, ctx(test)),
+        true,
+        ctx(test)
+      );
+
+      transfer::public_transfer(vote, alice);
+
+      test::return_shared(proposal);   
+    };
+
+    next_tx(test, alice);
+    {
+      let proposal = test::take_shared<Proposal<InterestDAO>>(test);
+      let vote = test::take_from_sender<Vote<InterestDAO, S_ETH>>(test);
+
+      burn_for_testing(dao::revoke_vote(
+        &mut proposal,
+        vote,
+        &c,
+        ctx(test)
+      ));
+
+      test::return_shared(proposal);  
+    };    
+
+    clock::destroy_for_testing(c);
+    test::end(scenario);          
+  }    
+
+  #[test]  
+  #[lint_allow(share_owned)]
+  #[expected_failure(abort_code = dao::EVoteAndProposalIdMismatch)]
+  fun test_revoke_vote_on_wrong_proposal() {
+    let scenario = scenario();
+    let (alice, _) = people();
+
+    let test = &mut scenario;
+
+    let c = clock::create_for_testing(ctx(test));
+
+    let proposal1_id;
+    let proposal2_id;
+
+    set_up(test);
+
+    next_tx(test, alice);  
+    {
+      let dao = test::take_shared<Dao<InterestDAO>>(test);
+      
+      clock::increment_for_testing(&mut c, 123);
+
+      let proposal = dao::propose(
+        &mut dao,
+        &c,
+        option::none(),
+        option::none(),
+        PROPOSAL_ACTION_DELAY,
+        PROPOSAL_QUORUM_VOTES,
+        vector[1],
+        ctx(test)
+      );
+
+      let proposal2 = dao::propose(
+        &mut dao,
+        &c,
+        option::none(),
+        option::none(),
+        PROPOSAL_ACTION_DELAY,
+        PROPOSAL_QUORUM_VOTES,
+        vector[1],
+        ctx(test)
+      );
+
+      proposal1_id = option::some(object::id(&proposal));
+      proposal2_id = option::some(object::id(&proposal2));
+
+      assert_eq(dao::state(&proposal, &c), PENDING);
+
+      transfer::public_share_object(proposal);
+      transfer::public_share_object(proposal2);
+      test::return_shared(dao);      
+    };
+
+    // 30 NO votes
+    next_tx(test, alice);
+    {
+      let proposal = test::take_shared<Proposal<InterestDAO>>(test);
+
+      clock::increment_for_testing(&mut c, DAO_VOTING_DELAY + 1);
+
+      assert_eq(dao::state(&proposal, &c), ACTIVE);
+
+      let vote = dao::cast_vote<InterestDAO, S_ETH>(
+        &mut proposal,
+        &c,
+        mint_for_testing(900, ctx(test)),
+        false,
+        ctx(test)
+      );
+
+      transfer::public_transfer(vote, alice);
+
+      test::return_shared(proposal);      
+    };
+
+    next_tx(test, alice);
+    {
+      let proposal = test::take_shared_by_id<Proposal<InterestDAO>>(test, *option::borrow(& proposal1_id));
+      let dao = test::take_shared<Dao<InterestDAO>>(test);
+      let proposal2 = test::take_shared_by_id<Proposal<InterestDAO>>(test, *option::borrow(& proposal2_id));
+
+      let vote = test::take_from_sender<Vote<InterestDAO, S_ETH>>(test);
+
+      burn_for_testing(dao::revoke_vote(
+        &mut proposal,
+        vote, 
+        &c,
+        ctx(test)
+      ));
+
+      transfer::public_share_object(proposal2);
+      test::return_shared(dao);
+      test::return_shared(proposal);      
+    };
+
+    clock::destroy_for_testing(c);
+    test::end(scenario);    
+  }  
+
   #[lint_allow(share_owned)]
   fun set_up(test: &mut Scenario) {
 
@@ -1135,6 +1166,45 @@ module suitears::dao_tests {
       
       transfer::public_share_object(dao);
       transfer::public_share_object(treasury);
+    };
+  }
+
+  #[lint_allow(share_owned)]
+  fun set_up_with_proposal(test: &mut Scenario, c: &Clock) {
+
+    let (alice, _) = people();
+    next_tx(test, alice);
+    {
+      let (dao, treasury) = dao::new_for_testing<InterestDAO, S_ETH>(
+        DAO_VOTING_DELAY,
+        DAO_VOTING_PERIOD,
+        DAO_QUORUM_RATE,
+        DAO_MIN_ACTION_DELAY,
+        DAO_MIN_QUORUM_VOTES,
+        ctx(test)
+      );
+      
+      transfer::public_share_object(dao);
+      transfer::public_share_object(treasury);
+    };
+
+    next_tx(test, alice);  
+    {
+      let dao = test::take_shared<Dao<InterestDAO>>(test);
+
+      let proposal = dao::propose(
+        &mut dao,
+        c,
+        option::none(),
+        option::none(),
+        PROPOSAL_ACTION_DELAY,
+        PROPOSAL_QUORUM_VOTES,
+        vector[1],
+        ctx(test)
+      );
+
+      transfer::public_share_object(proposal);
+      test::return_shared(dao);  
     };
   }
 
