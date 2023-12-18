@@ -3,15 +3,15 @@ module suitears::dao_tests {
   use std::option;
   use std::type_name;
 
+  use sui::clock;
   use sui::object;
   use sui::transfer;
-  use sui::clock::{Self, Clock};
   use sui::test_utils::assert_eq;
   use sui::coin::{Self, burn_for_testing, mint_for_testing};
   use sui::test_scenario::{Self as test, Scenario, next_tx, ctx};
 
 
-  use suitears::s_eth::{Self, S_ETH};
+  use suitears::s_eth::S_ETH;
   use suitears::dao::{Self, Dao, Proposal};
   use suitears::dao_treasury::DaoTreasury;
   use suitears::test_utils::{people, scenario};
@@ -23,8 +23,7 @@ module suitears::dao_tests {
   const DEFEATED: u8 = 3;
   const AGREED: u8 = 4;
   const QUEUED: u8 = 5;
-  const EXECUTABLE: u8 = 6;
-  const EXTRACTED: u8 = 7;
+  const FINISHED: u8 = 7;
 
   const DAO_VOTING_DELAY: u64 = 10;
   const DAO_VOTING_PERIOD: u64 = 20;  
@@ -79,7 +78,7 @@ module suitears::dao_tests {
       let proposal = dao::propose(
         &mut dao,
         &c,
-        type_name::get<AuthorizedWitness>(),
+        option::some(type_name::get<AuthorizedWitness>()),
         option::none(),
         PROPOSAL_ACTION_DELAY,
         PROPOSAL_QUORUM_VOTES,
@@ -96,7 +95,7 @@ module suitears::dao_tests {
       assert_eq(dao::quorum_votes(&proposal), PROPOSAL_QUORUM_VOTES);
       assert_eq(dao::voting_quorum_rate(&proposal), DAO_QUORUM_RATE);
       assert_eq(dao::hash(&proposal), vector[1]);
-      assert_eq(dao::authorized_witness(&proposal), type_name::get<AuthorizedWitness>());
+      assert_eq(*option::borrow(&dao::authorized_witness(&proposal)), type_name::get<AuthorizedWitness>());
       assert_eq(dao::capability_id(&proposal), option::none());
       assert_eq(dao::coin_type(&proposal), type_name::get<S_ETH>());
 
@@ -135,9 +134,9 @@ module suitears::dao_tests {
 
   #[test]
   #[lint_allow(share_owned)]
-  fun test_end_to_end_not_executable_proposal() {
+  fun test_end_to_end_sucessful_not_executable_proposal() {
     let scenario = scenario();
-    let (alice, _) = people();
+    let (alice, bob) = people();
 
     let test = &mut scenario;
 
@@ -147,8 +146,87 @@ module suitears::dao_tests {
 
     next_tx(test, alice);  
     {
+      let dao = test::take_shared<Dao<InterestDAO>>(test);
+      
+      clock::increment_for_testing(&mut c, 123);
 
+      let proposal = dao::propose(
+        &mut dao,
+        &c,
+        option::none(),
+        option::none(),
+        PROPOSAL_ACTION_DELAY,
+        PROPOSAL_QUORUM_VOTES,
+        vector[1],
+        ctx(test)
+      );
+
+      assert_eq(dao::state(&proposal, &c), PENDING);
+
+      transfer::public_share_object(proposal);
+      test::return_shared(dao);      
     };
+
+    // 30 NO votes
+    next_tx(test, bob);
+    {
+      let proposal = test::take_shared<Proposal<InterestDAO>>(test);
+
+      clock::increment_for_testing(&mut c, DAO_VOTING_DELAY + 1);
+
+      assert_eq(dao::state(&proposal, &c), ACTIVE);
+
+      let vote = dao::cast_vote<InterestDAO, S_ETH>(
+        &mut proposal,
+        &c,
+        mint_for_testing(900, ctx(test)),
+        false,
+        ctx(test)
+      );
+
+      transfer::public_transfer(vote, bob);
+
+      test::return_shared(proposal);      
+    };
+
+    // 70 YES votes
+    next_tx(test, alice);
+    {
+      let proposal = test::take_shared<Proposal<InterestDAO>>(test);
+
+      let vote = dao::cast_vote<InterestDAO, S_ETH>(
+        &mut proposal,
+        &c,
+        mint_for_testing(2100, ctx(test)),
+        true,
+        ctx(test)
+      );
+
+      transfer::public_transfer(vote, alice);
+
+      test::return_shared(proposal);      
+    };
+
+    // Queue the proposal
+    next_tx(test, alice);
+    {
+      let proposal = test::take_shared<Proposal<InterestDAO>>(test);
+
+      clock::increment_for_testing(&mut c, DAO_VOTING_PERIOD);
+
+      assert_eq(dao::state(&proposal, &c), AGREED);
+
+      dao::queue(&mut proposal, &c);
+
+      assert_eq(dao::state(&proposal, &c), QUEUED);
+
+      clock::increment_for_testing(&mut c, PROPOSAL_ACTION_DELAY);
+
+      assert_eq(dao::state(&proposal, &c), FINISHED);
+
+      test::return_shared(proposal);      
+    };
+
     clock::destroy_for_testing(c);
     test::end(scenario);
   }  

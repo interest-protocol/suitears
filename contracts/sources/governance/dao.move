@@ -80,7 +80,7 @@ module suitears::dao {
   const EXECUTABLE: u8 = 6;
 
   // @dev The proposal is considered finalized.  
-  const EXTRACTED: u8 = 7;
+  const FINISHED: u8 = 7;
 
   // === Errors ===
 
@@ -188,8 +188,9 @@ module suitears::dao {
     voting_quorum_rate: u64, 
     // The hash of the description of this proposal 
     hash: vector<u8>,
-    // The Witness that is allowed to call {execute}
-    authorized_witness: TypeName,
+    // The Witness that is allowed to call {execute}. 
+    // Not executable proposals do not have an authorized_witness
+    authorized_witness: Option<TypeName>,
     // The `sui::object::ID` that this proposal needs to execute. 
     // Not all proposals are executable.  
     capability_id: Option<ID>,
@@ -512,7 +513,7 @@ module suitears::dao {
   * @param proposal The {Proposal<DaoWitness>}
   * @return TypeName
   */
-  public fun authorized_witness<DaoWitness: drop>(proposal: &Proposal<DaoWitness>): TypeName {
+  public fun authorized_witness<DaoWitness: drop>(proposal: &Proposal<DaoWitness>): Option<TypeName> {
     proposal.authorized_witness
   }  
 
@@ -614,7 +615,7 @@ module suitears::dao {
   public fun propose<DaoWitness: drop>(
     dao: &mut Dao<DaoWitness>,
     c: &Clock,
-    authorized_witness: TypeName,
+    authorized_witness: Option<TypeName>,
     capability_id: Option<ID>,
     action_delay: u64,
     quorum_votes: u64,
@@ -795,7 +796,7 @@ module suitears::dao {
   * aborts-if:  
   * - if the `proposal` state is not AGREED. 
   */
-  public fun queue_proposal<DaoWitness: drop>(
+  public fun queue<DaoWitness: drop>(
     proposal: &mut Proposal<DaoWitness>, 
     c: &Clock
   ) {
@@ -832,7 +833,7 @@ module suitears::dao {
     let now = clock::timestamp_ms(c);
     assert!(proposal_state_impl(proposal, now) == EXECUTABLE, ECannotExecuteThisProposal);
     assert!(now >= proposal.end_time + proposal.action_delay, ETooEarlyToExecute);
-    assert!(type_name::get<AuhorizedWitness>() == proposal.authorized_witness, EInvalidExecuteWitness);
+    assert!(type_name::get<AuhorizedWitness>() == option::extract(&mut proposal.authorized_witness), EInvalidExecuteWitness);
 
     let proposal_capability_id = option::extract(&mut proposal.capability_id);
 
@@ -947,7 +948,7 @@ module suitears::dao {
       ACTIVE
     } else if (
       proposal.for_votes <= proposal.against_votes ||
-      proposal.for_votes < proposal.quorum_votes || 
+      proposal.for_votes + proposal.against_votes < proposal.quorum_votes || 
       proposal.voting_quorum_rate > div_down(proposal.for_votes, proposal.for_votes + proposal.against_votes)
     ) {
       // Defeated
@@ -961,7 +962,7 @@ module suitears::dao {
     } else if (option::is_some(&proposal.capability_id)) {
       EXECUTABLE
     } else {
-      EXTRACTED
+      FINISHED
     }
   }
 
