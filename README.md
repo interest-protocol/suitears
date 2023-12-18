@@ -1,5 +1,3 @@
-> Please note that this repository is still under development and needs testing and auditing. It is not production ready yet!
-
 <div align="center">  <img  width="446.5px" height="146.5px"  src="./assets/logo.png" /></div>
 
 <h3 align="center"><em>Production ready modules for Sui Move developers</em></h3>

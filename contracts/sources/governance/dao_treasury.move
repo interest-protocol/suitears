@@ -114,7 +114,10 @@ module suitears::dao_treasury {
   * @return ID
   */
   public fun balance<DaoWitness: drop, CoinType>(treasury: &DaoTreasury<DaoWitness>): u64 {
-    balance::value(bag::borrow<TypeName, Balance<CoinType>>(&treasury.coins, type_name::get<CoinType>()))
+    let key = type_name::get<CoinType>();
+    if (!bag::contains(&treasury.coins, key)) return 0;
+
+    balance::value(bag::borrow<TypeName, Balance<CoinType>>(&treasury.coins, key))
   }
 
   // === Public Mutate Functions ===      
