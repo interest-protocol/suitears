@@ -26,7 +26,9 @@
 *
 * @dev {Vote} Life Cycle 
 *
-* Deposit Coin -> Vote (Agaisnt or For) -> Wait for Proposal to Finish -> Withdraw
+*                                 -> Wait for Proposal to Finish -> Unstake 
+* Deposit Coin -> Vote (yes/no) ->
+*                                 -> Revoke
 *
 * @dev Each {Vote} struct belongs to a specific {Proposal} via the `vote.proposal_id` field.
 *  
@@ -297,7 +299,7 @@ module suitears::dao {
   * - `voting_quorum_rate` is larger than 1_000_000_000 
   * - `voting_quorum_rate` is zero.  
   */   
-  public fun new<OTW: drop, CoinType>(
+  public fun new<OTW: drop, CoinType: drop>(
     otw: OTW, 
     voting_delay: u64, 
     voting_period: u64, 
@@ -586,7 +588,7 @@ module suitears::dao {
   * @param proposal A {Proposal}.  
   * @return u8. It represents a Proposal State. 
   */
-  public fun proposal_state<DaoWitness: drop>(proposal: &Proposal<DaoWitness>, c: &Clock): u8 {
+  public fun state<DaoWitness: drop>(proposal: &Proposal<DaoWitness>, c: &Clock): u8 {
     proposal_state_impl(proposal, clock::timestamp_ms(c))
   }  
 

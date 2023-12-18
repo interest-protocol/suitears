@@ -122,7 +122,7 @@ module suitears::dao_tests {
       assert_eq(dao::proposal_id(&vote), object::id(&proposal));
       assert_eq(dao::vote_end_time(&vote), 123 + DAO_VOTING_DELAY + DAO_VOTING_PERIOD);
       assert_eq(dao::agree(&vote), true);
-      assert_eq(dao::proposal_state(&proposal, &c), ACTIVE);
+      assert_eq(dao::state(&proposal, &c), ACTIVE);
 
       transfer::public_transfer(vote, alice);
 
@@ -134,6 +134,7 @@ module suitears::dao_tests {
   }   
 
   #[test]
+  #[lint_allow(share_owned)]
   fun test_end_to_end_not_executable_proposal() {
     let scenario = scenario();
     let (alice, _) = people();
