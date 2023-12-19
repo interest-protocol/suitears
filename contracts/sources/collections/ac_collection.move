@@ -139,7 +139,6 @@ module suitears::ac_collection {
   *
   * @param self The wrapped collection. 
   * @param cap A reference to the `AcCollection<C>`'s {OwnerCap}.
-  * @return C. The inner collection.  
   *
   * aborts-if 
   * - `cap` is not the owner of `self`. 
