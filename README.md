@@ -39,7 +39,7 @@ defi
 ├─ vesting — "Virtual implementation of vesting schedules"
 governance
 ├─ dao — "Decentralized autonomous organization"
-├─ dao_request_lock — "DAO module to create a request locks"
+├─ dao_admin — "DAO admin capability"
 ├─ dao_treasury — "A treasury plugin for the DAO module"
 math
 ├─ fixed_point64 — "Fixed point math module for x << 64 numbers"
