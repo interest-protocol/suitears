@@ -25,7 +25,6 @@ airdrop
 capabilities
 ├─ owner — "Owner capability to give access to multiple objects"
 ├─ quest — "A wrapper that can only be unwrapped once a set of actions are completed"
-├─ request_lock — "A hot potato to ensure that a set of requests are completed before destroying it"
 ├─ timelock — "Timelock capability to add a delay between actions"
 collections
 ├─ ac_collection — "Capability access wrapper for collections"
