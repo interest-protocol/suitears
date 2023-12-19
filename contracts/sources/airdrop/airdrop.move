@@ -120,7 +120,7 @@ module suitears::airdrop {
   }
 
   /*
-  * @notice Returns a {Bitmap} that keeps track of the claimed airdrops.   
+  * @notice Checks if a user has already claimed his airdrop.
   *
   * @param self The shared {Airdrop<T>} object.  
   * @param proof The proof that the sender can redeem the `amount` from the airdrop.  
