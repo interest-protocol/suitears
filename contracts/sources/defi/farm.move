@@ -111,7 +111,7 @@ module suitears::farm {
   }
 
   /*
-  * @notice It creares an {Farm<StakeCoin, RewardCoin>}. 
+  * @notice It creates an {Farm<StakeCoin, RewardCoin>}. 
   *
   * @dev The `start_timestamp` is in seconds.
   *
@@ -159,7 +159,7 @@ module suitears::farm {
   }
 
   /*
-  * @notice It creares an {Account<StakeCoin, RewardCoin>}. 
+  * @notice It creates an {Account<StakeCoin, RewardCoin>}. 
   * It is used to keep track of the holder's deposit and rewards. 
   *
   * @param self The {Farm<StakeCoin, RewardCoin>}
