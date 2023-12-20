@@ -101,7 +101,7 @@ module suitears::farm {
   // === Public Create Functions ===  
 
   /*
-  * @notice It creares an {OwnerCap<FarmWitness>}. 
+  * @notice It creates an {OwnerCap<FarmWitness>}. 
   * It is used to provide admin capabilities to the holder.
   *
   * @return {OwnerCap<FarmWitness>}. 
