@@ -144,7 +144,7 @@ module suitears::linear_vesting_wallet_clawback {
   }  
 
   /*
-  * @notice Releases the current amount of coins available to the caller based on the linear schedule.  
+  * @notice Returns the current amount of coins available to the caller based on the linear schedule.  
   *
   * @param self A {Wallet<T>}.
   * @param c The `sui::clock::Clock` shared object. 
