@@ -124,7 +124,7 @@ module suitears::linear_vesting_wallet_clawback {
   }
 
   /*
-  * @notice Returns the current amount of total released tokens from the `self`.  
+  * @notice Returns the duration of the vesting schedule.   
   *
   * @param self A {Wallet<T>}.
   * @return u64. 
