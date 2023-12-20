@@ -89,8 +89,7 @@ module suitears::wit_collection {
   * @notice Drops the wrapped struct `AcCollection<C>` and `C`. 
   *
   * @param self The wrapped collection. 
-  * @param _ The witness `W` in the `WitCollection<W, C>`.
-  * @return C. The inner collection.  
+  * @param _ The witness `W` in the `WitCollection<W, C>`. 
   */
   public fun drop<W: drop, C: store + drop>(self: WitCollection<W, C>, _: W) {
     let WitCollection { id, collection: _ } = self;
