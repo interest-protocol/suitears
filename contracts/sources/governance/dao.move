@@ -767,10 +767,11 @@ module suitears::dao {
   * @param proposal The proposal the user is voting for. 
   * @param vote The vote that will be destroyed.     
   * @param c The `sui::clock::Clock`
+  * @return Coin<CoinType>
   *
   * aborts-if:  
   * - if the proposal has not ended. 
-  * - if the `stake` type does not match the `proposal.coin_type` 
+  * - if the `vote.proposal_id` type does not match the `proposal.id` 
   */
   public fun unstake_vote<DaoWitness: drop, CoinType>(
     proposal: &Proposal<DaoWitness>,
@@ -791,8 +792,7 @@ module suitears::dao {
   /*
   * @notice Allows a successful `proposal` to be queued.  
   *
-  * @param proposal The proposal the user is voting for. 
-  * @param vote The vote that will be destroyed.     
+  * @param proposal The proposal the user is voting for.   
   * @param c The `sui::clock::Clock`
   *
   * aborts-if:  
