@@ -24,10 +24,13 @@ module suitears::farm {
 
   // @dev Thrown when the user tries to unstake more than his total stake amount. 
   const EInsufficientStakeAmount: u64 = 0;
+
   // @dev Thrown when the user tries to destroy an {Account} that still has a deposit in the {Farm}. 
   const EAccountHasValue: u64 = 1;
+  
   // @dev Thrown when the user tries to create a {Farm} that starts in the past. 
   const EInvalidStartTime: u64 = 3;
+  
   // @dev Thrown when the user uses the wrong {Account}. 
   const EInvalidAccount: u64 = 5;
 
@@ -98,7 +101,7 @@ module suitears::farm {
   // === Public Create Functions ===  
 
   /*
-  * @notice It creares an {OwnerCap<FarmWitness>}. 
+  * @notice It creates an {OwnerCap<FarmWitness>}. 
   * It is used to provide admin capabilities to the holder.
   *
   * @return {OwnerCap<FarmWitness>}. 
@@ -108,7 +111,7 @@ module suitears::farm {
   }
 
   /*
-  * @notice It creares an {Farm<StakeCoin, RewardCoin>}. 
+  * @notice It creates an {Farm<StakeCoin, RewardCoin>}. 
   *
   * @dev The `start_timestamp` is in seconds.
   *
@@ -156,7 +159,7 @@ module suitears::farm {
   }
 
   /*
-  * @notice It creares an {Account<StakeCoin, RewardCoin>}. 
+  * @notice It creates an {Account<StakeCoin, RewardCoin>}. 
   * It is used to keep track of the holder's deposit and rewards. 
   *
   * @param self The {Farm<StakeCoin, RewardCoin>}

@@ -1,15 +1,15 @@
 #[test_only]
-module suitears::request_lock_tests {
+module examples::request_lock_testss {
   use std::vector;
   use std::type_name;
 
   use sui::tx_context;
   use sui::test_utils::assert_eq;
 
-  use suitears::request_one;
-  use suitears::request_two;
-  use suitears::request_lock;
-  use suitears::request_issuer_test;
+  use examples::request_one;
+  use examples::request_two;
+  use examples::request_lock;
+  use examples::request_issuer_test;
 
   struct Data has store, drop {
     value: u64
@@ -106,9 +106,9 @@ module suitears::request_lock_tests {
 }
 
 #[test_only]
-module suitears::request_issuer_test {
+module examples::request_issuer_test {
 
-  use suitears::request_lock::{Self, Lock};
+  use examples::request_lock::{Self, Lock};
 
   struct Issuer has drop {}
 
@@ -118,10 +118,10 @@ module suitears::request_issuer_test {
 }
 
 #[test_only]
-module suitears::request_one {
+module examples::request_one {
   
-  use suitears::request_lock::{Self, Lock};
-  use suitears::request_issuer_test::Issuer;
+  use examples::request_lock::{Self, Lock};
+  use examples::request_issuer_test::Issuer;
 
   struct Witness has drop {}
 
@@ -131,10 +131,10 @@ module suitears::request_one {
 }
 
 #[test_only]
-module suitears::request_two {
+module examples::request_two {
   
-  use suitears::request_lock::{Self, Lock};
-  use suitears::request_issuer_test::Issuer;
+  use examples::request_lock::{Self, Lock};
+  use examples::request_issuer_test::Issuer;
 
   struct Witness has drop {}
 

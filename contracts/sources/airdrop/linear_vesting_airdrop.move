@@ -23,10 +23,13 @@ module suitears::linear_vesting_airdrop {
 
   // @dev Thrown if a user tries to claim his airdrop twice.
   const EAlreadyClaimed: u64 = 0;
+
   // @dev Thrown if the airdrop creator tries provides an empty Merkle tree. 
   const EInvalidRoot: u64 = 1;
+
   // @dev Thrown if the airdrop creator tries create an airdrop in the past.  
   const EInvalidStartTime: u64 = 2;
+  
   // @dev Thrown if a user submits an empty proof.
   const EInvalidProof: u64 = 3;
 
@@ -126,7 +129,7 @@ module suitears::linear_vesting_airdrop {
   }
 
   /*
-  * @notice Returns a {Bitmap} that keeps track of the claimed airdrops.   
+  * @notice Checks if a user has already claimed his airdrop.
   *
   * @param self The shared {Airdrop<T>} object.  
   * @param proof The proof that the sender can redeem the `amount` from the airdrop.  

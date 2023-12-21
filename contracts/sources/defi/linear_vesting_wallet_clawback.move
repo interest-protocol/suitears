@@ -104,7 +104,7 @@ module suitears::linear_vesting_wallet_clawback {
   }
 
   /*
-  * @notice Returns the current amount of tokens in the `self`.  
+  * @notice Returns the vesting schedule start time.  
   *
   * @param self A {Wallet<T>}.
   * @return u64. 
@@ -124,7 +124,7 @@ module suitears::linear_vesting_wallet_clawback {
   }
 
   /*
-  * @notice Returns the current amount of total released tokens from the `self`.  
+  * @notice Returns the duration of the vesting schedule.   
   *
   * @param self A {Wallet<T>}.
   * @return u64. 
@@ -144,7 +144,7 @@ module suitears::linear_vesting_wallet_clawback {
   }  
 
   /*
-  * @notice Releases the current amount of coins available to the caller based on the linear schedule.  
+  * @notice Returns the current amount of coins available to the caller based on the linear schedule.  
   *
   * @param self A {Wallet<T>}.
   * @param c The `sui::clock::Clock` shared object. 

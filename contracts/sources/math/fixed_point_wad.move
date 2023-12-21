@@ -20,6 +20,7 @@ module suitears::fixed_point_wad {
 
   // @dev It is thrown in values that would overflow in the {exp} function.
   const EOverflow: u64 = 0;
+  
   // @dev when the natural log function receives a negative value
   const EUndefined: u64 = 1;
 

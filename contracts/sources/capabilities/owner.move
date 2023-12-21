@@ -76,7 +76,7 @@ module suitears::owner {
     *vec_set::keys(&self.of)
   }
 
-  // === Public Mutate Function ===    
+  // === Public Mutative Function ===    
 
   /*
   * @notice Assigns the `self` {OwnerCap<T>} as the owner of `x`.

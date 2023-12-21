@@ -9,7 +9,7 @@ module suitears::farm_tests {
   use sui::coin::{Self, burn_for_testing, mint_for_testing};
   use sui::test_scenario::{Self as test, Scenario, next_tx, ctx};
 
-  use suitears::eth::{Self, ETH};
+  use suitears::s_eth::{Self, S_ETH};
   use suitears::owner::{Self, OwnerCap};
   use suitears::test_utils::{people, scenario};
   use suitears::farm::{Self, Farm, FarmWitness, Account};
@@ -31,8 +31,8 @@ module suitears::farm_tests {
 
     next_tx(test, alice);  
     {
-      let farm = test::take_shared<Farm<ETH, SUI>>(test);
-      let account = test::take_from_sender<Account<ETH, SUI>>(test);
+      let farm = test::take_shared<Farm<S_ETH, SUI>>(test);
+      let account = test::take_from_sender<Account<S_ETH, SUI>>(test);
       
       let reward_coin = farm::stake(
         &mut farm,
@@ -53,8 +53,8 @@ module suitears::farm_tests {
 
     next_tx(test, alice);
     {
-      let farm = test::take_shared<Farm<ETH, SUI>>(test);
-      let account = test::take_from_sender<Account<ETH, SUI>>(test);
+      let farm = test::take_shared<Farm<S_ETH, SUI>>(test);
+      let account = test::take_from_sender<Account<S_ETH, SUI>>(test);
 
       // 5 seconds of rewards
       clock::increment_for_testing(&mut c, 5000 + 10_000);
@@ -81,8 +81,8 @@ module suitears::farm_tests {
 
     next_tx(test, alice);
     {
-      let farm = test::take_shared<Farm<ETH, SUI>>(test);
-      let account = test::take_from_sender<Account<ETH, SUI>>(test);
+      let farm = test::take_shared<Farm<S_ETH, SUI>>(test);
+      let account = test::take_from_sender<Account<S_ETH, SUI>>(test);
 
       // 15 more seconds of rewards
       clock::increment_for_testing(&mut c, 15_000);
@@ -128,8 +128,8 @@ module suitears::farm_tests {
 
     next_tx(test, alice);  
     {
-      let farm = test::take_shared<Farm<ETH, SUI>>(test);
-      let account = test::take_from_sender<Account<ETH, SUI>>(test);
+      let farm = test::take_shared<Farm<S_ETH, SUI>>(test);
+      let account = test::take_from_sender<Account<S_ETH, SUI>>(test);
       
       burn_for_testing(farm::stake(
         &mut farm,
@@ -145,8 +145,8 @@ module suitears::farm_tests {
 
     next_tx(test, alice);
     {
-      let farm = test::take_shared<Farm<ETH, SUI>>(test);
-      let account = test::take_from_sender<Account<ETH, SUI>>(test);
+      let farm = test::take_shared<Farm<S_ETH, SUI>>(test);
+      let account = test::take_from_sender<Account<S_ETH, SUI>>(test);
 
       // 5 seconds of rewards
       clock::increment_for_testing(&mut c, 5000 + 10_000);
@@ -194,8 +194,8 @@ module suitears::farm_tests {
 
     next_tx(test, alice);      
     {
-      let farm = test::take_shared<Farm<ETH, SUI>>(test);
-      let account = test::take_from_sender<Account<ETH, SUI>>(test);
+      let farm = test::take_shared<Farm<S_ETH, SUI>>(test);
+      let account = test::take_from_sender<Account<S_ETH, SUI>>(test);
       
       burn_for_testing(farm::stake(
         &mut farm,
@@ -211,8 +211,8 @@ module suitears::farm_tests {
 
     next_tx(test, bob);      
     {
-      let farm = test::take_shared<Farm<ETH, SUI>>(test);
-      let account = test::take_from_sender<Account<ETH, SUI>>(test);
+      let farm = test::take_shared<Farm<S_ETH, SUI>>(test);
+      let account = test::take_from_sender<Account<S_ETH, SUI>>(test);
 
       // Bob missed 5 seconds of rewards
       clock::increment_for_testing(&mut c, 5_000);
@@ -233,8 +233,8 @@ module suitears::farm_tests {
 
     next_tx(test, alice);  
     {
-      let farm = test::take_shared<Farm<ETH, SUI>>(test);
-      let account = test::take_from_sender<Account<ETH, SUI>>(test); 
+      let farm = test::take_shared<Farm<S_ETH, SUI>>(test);
+      let account = test::take_from_sender<Account<S_ETH, SUI>>(test); 
 
       // 9 seconds
       clock::increment_for_testing(&mut c, 4_000);
@@ -268,8 +268,8 @@ module suitears::farm_tests {
 
     next_tx(test, bob);
     {
-      let farm = test::take_shared<Farm<ETH, SUI>>(test);
-      let account = test::take_from_sender<Account<ETH, SUI>>(test);
+      let farm = test::take_shared<Farm<S_ETH, SUI>>(test);
+      let account = test::take_from_sender<Account<S_ETH, SUI>>(test);
 
       assert_eq(farm::amount(&account), 300);
       assert_eq(farm::reward_debt(&account), (300 * (REWARDS_PER_SECOND as u256) * 5 * (ETH_DECIMAL_SCALAR as u256) / 500) / (ETH_DECIMAL_SCALAR as u256));
@@ -296,8 +296,10 @@ module suitears::farm_tests {
     clock::destroy_for_testing(c);
     test::end(scenario);  
   }
-
+  
+    
   #[test]
+  #[lint_allow(share_owned)]
   fun test_no_rewards() {
     let scenario = scenario();
     let (alice, bob) = people();
@@ -308,15 +310,15 @@ module suitears::farm_tests {
 
     next_tx(test, alice);
     {
-      eth::init_for_testing(ctx(test));
+      s_eth::init_for_testing(ctx(test));
     };   
 
     next_tx(test, alice);
     {
-      let eth_metadata = test::take_shared<CoinMetadata<ETH>>(test);
+      let eth_metadata = test::take_shared<CoinMetadata<S_ETH>>(test);
 
       let cap = farm::new_cap(ctx(test));
-      let farm = farm::new_farm<ETH, SUI>(
+      let farm = farm::new_farm<S_ETH, SUI>(
         &mut cap,
         &eth_metadata,
         &c,
@@ -339,8 +341,8 @@ module suitears::farm_tests {
 
     next_tx(test, alice);
     {
-      let farm = test::take_shared<Farm<ETH, SUI>>(test);
-      let account = test::take_from_sender<Account<ETH, SUI>>(test);
+      let farm = test::take_shared<Farm<S_ETH, SUI>>(test);
+      let account = test::take_from_sender<Account<S_ETH, SUI>>(test);
       
       burn_for_testing(farm::stake(
         &mut farm,
@@ -359,8 +361,8 @@ module suitears::farm_tests {
 
     next_tx(test, alice);
     {
-      let farm = test::take_shared<Farm<ETH, SUI>>(test);
-      let account = test::take_from_sender<Account<ETH, SUI>>(test);
+      let farm = test::take_shared<Farm<S_ETH, SUI>>(test);
+      let account = test::take_from_sender<Account<S_ETH, SUI>>(test);
       
       let reward_coin = farm::stake(
         &mut farm,
@@ -379,8 +381,8 @@ module suitears::farm_tests {
 
     next_tx(test, bob);
     {
-      let farm = test::take_shared<Farm<ETH, SUI>>(test);
-      let account = test::take_from_sender<Account<ETH, SUI>>(test);
+      let farm = test::take_shared<Farm<S_ETH, SUI>>(test);
+      let account = test::take_from_sender<Account<S_ETH, SUI>>(test);
       
       burn_for_testing(farm::stake(
         &mut farm,
@@ -399,8 +401,8 @@ module suitears::farm_tests {
 
     next_tx(test, bob);
     {
-      let farm = test::take_shared<Farm<ETH, SUI>>(test);
-      let account = test::take_from_sender<Account<ETH, SUI>>(test);
+      let farm = test::take_shared<Farm<S_ETH, SUI>>(test);
+      let account = test::take_from_sender<Account<S_ETH, SUI>>(test);
       
       let (stake_coin, reward_coin) = farm::unstake(
         &mut farm,
@@ -428,8 +430,8 @@ module suitears::farm_tests {
 
     next_tx(test, alice);
     {
-      let farm = test::take_shared<Farm<ETH, SUI>>(test);
-      let account = test::take_from_sender<Account<ETH, SUI>>(test);
+      let farm = test::take_shared<Farm<S_ETH, SUI>>(test);
+      let account = test::take_from_sender<Account<S_ETH, SUI>>(test);
       
       let reward_coin = farm::stake(
         &mut farm,
@@ -452,8 +454,8 @@ module suitears::farm_tests {
 
     next_tx(test, bob);
     {
-      let farm = test::take_shared<Farm<ETH, SUI>>(test);
-      let account = test::take_from_sender<Account<ETH, SUI>>(test);
+      let farm = test::take_shared<Farm<S_ETH, SUI>>(test);
+      let account = test::take_from_sender<Account<S_ETH, SUI>>(test);
       
       let reward_coin = farm::stake(
         &mut farm,
@@ -489,7 +491,7 @@ module suitears::farm_tests {
 
     next_tx(test, alice);      
     {
-      let farm = test::take_shared<Farm<ETH, SUI>>(test);
+      let farm = test::take_shared<Farm<S_ETH, SUI>>(test);
       let cap = test::take_from_sender<OwnerCap<FarmWitness>>(test);
 
       assert_eq(farm::rewards_per_second(&farm), REWARDS_PER_SECOND);
@@ -524,7 +526,7 @@ module suitears::farm_tests {
     next_tx(test, alice); 
     {
       let wrong_cap = farm::new_cap(ctx(test)); 
-      let farm = test::take_shared<Farm<ETH, SUI>>(test);
+      let farm = test::take_shared<Farm<S_ETH, SUI>>(test);
 
       farm::update_rewards_per_second(
         &mut farm,
@@ -556,7 +558,7 @@ module suitears::farm_tests {
     next_tx(test, alice); 
     {
       let wrong_cap = farm::new_cap(ctx(test)); 
-      let farm = test::take_shared<Farm<ETH, SUI>>(test);
+      let farm = test::take_shared<Farm<S_ETH, SUI>>(test);
 
       farm::borrow_mut_uid(&mut farm, &wrong_cap);
 
@@ -582,10 +584,10 @@ module suitears::farm_tests {
     next_tx(test, alice); 
     {
       let wrong_cap = farm::new_cap(ctx(test)); 
-      let eth_metadata = test::take_shared<CoinMetadata<ETH>>(test);
+      let eth_metadata = test::take_shared<CoinMetadata<S_ETH>>(test);
 
       let cap = farm::new_cap(ctx(test));
-      let farm = farm::new_farm<ETH, SUI>(
+      let farm = farm::new_farm<S_ETH, SUI>(
         &mut cap,
         &eth_metadata,
         &c,
@@ -605,6 +607,7 @@ module suitears::farm_tests {
   }  
 
   #[test]
+  #[lint_allow(share_owned)]
   #[expected_failure(abort_code = farm::EInvalidStartTime)] 
   fun test_invalid_start_time() {
     let scenario = scenario();
@@ -616,15 +619,15 @@ module suitears::farm_tests {
 
     next_tx(test, alice);
     {
-      eth::init_for_testing(ctx(test));
+      s_eth::init_for_testing(ctx(test));
     };   
 
     next_tx(test, alice);
     {
-      let eth_metadata = test::take_shared<CoinMetadata<ETH>>(test);
+      let eth_metadata = test::take_shared<CoinMetadata<S_ETH>>(test);
 
       let cap = farm::new_cap(ctx(test));
-      let farm = farm::new_farm<ETH, SUI>(
+      let farm = farm::new_farm<S_ETH, SUI>(
         &mut cap,
         &eth_metadata,
         &c,
@@ -659,8 +662,8 @@ module suitears::farm_tests {
 
     next_tx(test, alice);  
     {
-      let farm = test::take_shared<Farm<ETH, SUI>>(test);
-      let account = test::take_from_sender<Account<ETH, SUI>>(test);
+      let farm = test::take_shared<Farm<S_ETH, SUI>>(test);
+      let account = test::take_from_sender<Account<S_ETH, SUI>>(test);
       
       let reward_coin = farm::stake(
         &mut farm,
@@ -693,8 +696,8 @@ module suitears::farm_tests {
 
     next_tx(test, alice);  
     {
-      let farm = test::take_shared<Farm<ETH, SUI>>(test);
-      let account = test::take_from_sender<Account<ETH, SUI>>(test);
+      let farm = test::take_shared<Farm<S_ETH, SUI>>(test);
+      let account = test::take_from_sender<Account<S_ETH, SUI>>(test);
       
       let reward_coin = farm::stake(
         &mut farm,
@@ -711,8 +714,8 @@ module suitears::farm_tests {
 
     next_tx(test, alice);
     {
-      let farm = test::take_shared<Farm<ETH, SUI>>(test);
-      let account = test::take_from_sender<Account<ETH, SUI>>(test);
+      let farm = test::take_shared<Farm<S_ETH, SUI>>(test);
+      let account = test::take_from_sender<Account<S_ETH, SUI>>(test);
 
       let (stake_coin, reward_coin) = farm::unstake(
         &mut farm,
@@ -747,11 +750,11 @@ module suitears::farm_tests {
 
     next_tx(test, alice);  
     {
-      let farm = test::take_shared<Farm<ETH, SUI>>(test);
+      let farm = test::take_shared<Farm<S_ETH, SUI>>(test);
       let cap = farm::new_cap(ctx(test));
-      let eth_metadata = test::take_shared<CoinMetadata<ETH>>(test);
+      let eth_metadata = test::take_shared<CoinMetadata<S_ETH>>(test);
 
-      let farm2 = farm::new_farm<ETH, SUI>(
+      let farm2 = farm::new_farm<S_ETH, SUI>(
         &mut cap,
         &eth_metadata,
         &c,
@@ -795,8 +798,8 @@ module suitears::farm_tests {
 
     next_tx(test, alice);
     {
-      let farm = test::take_shared<Farm<ETH, SUI>>(test);
-      let account = test::take_from_sender<Account<ETH, SUI>>(test);
+      let farm = test::take_shared<Farm<S_ETH, SUI>>(test);
+      let account = test::take_from_sender<Account<S_ETH, SUI>>(test);
       
       burn_for_testing(farm::stake(
         &mut farm,
@@ -812,11 +815,11 @@ module suitears::farm_tests {
 
     next_tx(test, alice);  
     {
-      let farm = test::take_shared<Farm<ETH, SUI>>(test);
+      let farm = test::take_shared<Farm<S_ETH, SUI>>(test);
       let cap = farm::new_cap(ctx(test));
-      let eth_metadata = test::take_shared<CoinMetadata<ETH>>(test);
+      let eth_metadata = test::take_shared<CoinMetadata<S_ETH>>(test);
 
-      let farm2 = farm::new_farm<ETH, SUI>(
+      let farm2 = farm::new_farm<S_ETH, SUI>(
         &mut cap,
         &eth_metadata,
         &c,
@@ -846,22 +849,23 @@ module suitears::farm_tests {
     clock::destroy_for_testing(c);
     test::end(scenario);           
   }    
-
+  
+  #[lint_allow(share_owned)]
   fun set_up(test: &mut Scenario) {
     let (alice, bob) = people();
 
     next_tx(test, alice);
     {
-      eth::init_for_testing(ctx(test));
+      s_eth::init_for_testing(ctx(test));
     }; 
 
     next_tx(test, alice);
     {
-      let eth_metadata = test::take_shared<CoinMetadata<ETH>>(test);
+      let eth_metadata = test::take_shared<CoinMetadata<S_ETH>>(test);
       let c = clock::create_for_testing(ctx(test));
 
       let cap = farm::new_cap(ctx(test));
-      let farm = farm::new_farm<ETH, SUI>(
+      let farm = farm::new_farm<S_ETH, SUI>(
         &mut cap,
         &eth_metadata,
         &c,

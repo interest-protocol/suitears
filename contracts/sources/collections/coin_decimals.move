@@ -81,7 +81,7 @@ module suitears::coin_decimals {
     data.scalar
   } 
 
-  // === Public Mutate Function ===  
+  // === Public Mutative Function ===  
 
   /*
   * @notice Adds the decimals and decimal scalar of a coin with type `CoinType` to `self`.

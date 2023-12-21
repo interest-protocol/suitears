@@ -1,65 +1,58 @@
+/*
+* @title Dao Treasury 
+*
+* @notice Treasury for {Dao} to allow them to receive and send `sui::coin::Coin`. 
+*/
 module suitears::dao_treasury { 
-  use std::type_name::{TypeName, get};
+  // === Imports ===
+
+  use std::type_name::{Self, TypeName};
 
   use sui::event::emit;
   use sui::clock::Clock;
   use sui::bag::{Self, Bag};
-  use sui::package::Publisher;
   use sui::coin::{Self, Coin};
   use sui::object::{Self, UID, ID};
   use sui::balance::{Self, Balance};
   use sui::tx_context::{Self, TxContext};
 
-  use suitears::dao_request_lock::Issuer;
+  use suitears::dao_admin::DaoAdmin;
   use suitears::fixed_point_roll::mul_up;
-  use suitears::request_lock::{Self, destroy, Lock};
   use suitears::linear_vesting_wallet::{Self, Wallet as LinearWallet};
 
   friend suitears::dao;
 
+  // === Constants ===
+
+  // @dev The flash loan fee. 
   const FLASH_LOAN_FEE: u64 = 5000000; // 0.5%
 
-  const EMismatchCoinType: u64 = 0;
-  const EInvalidPublisher: u64 = 1;
-  const EFlashloanNotAllowed: u64 = 2;
-  const ERepayAmountTooLow: u64 = 3;
+  // === Errors ===  
 
-  struct TransferTask has drop {}
+  // @dev Thrown when the borrower does not repay the correct amount. 
+  const ERepayAmountTooLow: u64 = 0;
 
-  struct TransferPayload has store {
-    type: TypeName,
-    value: u64,
-    publisher_id: ID
-  }
-
-  struct TransferVestingWalletPayload has store {
-    start: u64,
-    duration: u64,
-    type: TypeName,
-    value: u64,
-    publisher_id: ID
-  }
+  // === Struct ===  
 
   struct DaoTreasury<phantom DaoWitness: drop> has key, store {
     id: UID,
+    // Stores coins
     coins: Bag,
+    // The `sui::object::ID` of the {Dao} that owns this {DaoTreasury}
     dao: ID,
-    allow_flashloan: bool
   }
 
   // * IMPORTANT do not add abilities 
   struct FlashLoan<phantom DaoWitness, phantom CoinType> {
-    initial_balance: u64,
+    // The amount being borrowed
+    amount: u64,
+    // The fee amount to be repaid
     fee: u64,
+    // The `std::type_name::TypeName` of the CoinType to repay the loan.  
     type: TypeName
   }
 
-  // Events
-
-  struct CreateDaoTreasury<phantom DaoWitness> has copy, drop {
-    treasury_id: ID,
-    dao_id: ID
-  }
+  // === Events ===  
 
   struct Donate<phantom DaoWitness, phantom CoinType> has copy, drop {
     value: u64,
@@ -68,13 +61,11 @@ module suitears::dao_treasury {
 
   struct Transfer<phantom DaoWitness, phantom CoinType> has copy, drop {
     value: u64,
-    publisher_id: ID,
     sender: address
   }
   
   struct TransferLinearWallet<phantom DaoWitness, phantom CoinType> has copy, drop {
     value: u64,
-    publisher_id: ID,
     sender: address,
     wallet_id: ID,
     start: u64,
@@ -88,21 +79,57 @@ module suitears::dao_treasury {
     type: TypeName
   } 
 
-  public(friend) fun create<DaoWitness: drop>(dao: ID, allow_flashloan: bool, ctx: &mut TxContext): DaoTreasury<DaoWitness> {
-    let treasury = DaoTreasury {
+  // === Public Friend Create Function ===  
+
+  /*
+  * @notice Creates a {DaoTreasury} for the {Dao} with `sui::object::ID`  `dao`. 
+  *
+  * @param dao The `sui::object::ID` of a {Dao} 
+  * @return DaoTreasury<DaoWitness>
+  */
+  public(friend) fun new<DaoWitness: drop>(dao: ID, ctx: &mut TxContext): DaoTreasury<DaoWitness> {
+    DaoTreasury {
       id: object::new(ctx),
       coins: bag::new(ctx),
-      dao,
-      allow_flashloan
-    };
-
-    emit(CreateDaoTreasury<DaoWitness> { treasury_id: object::id(&treasury), dao_id: dao });
-
-    treasury
+      dao
+    }
   }
 
+  // === Public View Function ===    
+
+  /*
+  * @notice Returns the `sui::object::ID` of the  {Dao} that owns the `treasury`. 
+  *
+  * @param treasury A {DaoTreasury<DaoWitness>}
+  * @return ID
+  */
+  public fun dao<DaoWitness: drop>(treasury: &DaoTreasury<DaoWitness>): ID {
+    treasury.dao
+  }  
+
+  /*
+  * @notice Returns the amount of Coin<CoinType> in the `treasury`. 
+  *
+  * @param treasury A {DaoTreasury<DaoWitness>}
+  * @return ID
+  */
+  public fun balance<DaoWitness: drop, CoinType>(treasury: &DaoTreasury<DaoWitness>): u64 {
+    let key = type_name::get<CoinType>();
+    if (!bag::contains(&treasury.coins, key)) return 0;
+
+    balance::value(bag::borrow<TypeName, Balance<CoinType>>(&treasury.coins, key))
+  }
+
+  // === Public Mutative Functions ===      
+
+  /*
+  * @notice Adds `token` to the `treasury`. 
+  *
+  * @param treasury A {DaoTreasury<DaoWitness>}
+  * @param token It will be donated to the `treasury`. 
+  */
   public fun donate<DaoWitness: drop, CoinType>(treasury: &mut DaoTreasury<DaoWitness>, token: Coin<CoinType>, ctx: &mut TxContext) {
-    let key = get<CoinType>();
+    let key = type_name::get<CoinType>();
     let value = coin::value(&token);
 
     if (!bag::contains(&treasury.coins, key)) {
@@ -114,32 +141,25 @@ module suitears::dao_treasury {
     emit(Donate<DaoWitness, CoinType> { value, donator: tx_context::sender(ctx) });
   }
 
-  public fun view_coin_balance<DaoWitness: drop, CoinType>(treasury: &DaoTreasury<DaoWitness>): u64 {
-    balance::value(bag::borrow<TypeName, Balance<CoinType>>(&treasury.coins, get<CoinType>()))
-  }
-
-  public fun transfer<DaoWitness: drop, CoinType>(
+  /*
+  * @notice Withdraws a coin from the `treasury`.  
+  *
+  * @param treasury A {DaoTreasury<DaoWitness>}.
+  * @param _ Immutable reference to the {DaoAdmin}.  
+  * @param value The amount to withdraw.  
+  * @return Coin<CoinType>
+  */
+  public fun transfer<DaoWitness: drop, CoinType, TransferCoin>(
     treasury: &mut DaoTreasury<DaoWitness>,
-    pub: &Publisher,
-    lock: Lock<Issuer<DaoWitness>>, 
+    _: &DaoAdmin<DaoWitness>,
+    value: u64,
     ctx: &mut TxContext
   ): Coin<CoinType> {
-    let TransferPayload { 
-      type: coin_typename, 
-      publisher_id, 
-      value
-    } = request_lock::complete_with_payload<Issuer<DaoWitness>, TransferTask, TransferPayload>(&mut lock, TransferTask {});
     
-    destroy(lock);
-
-    assert!(get<CoinType>() == coin_typename, EMismatchCoinType);
-    assert!(object::id(pub) == publisher_id, EInvalidPublisher);
-    
-    let token = coin::take(bag::borrow_mut(&mut treasury.coins, coin_typename), value, ctx);
+    let token = coin::take(bag::borrow_mut(&mut treasury.coins, type_name::get<TransferCoin>()), value, ctx);
 
     emit(Transfer<DaoWitness, CoinType> { 
         value: value, 
-        publisher_id, 
         sender: tx_context::sender(ctx) 
       }
     );
@@ -147,33 +167,33 @@ module suitears::dao_treasury {
     token
   }
 
-  public fun transfer_linear_vesting_wallet<DaoWitness: drop, CoinType>(
+  /*
+  * @notice Withdraws a {LinearWallet<CoinTYpe>} from the `treasury`.  
+  *
+  * @param treasury A {DaoTreasury<DaoWitness>}.  
+  * @param _ Immutable reference to the {DaoAdmin}.
+  * @param c The `sui::clock::Clock`    
+  * @param value The amount to withdraw.  
+  * @param start Dictate when the vesting schedule starts.    
+  * @param duration The duration of the vesting schedule.   
+  * @return LinearWallet<CoinTYpe>.  
+  */
+  public fun transfer_linear_vesting_wallet<DaoWitness: drop, CoinType, TransferCoin>(
     treasury: &mut DaoTreasury<DaoWitness>,
+    _: &DaoAdmin<DaoWitness>,
     c: &Clock,
-    pub: &Publisher,
-    lock: Lock<Issuer<DaoWitness>>, 
+    value: u64,
+    start: u64,
+    duration: u64,
     ctx: &mut TxContext    
   ): LinearWallet<CoinType> {
-    let TransferVestingWalletPayload { 
-      publisher_id, 
-      start, 
-      duration, 
-      value, 
-      type: coin_typename 
-    } = request_lock::complete_with_payload<Issuer<DaoWitness>, TransferTask, TransferVestingWalletPayload>(&mut lock, TransferTask {});
-
-    destroy(lock);
-
-    assert!(get<CoinType>() == coin_typename, EMismatchCoinType);
-    assert!(object::id(pub) == publisher_id, EInvalidPublisher);
     
-    let token = coin::take<CoinType>(bag::borrow_mut(&mut treasury.coins, coin_typename), value, ctx);
+    let token = coin::take<CoinType>(bag::borrow_mut(&mut treasury.coins, type_name::get<TransferCoin>()), value, ctx);
 
     let wallet = linear_vesting_wallet::new(token, c, start, duration, ctx);
 
     emit(TransferLinearWallet<DaoWitness, CoinType> { 
         value, 
-        publisher_id, 
         sender: tx_context::sender(ctx), 
         duration, 
         start, 
@@ -184,60 +204,70 @@ module suitears::dao_treasury {
     wallet
   }
 
-  public fun create_transfer_payload<CoinType>(value: u64, publisher_id: ID): TransferPayload {
-    TransferPayload {
-      type: get<CoinType>(),
-      value,
-      publisher_id
-    }
-  }
+  // === Flash Loan Functions ===    
 
-  public fun create_transfer_linear_vesting_wallet_payload<CoinType>(
-    value: u64, 
-    publisher_id: ID,
-    start: u64, 
-    duration: u64
-  ): TransferVestingWalletPayload {
-    TransferVestingWalletPayload {
-      type: get<CoinType>(),
-      value,
-      publisher_id,
-      start,
-      duration
-    }
-  }
-
-  // Flash loan logic
-
+  /*
+  * @notice Requests a Flash Loan from the `treasury`.  
+  *
+  * @param treasury A {DaoTreasury<DaoWitness>}.  
+  * @param value The amount of the loan.  
+  * @return Coin<CoinType>. The coin that is being borrowed.  
+  * @return FlashLoan<DaoWitness, CoinType>
+  */
   public fun flash_loan<DaoWitness: drop, CoinType>(
     treasury: &mut DaoTreasury<DaoWitness>, 
     value: u64, 
     ctx: &mut TxContext
   ): (Coin<CoinType>, FlashLoan<DaoWitness, CoinType>) {
-    assert!(treasury.allow_flashloan, EFlashloanNotAllowed);
 
-    let type = get<CoinType>();
-    let initial_balance = balance::value(bag::borrow<TypeName, Balance<CoinType>>(&treasury.coins, type));
+    let type = type_name::get<CoinType>();
+    let amount = balance::value(bag::borrow<TypeName, Balance<CoinType>>(&treasury.coins, type));
 
     emit(FlashLoanRequest<DaoWitness, CoinType> { type, borrower: tx_context::sender(ctx), value, treasury_id: object::id(treasury) });
 
     (
       coin::take<CoinType>(bag::borrow_mut(&mut treasury.coins, type), value, ctx),
-      FlashLoan { initial_balance , type, fee: mul_up(value, FLASH_LOAN_FEE) }
+      FlashLoan { amount , type, fee: mul_up(value, FLASH_LOAN_FEE) }
     )
   }
 
-  public fun view_flash_loan<DaoWitness: drop, CoinType>(flash_loan: &FlashLoan<DaoWitness, CoinType>): (TypeName, u64) {
-    (flash_loan.type, flash_loan.fee)
+  /*
+  * @notice Returns the service fee amount that must be paid.   
+  *
+  * @param flash_loan A {FlashLoan} hot potato.  
+  * @return u64
+  */
+  public fun fee<DaoWitness: drop, CoinType>(flash_loan: &FlashLoan<DaoWitness, CoinType>): u64 {
+    flash_loan.fee
+  }
+  
+  /*
+  * @notice Returns the amount of the loan without the fees.    
+  *
+  * @param flash_loan A {FlashLoan} hot potato.  
+  * @return u64
+  */
+  public fun amount<DaoWitness: drop, CoinType>(flash_loan: &FlashLoan<DaoWitness, CoinType>): u64 {
+    flash_loan.amount
   }
 
+  /*
+  * @notice Repays the `flash_loan` to the `treasury`.    
+  *
+  * @param treasury A {DaoTreasury<DaoWitness>}.    
+  * @param flash_loan A {FlashLoan} hot potato.  
+  * @param token The coin borrowed. Loan amount + fee amount.  
+  *
+  * aborts-if:  
+  * - `token.value` is smaller than the initial loan amount + fee amount.  
+  */
   public fun repay_flash_loan<DaoWitness: drop, CoinType>(
     treasury: &mut DaoTreasury<DaoWitness>, 
     flash_loan: FlashLoan<DaoWitness, CoinType>,
     token: Coin<CoinType>
   ) {
-    let FlashLoan { initial_balance, type, fee } = flash_loan;
-    assert!(coin::value(&token) >= initial_balance + fee, ERepayAmountTooLow);
+    let FlashLoan { amount, type, fee } = flash_loan;
+    assert!(coin::value(&token) >= amount + fee, ERepayAmountTooLow);
 
     balance::join(bag::borrow_mut(&mut treasury.coins, type), coin::into_balance(token));
   }

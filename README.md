@@ -1,5 +1,3 @@
-> Please note that this repository is still under development and needs testing and auditing. It is not production ready yet!
-
 <div align="center">  <img  width="446.5px" height="146.5px"  src="./assets/logo.png" /></div>
 
 <h3 align="center"><em>Production ready modules for Sui Move developers</em></h3>
@@ -27,7 +25,6 @@ airdrop
 capabilities
 ├─ owner — "Owner capability to give access to multiple objects"
 ├─ quest — "A wrapper that can only be unwrapped once a set of actions are completed"
-├─ request_lock — "A hot potato to ensure that a set of requests are completed before destroying it"
 ├─ timelock — "Timelock capability to add a delay between actions"
 collections
 ├─ ac_collection — "Capability access wrapper for collections"
@@ -42,7 +39,7 @@ defi
 ├─ vesting — "Virtual implementation of vesting schedules"
 governance
 ├─ dao — "Decentralized autonomous organization"
-├─ dao_request_lock — "DAO module to create a request locks"
+├─ dao_admin — "DAO admin capability"
 ├─ dao_treasury — "A treasury plugin for the DAO module"
 math
 ├─ fixed_point64 — "Fixed point math module for x << 64 numbers"

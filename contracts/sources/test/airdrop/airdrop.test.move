@@ -12,6 +12,7 @@ module suitears::airdrop_tests {
   use suitears::test_utils::scenario;
 
   #[test]
+  #[lint_allow(share_owned)]
   fun test_get_airdrop() {
     let scenario = scenario();
     let alice = @0x94fbcf49867fd909e6b2ecf2802c4b2bba7c9b2d50a13abbb75dbae0216db82a;
@@ -43,7 +44,7 @@ module suitears::airdrop_tests {
       
       assert_eq(burn_for_testing(reward), 55);
       assert_eq(airdrop::has_account_claimed(
-        &mut airdrop,
+        &airdrop,
         vector[x"f99692a8fccf12eb2bf6399f23bf9379e38a98367a75e250d53eb727c1385624"],
         55,
         alice
@@ -65,7 +66,7 @@ module suitears::airdrop_tests {
       
       assert_eq(burn_for_testing(reward), 27);
       assert_eq(airdrop::has_account_claimed(
-        &mut airdrop,
+        &airdrop,
         vector[x"45db79b20469c3d6b3c40ea3e4e76603cca6981e7765382ffa4cb1336154efe5"],
         27,
         bob
@@ -79,6 +80,7 @@ module suitears::airdrop_tests {
   }
 
   #[test]
+  #[lint_allow(share_owned)]
   #[expected_failure(abort_code = airdrop::EInvalidRoot)]
   fun test_error_invalid_root() {
     let scenario = scenario();
@@ -105,6 +107,7 @@ module suitears::airdrop_tests {
   }     
 
   #[test]
+  #[lint_allow(share_owned)]
   #[expected_failure(abort_code = airdrop::EInvalidStartTime)]
   fun test_error_invalid_create_time() {
     let scenario = scenario();
@@ -132,6 +135,7 @@ module suitears::airdrop_tests {
   }    
 
   #[test]
+  #[lint_allow(share_owned)]
   #[expected_failure(abort_code = airdrop::EHasNotStarted)]
   fun test_error_airdrop_has_not_started() {
     let scenario = scenario();
@@ -168,6 +172,7 @@ module suitears::airdrop_tests {
   }  
 
   #[test]
+  #[lint_allow(share_owned)]
   #[expected_failure(abort_code = airdrop::EAlreadyClaimed)]
   fun test_error_trying_to_claim_again() {
     let scenario = scenario();
@@ -215,7 +220,8 @@ module suitears::airdrop_tests {
     test::end(scenario);     
   }
 
- #[test]
+  #[test]
+  #[lint_allow(share_owned)]
   #[expected_failure]
   fun test_error_wrong_amount() {
     let scenario = scenario();
