@@ -21,7 +21,7 @@
 *                                             Failed -> Finished
 * 
 *
-* @dev A Success {Proposal} requires: 
+* @dev A Successful {Proposal} requires: 
 * - for_votes > agaisnt_votes  
 * - for_votes / total_votes > quorum rate  
 * - for_votes >= min_quorum_votes
@@ -81,7 +81,7 @@ module suitears::dao {
   // @dev This proposal is ready to be executed.  
   const EXECUTABLE: u8 = 6;
 
-  // @dev The proposal is considered finalized.  
+  // @dev The proposal has been executed.  
   const FINISHED: u8 = 7;
 
   // === Errors ===
@@ -181,7 +181,7 @@ module suitears::dao {
     // It is calculated by adding `end_time` and `action_delay`. It assumes the {Proposal} will be executed as soon as possible.  
     // Estimated Time of Arrival.  
     eta: u64, 
-    // Time Delay between a sucessful {Proposal} `end_time` and when it is allowed to be executed. 
+    // Time Delay between a successful  {Proposal} `end_time` and when it is allowed to be executed. 
     // It allows users who disagree with the proposal to make changes. 
     action_delay: u64, 
     // The minimum amount of `for_votes` for a {Proposal} to pass. 
@@ -379,7 +379,7 @@ module suitears::dao {
   * @notice Returns the `sui::object::id` of the Dao wrapped in an `std::option`.  
   *
   * @param self a {Dao<OTW>}
-  * @return Option<ID>
+  * @return ID
   */
   public fun treasury<DaoWitness>(self: &Dao<DaoWitness>): ID {
     self.treasury
@@ -389,7 +389,7 @@ module suitears::dao {
   * @notice Returns the `std::type_name` of the Dao's coin type. This is the Coin<Type> that can be used to vote on proposals. 
   *
   * @param self a {Dao<OTW>}
-  * @return Option<ID>
+  * @return TypeName
   */
   public fun dao_coin_type<DaoWitness>(self: &Dao<DaoWitness>): TypeName {
     self.coin_type
