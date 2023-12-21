@@ -111,7 +111,7 @@ module suitears::dao_treasury {
   * @notice Returns the amount of Coin<CoinType> in the `treasury`. 
   *
   * @param treasury A {DaoTreasury<DaoWitness>}
-  * @return ID
+  * @return u64
   */
   public fun balance<DaoWitness: drop, CoinType>(treasury: &DaoTreasury<DaoWitness>): u64 {
     let key = type_name::get<CoinType>();

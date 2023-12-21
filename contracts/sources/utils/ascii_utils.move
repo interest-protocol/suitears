@@ -91,6 +91,7 @@ module suitears::ascii_utils {
   * @param s The string that will be sliced.  
   * @param i The first index of the substring.  
   * @param j The last index of the substring. This character is not included. 
+  * @return String The substring.
   *
   * aborts-if 
   * - if `j` is greater than `s`.  
@@ -204,9 +205,10 @@ module suitears::ascii_utils {
   /*
   * @notice Converts a `u128` to its `ascii::String` hexadecimal representation with fixed length (in whole bytes). 
   *
-  * @dev The returned String is `2 * length + 2`(with '0x') in size. 
-  *
-  * @param value A u128.  
+  * @dev The returned String is `2 * length + 2`(with '0x') in size.
+  * 
+  * @param value A u128.
+  * @param length of the string.   
   * @return String. The HEX string representation of `value`. E.g. 10 => "0x0A". 
   */  
   public fun u128_to_hex_string_fixed_length(value: u128, length: u128): String {
@@ -226,8 +228,6 @@ module suitears::ascii_utils {
 
   /*
   * @notice Converts a `vector<u8>` to its `ascii::String` hexadecimal representation.
-  *
-  * @dev The returned String is `2 * length + 2`(with '0x') in size. 
   *
   * @param bytes A vector<u8>.  
   * @return String. The HEX string representation of `bytes`. E.g. 0b1010 => "0x0A". 
@@ -273,9 +273,7 @@ module suitears::ascii_utils {
   }
 
   /*
-  * @notice Converts a u8 `num` to a ascii character.
-  *
-  * @dev This function assumes `num` is [0...15].
+  * @notice Converts a u8 `num` to an ascii character.
   *
   * @param num represents an ASCII character.    
   * @return u8. The `ascii::String` code for `num`. 
@@ -290,8 +288,6 @@ module suitears::ascii_utils {
 
   /*
   * @notice Converts an ASCII character to its decimal representation u8.
-  *
-  * @dev This function assumes the ascii character is [0...15].
   *
   * @param char ASCII character.    
   * @return u8. The decimal representation of `char`. 
