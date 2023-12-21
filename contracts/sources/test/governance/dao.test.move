@@ -2,6 +2,7 @@
 module suitears::dao_tests {
   use std::option;
   use std::type_name;
+  use std::string;
 
   use sui::object;
   use sui::transfer;
@@ -82,7 +83,7 @@ module suitears::dao_tests {
         option::none(),
         PROPOSAL_ACTION_DELAY,
         PROPOSAL_QUORUM_VOTES,
-        vector[1],
+        string::utf8(b"hash"),
         ctx(test)
       );
 
@@ -94,7 +95,7 @@ module suitears::dao_tests {
       assert_eq(dao::eta(&proposal), 0);
       assert_eq(dao::quorum_votes(&proposal), PROPOSAL_QUORUM_VOTES);
       assert_eq(dao::voting_quorum_rate(&proposal), DAO_QUORUM_RATE);
-      assert_eq(dao::hash(&proposal), vector[1]);
+      assert_eq(dao::hash(&proposal), string::utf8(b"hash"));
       assert_eq(*option::borrow(&dao::authorized_witness(&proposal)), type_name::get<AuthorizedWitness>());
       assert_eq(dao::capability_id(&proposal), option::none());
       assert_eq(dao::coin_type(&proposal), type_name::get<S_ETH>());
@@ -157,7 +158,7 @@ module suitears::dao_tests {
         option::none(),
         PROPOSAL_ACTION_DELAY,
         PROPOSAL_QUORUM_VOTES,
-        vector[1],
+        string::utf8(b"hash"),
         ctx(test)
       );
 
@@ -258,7 +259,7 @@ module suitears::dao_tests {
         option::none(),
         PROPOSAL_ACTION_DELAY,
         PROPOSAL_QUORUM_VOTES,
-        vector[1],
+        string::utf8(b"hash"),
         ctx(test)
       );
 
@@ -538,7 +539,7 @@ module suitears::dao_tests {
 
   #[test]  
   #[lint_allow(share_owned)]
-  #[expected_failure(abort_code = dao::EActionDelayTooSmall)]
+  #[expected_failure(abort_code = dao::EActionDelayTooShort)]
   fun test_proposal_low_action_delay() {
     let scenario = scenario();
     let (alice, _) = people();
@@ -560,7 +561,7 @@ module suitears::dao_tests {
         option::none(),
         DAO_MIN_ACTION_DELAY - 1,
         PROPOSAL_QUORUM_VOTES,
-        vector[1],
+        string::utf8(b"hash"),
         ctx(test)
       );
 
@@ -596,7 +597,7 @@ module suitears::dao_tests {
         option::none(),
         DAO_MIN_ACTION_DELAY,
         DAO_MIN_QUORUM_VOTES - 1,
-        vector[1],
+        string::utf8(b"hash"),
         ctx(test)
       );
 
@@ -632,7 +633,7 @@ module suitears::dao_tests {
         option::none(),
         DAO_MIN_ACTION_DELAY,
         DAO_MIN_QUORUM_VOTES,
-        vector[],
+        string::utf8(b""),
         ctx(test)
       );
 
@@ -910,7 +911,7 @@ module suitears::dao_tests {
         option::none(),
         PROPOSAL_ACTION_DELAY,
         PROPOSAL_QUORUM_VOTES,
-        vector[1],
+        string::utf8(b"hash"),
         ctx(test)
       );
 
@@ -921,7 +922,7 @@ module suitears::dao_tests {
         option::none(),
         PROPOSAL_ACTION_DELAY,
         PROPOSAL_QUORUM_VOTES,
-        vector[1],
+        string::utf8(b"hash"),
         ctx(test)
       );
 
@@ -1078,7 +1079,7 @@ module suitears::dao_tests {
         option::none(),
         PROPOSAL_ACTION_DELAY,
         PROPOSAL_QUORUM_VOTES,
-        vector[1],
+        string::utf8(b"hash"),
         ctx(test)
       );
 
@@ -1089,7 +1090,7 @@ module suitears::dao_tests {
         option::none(),
         PROPOSAL_ACTION_DELAY,
         PROPOSAL_QUORUM_VOTES,
-        vector[1],
+        string::utf8(b"hash"),
         ctx(test)
       );
 
@@ -1229,7 +1230,7 @@ module suitears::dao_tests {
         option::none(),
         PROPOSAL_ACTION_DELAY,
         PROPOSAL_QUORUM_VOTES,
-        vector[1],
+        string::utf8(b"hash"),
         ctx(test)
       );
 
@@ -1240,7 +1241,7 @@ module suitears::dao_tests {
         option::none(),
         PROPOSAL_ACTION_DELAY,
         PROPOSAL_QUORUM_VOTES,
-        vector[1],
+        string::utf8(b"hash"),
         ctx(test)
       );
 
@@ -1352,7 +1353,7 @@ module suitears::dao_tests {
         option::none(),
         PROPOSAL_ACTION_DELAY,
         PROPOSAL_QUORUM_VOTES,
-        vector[1],
+        string::utf8(b"hash"),
         ctx(test)
       );
 

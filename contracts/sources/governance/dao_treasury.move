@@ -120,7 +120,7 @@ module suitears::dao_treasury {
     balance::value(bag::borrow<TypeName, Balance<CoinType>>(&treasury.coins, key))
   }
 
-  // === Public Mutate Functions ===      
+  // === Public Mutative Functions ===      
 
   /*
   * @notice Adds `token` to the `treasury`. 

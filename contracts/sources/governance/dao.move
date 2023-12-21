@@ -43,9 +43,9 @@
 module suitears::dao {
   // === Imports ===
 
-  use std::vector;
   use std::option::{Self, Option};
   use std::type_name::{Self, TypeName};
+  use std::string::{Self, String};
 
   use sui::event::emit;
   use sui::coin::{Self, Coin};
@@ -96,7 +96,7 @@ module suitears::dao {
   const EInvalidQuorumRate: u64 = 1;
 
   // @dev Thrown when a {Proposal} is created with a time delay lower than the {Dao}'s minimum voting delay. 
-  const EActionDelayTooSmall: u64 = 2;
+  const EActionDelayTooShort: u64 = 2;
 
   // @dev Thrown when a {Proposal} is created with a votes quorum lower than the {Dao}'s minimum votes quorum.  
   const EMinQuorumVotesTooSmall: u64 = 3;
@@ -151,7 +151,7 @@ module suitears::dao {
     // The voting duration of a proposal.  
     voting_period: u64,
     // The minimum quorum rate to pass a proposal.
-    // If 50% votes are needed, then the voting_quorum_rate should be 5_00_000_000.
+    // If 50% votes are needed, then the voting_quorum_rate should be 500_000_000.
     // It should be between (0, 1e9].
     voting_quorum_rate: u64,
     // How long the proposal should wait before it can be executed (in milliseconds).
@@ -189,7 +189,7 @@ module suitears::dao {
     // The minimum support rate for a {Proposal} to pass. 
     voting_quorum_rate: u64, 
     // The hash of the description of this proposal 
-    hash: vector<u8>,
+    hash: String,
     // The Witness that is allowed to call {execute}. 
     // Not executable proposals do not have an authorized_witness
     authorized_witness: Option<TypeName>,
@@ -291,7 +291,7 @@ module suitears::dao {
   * @param otw A One Time Witness to ensure that the {Dao<OTW>} is unique.  
   * @param voting_delay The minimum waiting period between the creation of a proposal and the voting period.  
   * @param voting_period The duration of the voting period.  
-  * @param voting_quorum_rate The minimum percentage of votes to pass a proposal. E.g. for_votes / total_votes. keep in mint (0, 1_000_000_000]  
+  * @param voting_quorum_rate The minimum percentage of votes to pass a proposal. E.g. for_votes / total_votes. keep in mind (0, 1_000_000_000]  
   * @param min_action_delay The minimum delay required to execute a proposal after it passes.  
   * @param min_quorum_votes The minimum votes required for a {Proposal} to be sucessful.   
   * @return Dao<OTW>  
@@ -505,7 +505,7 @@ module suitears::dao {
   * @param proposal The {Proposal<DaoWitness>}
   * @return vector<u8>
   */
-  public fun hash<DaoWitness: drop>(proposal: &Proposal<DaoWitness>): vector<u8> {
+  public fun hash<DaoWitness: drop>(proposal: &Proposal<DaoWitness>): String {
     proposal.hash
   }    
 
@@ -621,12 +621,12 @@ module suitears::dao {
     capability_id: Option<ID>,
     action_delay: u64,
     quorum_votes: u64,
-    hash: vector<u8>,// hash proposal title/content
+    hash: String,// hash proposal title/content
     ctx: &mut TxContext    
   ): Proposal<DaoWitness> {
-    assert!(action_delay >= dao.min_action_delay, EActionDelayTooSmall);
+    assert!(action_delay >= dao.min_action_delay, EActionDelayTooShort);
     assert!(quorum_votes >= dao.min_quorum_votes, EMinQuorumVotesTooSmall);
-    assert!(vector::length(&hash) != 0, EEmptyHash);
+    assert!(string::length(&hash) != 0, EEmptyHash);
 
     let start_time = clock::timestamp_ms(c) + dao.voting_delay;
 
@@ -865,6 +865,50 @@ module suitears::dao {
     assert!(capability_id == object::id(&cap), EInvalidReturnCapability);
 
     transfer::public_transfer(cap, object::uid_to_address(&dao.id));
+  } 
+
+  /*
+  * @notice updates the configuration settings of the `dao`. 
+  *
+  * @dev Can only be called by a proposal. 
+  * @dev If the value of the argument is `option::none()`, the value will not be updated. 
+  * 
+  * @param dao The {Dao<OTW>}   
+  * @param _ Immutable reference to the {DaoAdmin}.  
+  * @param voting_delay The minimum waiting period between the creation of a proposal and the voting period.  
+  * @param voting_period The duration of the voting period.  
+  * @param voting_quorum_rate The minimum percentage of votes. E.g. for_votes / total_votes. Range = (0, 1_000_000_000]  
+  * @param min_action_delay The delay required to execute a proposal after it passes.    
+  * @param min_quorum_votes The minimum votes required for a {Proposal} to be sucessful.    
+  */
+  public fun update_dao_config<DaoWitness: drop>(
+    dao: &mut Dao<DaoWitness>,
+    _: &DaoAdmin<DaoWitness>,
+    voting_delay: Option<u64>, 
+    voting_period: Option<u64>, 
+    voting_quorum_rate: Option<u64>, 
+    min_action_delay: Option<u64>, 
+    min_quorum_votes: Option<u64>
+  ) {
+
+    dao.voting_delay = option::destroy_with_default(voting_delay, dao.voting_delay);
+    dao.voting_period = option::destroy_with_default(voting_period, dao.voting_period);
+    dao.voting_quorum_rate = option::destroy_with_default(voting_quorum_rate, dao.voting_quorum_rate);
+    dao.min_action_delay = option::destroy_with_default(min_action_delay, dao.min_action_delay);
+    dao.min_quorum_votes = option::destroy_with_default(min_quorum_votes, dao.min_quorum_votes);
+
+    assert!(1_000_000_000 >= dao.voting_quorum_rate && dao.voting_quorum_rate != 0, EInvalidQuorumRate);
+
+    emit(
+      UpdateDao<DaoWitness> {
+        dao_id: object::id(dao),
+        voting_delay: dao.voting_delay,
+        voting_period: dao.voting_period,
+        voting_quorum_rate: dao.voting_quorum_rate,
+        min_action_delay: dao.min_action_delay,
+        min_quorum_votes: dao.min_quorum_votes
+      }
+    );
   }
 
   // === Private Functions ===   
@@ -967,52 +1011,6 @@ module suitears::dao {
     } else {
       FINISHED
     }
-  }
-
-  // === Private Functions ===     
-
-  /*
-  * @notice updates the configuration settings of the `dao`. 
-  *
-  * @dev Can only be called by a proposal. 
-  * @dev If the value of the argument is `option::none()`, the value will not be updated. 
-  * 
-  * @param dao The {Dao<OTW>}   
-  * @param _ Immutable reference to the {DaoAdmin}.  
-  * @param voting_delay The minimum waiting period between the creation of a proposal and the voting period.  
-  * @param voting_period The duration of the voting period.  
-  * @param voting_quorum_rate The minimum percentage of votes. E.g. for_votes / total_votes. Range = (0, 1_000_000_000]  
-  * @param min_action_delay The delay required to execute a proposal after it passes.    
-  * @param min_quorum_votes The minimum votes required for a {Proposal} to be sucessful.    
-  */
-  public fun update_dao_config<DaoWitness: drop>(
-    dao: &mut Dao<DaoWitness>,
-    _: &DaoAdmin<DaoWitness>,
-    voting_delay: Option<u64>, 
-    voting_period: Option<u64>, 
-    voting_quorum_rate: Option<u64>, 
-    min_action_delay: Option<u64>, 
-    min_quorum_votes: Option<u64>
-  ) {
-
-    dao.voting_delay = option::destroy_with_default(voting_delay, dao.voting_delay);
-    dao.voting_period = option::destroy_with_default(voting_period, dao.voting_period);
-    dao.voting_quorum_rate = option::destroy_with_default(voting_quorum_rate, dao.voting_quorum_rate);
-    dao.min_action_delay = option::destroy_with_default(min_action_delay, dao.min_action_delay);
-    dao.min_quorum_votes = option::destroy_with_default(min_quorum_votes, dao.min_quorum_votes);
-
-    assert!(1_000_000_000 >= dao.voting_quorum_rate && dao.voting_quorum_rate != 0, EInvalidQuorumRate);
-
-    emit(
-      UpdateDao<DaoWitness> {
-        dao_id: object::id(dao),
-        voting_delay: dao.voting_delay,
-        voting_period: dao.voting_period,
-        voting_quorum_rate: dao.voting_quorum_rate,
-        min_action_delay: dao.min_action_delay,
-        min_quorum_votes: dao.min_quorum_votes
-      }
-    );
   }
 
   // === Test Only Functions ===
