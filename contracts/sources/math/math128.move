@@ -349,7 +349,7 @@ module suitears::math128 {
   * @notice Returns the log2(x) rounding down.
   *
   * @param x The operand.  
-  * @return u128. Log2(x). 
+  * @return u8. Log2(x). 
   */ 
   public fun log2_down(x: u128): u8 {
    math256::log2_down((x as u256))
@@ -359,7 +359,7 @@ module suitears::math128 {
   * @notice Returns the log2(x) rounding up.
   *
   * @param x The operand.  
-  * @return u128. Log2(x). 
+  * @return u16. Log2(x). 
   */ 
   public fun log2_up(x: u128): u16 {
    math256::log2_up((x as u256))
@@ -369,7 +369,7 @@ module suitears::math128 {
   * @notice Returns the log10(x) rounding down.
   *
   * @param x The operand.  
-  * @return u128. Log10(x). 
+  * @return u8. Log10(x). 
   */
   public fun log10_down(x: u128): u8 {
     math256::log10_down((x as u256))
@@ -379,7 +379,7 @@ module suitears::math128 {
   * @notice Returns the log10(x) rounding up.
   *
   * @param x The operand.  
-  * @return u128. Log10(x). 
+  * @return u8. Log10(x). 
   */
   public fun log10_up(x: u128): u8 {
     math256::log10_up((x as u256))
@@ -389,7 +389,7 @@ module suitears::math128 {
   * @notice Returns the log256(x) rounding down.
   *
   * @param x The operand.  
-  * @return u128. Log256(x). 
+  * @return u8. Log256(x). 
   */ 
   public fun log256_down(x: u128): u8 {
     math256::log256_down((x as u256))
@@ -399,7 +399,7 @@ module suitears::math128 {
   * @notice Returns the log256(x) rounding up.
   *
   * @param x The operand.  
-  * @return u128. Log256(x). 
+  * @return u8. Log256(x). 
   */ 
   public fun log256_up(x: u128): u8 {
     math256::log256_up((x as u256))
