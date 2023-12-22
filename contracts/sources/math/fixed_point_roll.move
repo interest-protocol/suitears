@@ -35,7 +35,7 @@ module suitears::fixed_point_roll {
   *
   * @param x The first operand. 
   * @param y The second operand. 
-  * @param bool. If the operation was successful or not.
+  * @return bool. If the operation was successful or not.
   * @return u64. The result of `x` * `y` / `ROLL`. 
   */
   public fun try_mul_down(x: u64, y: u64): (bool, u64) {
@@ -136,7 +136,7 @@ module suitears::fixed_point_roll {
   * @notice It converts `x` precision to a `ROLL`, a number with a precision of 1e9.
   *
   * @param x The value to be converted. 
-  * @param y The current decimal scalar of the x. 
+  * @param decimal_factor The current decimal scalar of the x. 
   * @return u64. The result of `x` * `ROLL` / `decimal_factor`. 
   */
   public fun to_roll(x: u64, decimal_factor: u64): u64 {

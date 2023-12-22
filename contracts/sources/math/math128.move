@@ -329,8 +329,8 @@ module suitears::math128 {
   * @param x The operand.  
   * @return u128. The square root of x rounding down. 
   */   
-  public fun sqrt_down(a: u128): u128 {
-    (math256::sqrt_down((a as u256)) as u128)
+  public fun sqrt_down(x: u128): u128 {
+    (math256::sqrt_down((x as u256)) as u128)
   }
 
    /*
@@ -341,8 +341,8 @@ module suitears::math128 {
   * @param x The operand.  
   * @return u128. The square root of x rounding up. 
   */ 
-  public fun sqrt_up(a: u128): u128 {
-    (math256::sqrt_up((a as u256)) as u128)
+  public fun sqrt_up(x: u128): u128 {
+    (math256::sqrt_up((x as u256)) as u128)
   }
 
   /*
