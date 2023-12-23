@@ -29,7 +29,7 @@ module suitears::wit_collection {
   * @param collection An object with the store ability.
   * @return `WitCollection<W, C>`. The wrapped `collection`.  
   */
-  public fun new<W: drop, C: store>(_: W, collection: C, ctx: &mut TxContext): WitCollection<W, C> {
+  public fun new<W: drop, C: store>(collection: C, _: W, ctx: &mut TxContext): WitCollection<W, C> {
     WitCollection {
       id: object::new(ctx),
       collection

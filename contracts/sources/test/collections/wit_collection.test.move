@@ -31,7 +31,7 @@ module suitears::wit_collection_tests {
     {
       let collection = DropCollection { value: 1 };
 
-      let wit_collection = new(Witness {}, collection, ctx(test));
+      let wit_collection = new(collection, Witness {}, ctx(test));
 
       // Does not throw - real cap
       borrow_mut(&mut wit_collection, Witness {});
@@ -52,7 +52,7 @@ module suitears::wit_collection_tests {
 
       let collection = Collection { id: object::new(ctx(test)) };
       
-      let wit_collection = new( Witness {}, collection, ctx(test));
+      let wit_collection = new(collection, Witness {}, ctx(test));
 
       // Does not throw - real cap
       borrow_mut(&mut wit_collection, Witness {});
@@ -71,7 +71,7 @@ module suitears::wit_collection_tests {
     next_tx(test, alice);
     {
       let collection = DropCollection { value: 1 };
-      let wit_collection = new(Witness {} , collection, ctx(test));
+      let wit_collection = new(collection, Witness {}, ctx(test));
 
       let immut_value = drop_collection_borrow_value(borrow(&wit_collection));
       assert_eq(immut_value, 1);

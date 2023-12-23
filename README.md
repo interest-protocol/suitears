@@ -6,6 +6,17 @@
 
 Add the following snippet in your `Move.toml`
 
+For mainnet:
+
+```toml
+[dependencies.SuiTears]
+git = "https://github.com/interest-protocol/suitears.git"
+subdir = "contracts"
+rev = "main"
+```
+
+For testnet:
+
 ```toml
 [dependencies.SuiTears]
 git = "https://github.com/interest-protocol/suitears.git"
