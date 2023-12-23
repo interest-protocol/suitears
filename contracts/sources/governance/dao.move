@@ -293,7 +293,7 @@ module suitears::dao {
   * @param voting_period The duration of the voting period.  
   * @param voting_quorum_rate The minimum percentage of votes to pass a proposal. E.g. for_votes / total_votes. keep in mind (0, 1_000_000_000]  
   * @param min_action_delay The minimum delay required to execute a proposal after it passes.  
-  * @param min_quorum_votes The minimum votes required for a {Proposal} to be sucessful.   
+  * @param min_quorum_votes The minimum votes required for a {Proposal} to be successful.   
   * @return Dao<OTW>  
   * @return Treasury<OTW>
   *
@@ -605,7 +605,7 @@ module suitears::dao {
   * @param authorized_witness The Witness required to execute this proposal.  
   * @param capability_id The `sui::object::ID` of the Capability that this proposal needs to be executed. If a proposal is not executable pass `option::none()`,
   * @param action_delay The minimum waiting period for a successful {Proposal} to be executed.  
-  * @param quorum_votes The minimum votes required for a {Proposal} to be sucessful.   
+  * @param quorum_votes The minimum votes required for a {Proposal} to be successful.   
   * @param hash The hash of the proposal's description.  
   * @return Proposal<DaoWitness> 
   *
@@ -879,7 +879,11 @@ module suitears::dao {
   * @param voting_period The duration of the voting period.  
   * @param voting_quorum_rate The minimum percentage of votes. E.g. for_votes / total_votes. Range = (0, 1_000_000_000]  
   * @param min_action_delay The delay required to execute a proposal after it passes.    
-  * @param min_quorum_votes The minimum votes required for a {Proposal} to be sucessful.    
+  * @param min_quorum_votes The minimum votes required for a {Proposal} to be successful.    
+  *
+  * aborts-if:  
+  * - if the `dao.voting_quorum_rate` is larger than 1e9.
+  * - if the `dao.voting_quorum_rate` is zero. 
   */
   public fun update_dao_config<DaoWitness: drop>(
     dao: &mut Dao<DaoWitness>,
