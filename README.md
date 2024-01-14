@@ -13,6 +13,9 @@ For mainnet:
 git = "https://github.com/interest-protocol/suitears.git"
 subdir = "contracts"
 rev = "main"
+
+[addresses]
+suitears = "0xb32168662dae81b75ef91c6792c1b0eaedb791fa707eef0f58093fbce4db3790"
 ```
 
 For testnet:
