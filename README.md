@@ -25,6 +25,9 @@ For testnet:
 git = "https://github.com/interest-protocol/suitears.git"
 subdir = "contracts"
 rev = "testnet"
+
+[addresses]
+suitears = "0x1180cab80b5b3f5c002f70fba79035ef70e809eafacb34e788e7f0b24a97840f"
 ```
 
 ## Contracts
