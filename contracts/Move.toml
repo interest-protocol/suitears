@@ -1,13 +1,13 @@
 [package]
 name = "SuiTears"
 version = "0.0.1"
-published-at = "0xb32168662dae81b75ef91c6792c1b0eaedb791fa707eef0f58093fbce4db3790"
+published-at = "0x1180cab80b5b3f5c002f70fba79035ef70e809eafacb34e788e7f0b24a97840f"
 
 [dependencies]
 MoveStdlib = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/move-stdlib", rev = "framework/testnet" }
 Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/testnet" }
 
 [addresses]
-suitears = "0xb32168662dae81b75ef91c6792c1b0eaedb791fa707eef0f58093fbce4db3790"
+suitears = "0x1180cab80b5b3f5c002f70fba79035ef70e809eafacb34e788e7f0b24a97840f"
 std = "0x1"
 sui = "0x2"
