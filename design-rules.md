@@ -206,7 +206,7 @@
   }
   ```
 
-- **Errors must be CamelCase, start with E and be descriptive.**
+- **Errors must be CamelCase, start with an E and be descriptive.**
 
   ```Move
   module suitears::profile {
