@@ -271,7 +271,7 @@
   }
   ```
 
-  - **Do not pass mutable references of coins. Move the whole coin.**
+  - **Pass the Coin by value with the right amount directly, it's better for transaction readability from the frontend**
 
   ```Move
   module suitears::amm {
@@ -287,7 +287,7 @@
   }
   ```
 
-  - **Do not store the user's account data in a hashmap - e.g. (Table/Bag/VecSet). Create an object and return it to the user.**
+  - **To maintain composability, do not store the user's account data in a hashmap - e.g. (Table/Bag/VecSet). Create an object and return it to the user. Moreover, parallelization on Sui depends on objects so it's always a good idea to split the app state to a maximum.**
 
   ```Move
   module suitears::social_network {
