@@ -299,7 +299,7 @@
 
   ```Move
   module suitears::social_network {
-      struct Account has key {
+      struct Account has key, store {
         id: UID,
         name: String
       }
