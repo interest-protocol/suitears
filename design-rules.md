@@ -279,7 +279,7 @@
   }
   ```
 
-  - **Pass the Coin by value with the right amount directly, it's better for transaction readability from the frontend**
+- **Pass the Coin by value with the right amount directly, it's better for transaction readability from the frontend**
 
   ```Move
   module suitears::amm {
