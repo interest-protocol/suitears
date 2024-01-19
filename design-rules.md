@@ -249,7 +249,7 @@
   }
   ```
 
-  - **Keep your functions pure to maintain composability. Do not use `transfer::transfer` or `transfer::public_transfer` inside core functions.**
+- **Keep your functions pure to maintain composability. Do not use `transfer::transfer` or `transfer::public_transfer` inside core functions.**
 
   ```Move
   module suitears::amm {
@@ -261,6 +261,15 @@
       // Return the excess coins even if they have zero value.
       public fun add_liquidity<CoinX, CoinY, LP_Coin>(pool: &mut Pool, coin_x: Coin<CoinX>, coin_y: Coin<CoinY>): (Coin<LpCoin>, Coin<CoinX>, Coin<CoinY>) {}
 
+        // ✅ Right
+      // Return the excess coins even if they have zero value.
+      public fun entry_add_liquidity<CoinX, CoinY, LP_Coin>(pool: &mut Pool, coin_x: Coin<CoinX>, coin_y: Coin<CoinY>, ctx: &mut TxContext): (Coin<LpCoin>, Coin<CoinX>, Coin<CoinY>) {
+        let (lp_coin, coin_x, coin_y) = add_liquidity(pool, coin_x, coin_y);
+        transfer::public_transfer(lp_coin, tx_context::sender(ctx));
+        transfer::public_transfer(coin_x, tx_context::sender(ctx));
+        transfer::public_transfer(coin_y, tx_context::sender(ctx));
+      }
+
       // ❌ Wrong
       public fun add_liquidity<CoinX, CoinY, LP_Coin>(pool: &mut Pool, coin_x: Coin<CoinX>, coin_y: Coin<CoinY>, ctx: &mut TxContext): Coin<LpCoin> {
         transfer::public_transfer(coin_x, tx_context::sender(ctx));
@@ -271,7 +280,7 @@
   }
   ```
 
-  - **Do not pass mutable references of coins. Move the whole coin.**
+- **Do not pass mutable references of coins. Move the whole coin.**
 
   ```Move
   module suitears::amm {
@@ -287,7 +296,7 @@
   }
   ```
 
-  - **Do not store the user's account data in a hashmap - e.g. (Table/Bag/VecSet). Create an object and return it to the user.**
+- **Do not store the user's account data in a hashmap - e.g. (Table/Bag/VecSet). Create an object and return it to the user.**
 
   ```Move
   module suitears::social_network {
@@ -309,7 +318,7 @@
   }
   ```
 
-  - **The first argument should be the object being mutated. It fits nicely with the dot notation. It usually happens in admin functions.**
+- **The first argument should be the object being mutated. It fits nicely with the dot notation. It usually happens in admin functions.**
 
   ```Move
   module suitears::social_network {
