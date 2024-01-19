@@ -317,7 +317,7 @@
   }
   ```
 
-- **The first argument should be the object being mutated. It fits nicely with the dot notation. It usually happens in admin functions.**
+- **The first argument should be the object being mutated. It fits nicely with the dot notation. This issue usually happens in admin functions.**
 
   ```Move
   module suitears::social_network {
