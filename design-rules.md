@@ -261,8 +261,7 @@
       // Return the excess coins even if they have zero value.
       public fun add_liquidity<CoinX, CoinY, LP_Coin>(pool: &mut Pool, coin_x: Coin<CoinX>, coin_y: Coin<CoinY>): (Coin<LpCoin>, Coin<CoinX>, Coin<CoinY>) {}
 
-        // ✅ Right
-      // Return the excess coins even if they have zero value.
+      // ✅ Right
       public fun entry_add_liquidity<CoinX, CoinY, LP_Coin>(pool: &mut Pool, coin_x: Coin<CoinX>, coin_y: Coin<CoinY>, ctx: &mut TxContext): (Coin<LpCoin>, Coin<CoinX>, Coin<CoinY>) {
         let (lp_coin, coin_x, coin_y) = add_liquidity(pool, coin_x, coin_y);
         transfer::public_transfer(lp_coin, tx_context::sender(ctx));
