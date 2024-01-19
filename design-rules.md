@@ -249,7 +249,7 @@
   }
   ```
 
-  - **Keep your functions pure to maintain composability. Do not use `transfer::transfer` or `transfer::public_transfer` inside core functions.**
+- **Keep your functions pure to maintain composability. Do not use `transfer::transfer` or `transfer::public_transfer` inside core functions.**
 
   ```Move
   module suitears::amm {
@@ -260,6 +260,14 @@
       // ✅ Right
       // Return the excess coins even if they have zero value.
       public fun add_liquidity<CoinX, CoinY, LP_Coin>(pool: &mut Pool, coin_x: Coin<CoinX>, coin_y: Coin<CoinY>): (Coin<LpCoin>, Coin<CoinX>, Coin<CoinY>) {}
+
+      // ✅ Right
+      public fun entry_add_liquidity<CoinX, CoinY, LP_Coin>(pool: &mut Pool, coin_x: Coin<CoinX>, coin_y: Coin<CoinY>, ctx: &mut TxContext) {
+        let (lp_coin, coin_x, coin_y) = add_liquidity(pool, coin_x, coin_y);
+        transfer::public_transfer(lp_coin, tx_context::sender(ctx));
+        transfer::public_transfer(coin_x, tx_context::sender(ctx));
+        transfer::public_transfer(coin_y, tx_context::sender(ctx));
+      }
 
       // ❌ Wrong
       public fun add_liquidity<CoinX, CoinY, LP_Coin>(pool: &mut Pool, coin_x: Coin<CoinX>, coin_y: Coin<CoinY>, ctx: &mut TxContext): Coin<LpCoin> {
@@ -287,11 +295,11 @@
   }
   ```
 
-  - **To maintain composability, do not store the user's account data in a hashmap - e.g. (Table/Bag/VecSet). Create an object and return it to the user. Moreover, parallelization on Sui depends on objects so it's always a good idea to split the app state to a maximum.**
+- **To maintain composability, do not store the user's account data in a hashmap - e.g. (Table/Bag/VecSet). Create an object and return it to the user. Moreover, parallelization on Sui depends on objects so it's always a good idea to split the app state to a maximum.**
 
   ```Move
   module suitears::social_network {
-      struct Account has key {
+      struct Account has key, store {
         id: UID,
         name: String
       }
@@ -309,7 +317,7 @@
   }
   ```
 
-  - **The first argument should be the object being mutated. It fits nicely with the dot notation. It usually happens in admin functions.**
+- **The first argument should be the object being mutated. It fits nicely with the dot notation. This issue usually happens in admin functions.**
 
   ```Move
   module suitears::social_network {
@@ -323,9 +331,12 @@
       }
 
       // ✅ Right
+      // account.update(&cap, b"jose");
       public fun update(account: &mut Account, _: &Admin, new_name: String) {}
 
       // ❌ Wrong
+      // We are not updating the cap 🥴
+      // cap.update(&mut account, b"jose");
       public fun update(_: &Admin, account: &mut Account, new_name: String) {}
   }
   ```
