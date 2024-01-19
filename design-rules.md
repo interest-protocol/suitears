@@ -331,9 +331,12 @@
       }
 
       // ✅ Right
+      // account.update(&cap, b"jose");
       public fun update(account: &mut Account, _: &Admin, new_name: String) {}
 
       // ❌ Wrong
+      // We are not updating the cap 🥴
+      // cap.update(&mut account, b"jose");
       public fun update(_: &Admin, account: &mut Account, new_name: String) {}
   }
   ```
