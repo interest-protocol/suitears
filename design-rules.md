@@ -248,3 +248,95 @@
       public fun destroy_empty<Value>(wallet: &mut Wallet<Value>) {}
   }
   ```
+
+- **Keep your functions pure to maintain composability. Do not use `transfer::transfer` or `transfer::public_transfer` inside core functions.**
+
+  ```Move
+  module suitears::amm {
+      struct Pool has key {
+        id: UID
+      }
+
+      // ✅ Right
+      // Return the excess coins even if they have zero value.
+      public fun add_liquidity<CoinX, CoinY, LP_Coin>(pool: &mut Pool, coin_x: Coin<CoinX>, coin_y: Coin<CoinY>): (Coin<LpCoin>, Coin<CoinX>, Coin<CoinY>) {}
+
+      // ✅ Right
+      public fun entry_add_liquidity<CoinX, CoinY, LP_Coin>(pool: &mut Pool, coin_x: Coin<CoinX>, coin_y: Coin<CoinY>, ctx: &mut TxContext) {
+        let (lp_coin, coin_x, coin_y) = add_liquidity(pool, coin_x, coin_y);
+        transfer::public_transfer(lp_coin, tx_context::sender(ctx));
+        transfer::public_transfer(coin_x, tx_context::sender(ctx));
+        transfer::public_transfer(coin_y, tx_context::sender(ctx));
+      }
+
+      // ❌ Wrong
+      public fun add_liquidity<CoinX, CoinY, LP_Coin>(pool: &mut Pool, coin_x: Coin<CoinX>, coin_y: Coin<CoinY>, ctx: &mut TxContext): Coin<LpCoin> {
+        transfer::public_transfer(coin_x, tx_context::sender(ctx));
+        transfer::public_transfer(coin_y, tx_context::sender(ctx));
+
+        coin_lp
+      }
+  }
+  ```
+
+- **Pass the Coin by value with the right amount directly, it's better for transaction readability from the frontend**
+
+  ```Move
+  module suitears::amm {
+      struct Pool has key {
+        id: UID
+      }
+
+      // ✅ Right
+      public fun swap<CoinX, CoinY>(coin_in: Coin<CoinX>): Coin<CoinY> {}
+
+      // ❌ Wrong
+      public fun swap<CoinX, CoinY>(coin_in: &mut Coin<CoinX>): Coin<CoinY> {}
+  }
+  ```
+
+- **To maintain composability, do not store the user's account data in a hashmap - e.g. (Table/Bag/VecSet). Create an object and return it to the user. Moreover, parallelization on Sui depends on objects so it's always a good idea to split the app state to a maximum.**
+
+  ```Move
+  module suitears::social_network {
+      struct Account has key, store {
+        id: UID,
+        name: String
+      }
+
+      struct State has key {
+        id: UID,
+        accounts: Table<address, String>
+      }
+
+      // ✅ Right
+      public fun new(name: String): Account {}
+
+      // ❌ Wrong
+      public fun new(state: &mut State, name: String) {}
+  }
+  ```
+
+- **The first argument should be the object being mutated. It fits nicely with the dot notation. This issue usually happens in admin functions.**
+
+  ```Move
+  module suitears::social_network {
+      struct Account has key {
+        id: UID,
+        name: String
+      }
+
+      struct Admin has key {
+        id: UID,
+      }
+
+      // ✅ Right
+      // account.update(&cap, b"jose");
+      public fun update(account: &mut Account, _: &Admin, new_name: String) {}
+
+      // ❌ Wrong
+      // We are not updating the cap 🥴
+      // cap.update(&mut account, b"jose");
+      public fun update(_: &Admin, account: &mut Account, new_name: String) {}
+  }
+  ```
