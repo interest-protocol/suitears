@@ -245,6 +245,11 @@
       public fun drop<Value: drop>(wallet: &mut Wallet<Value>) {}
 
       // Value doesn't have drop
+      // Does NOT throw if the `wallet` is not empty.
+      public fun destroy<Value>(wallet: &mut Wallet<Value>) {}
+
+      // Value doesn't have drop
+      // Throws if the `wallet` is not empty.
       public fun destroy_empty<Value>(wallet: &mut Wallet<Value>) {}
   }
   ```
