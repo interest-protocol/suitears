@@ -137,7 +137,7 @@
   }
   ```
 
-- **Functions that return a reference must be named property_name_mut or property_name_immut. The borrow is implied by the mutation keyword.**
+- **Functions that return a reference must be named property_name_mut or property_name_immut. The borrow is implied by the mut and immut.**
 
   ```Move
   module suitears::profile {
