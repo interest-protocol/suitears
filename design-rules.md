@@ -137,7 +137,7 @@
   }
   ```
 
-- **Functions that return a reference must be named borrow_property_name or borrow_mut_property_name.**
+- **Functions that return a reference must be named property_name_mut or property_name_immut. The borrow is implied by the mutation keyword.**
 
   ```Move
   module suitears::profile {
@@ -324,7 +324,7 @@
   }
   ```
 
-- **In admin gated functions, the first parameter should be the capability. It helps the autocomplete with user types.**
+- **In admin-gated functions, the first parameter should be the capability. It helps the autocomplete with user types.**
 
   ```Move
   module suitears::social_network {
