@@ -41,8 +41,8 @@
   - destroy_empty
   - to_object_name
   - from_object_name
-  - borrow_property_name
-  - borrow_mut_property_name
+  - property_name_mut
+  - property_name_immut
 
 - **Do not call structs as \*Potato. It is a pattern recognized by the lack of abilities:**
 
@@ -137,7 +137,7 @@
   }
   ```
 
-- **Functions that return a reference must be named borrow_property_name or borrow_mut_property_name.**
+- **Functions that return a reference must be named property_name_mut or property_name_immut. The borrow is implied by the mut and immut.**
 
   ```Move
   module suitears::profile {
@@ -148,9 +148,11 @@
           age: u8
       }
 
-      public fun borrow_name(self: &Profile): &String {}
+      // profile.name_immut()
+      public fun name_immut(self: &Profile): &String {}
 
-      public fun borrow_mut_age(self: &mut Profile): &mut u8 {}
+      // profile.age_mut()
+      public fun age_mut(self: &mut Profile): &mut u8 {}
 
   }
   ```
@@ -322,7 +324,7 @@
   }
   ```
 
-- **The first argument should be the object being mutated. It fits nicely with the dot notation. This issue usually happens in admin functions.**
+- **In admin-gated functions, the first parameter should be the capability. It helps the autocomplete with user types.**
 
   ```Move
   module suitears::social_network {
@@ -336,12 +338,11 @@
       }
 
       // ✅ Right
-      // account.update(&cap, b"jose");
-      public fun update(account: &mut Account, _: &Admin, new_name: String) {}
-
-      // ❌ Wrong
-      // We are not updating the cap 🥴
       // cap.update(&mut account, b"jose");
       public fun update(_: &Admin, account: &mut Account, new_name: String) {}
+
+      // ❌ Wrong
+      // account.update(&cap, b"jose");
+      public fun update(account: &mut Account, _: &Admin, new_name: String) {}
   }
   ```
