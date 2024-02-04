@@ -213,10 +213,11 @@ module suitears::ascii_utils {
   */  
   public fun u128_to_hex_string_fixed_length(value: u128, length: u128): String {
     let buffer = vector::empty<u8>();
+    let hex_symbols = HEX_SYMBOLS;
 
     let i: u128 = 0;
     while (i < length * 2) {
-      vector::push_back(&mut buffer, *vector::borrow(&HEX_SYMBOLS, (value & 0xf as u64)));
+      vector::push_back(&mut buffer, *vector::borrow(&hex_symbols, (value & 0xf as u64)));
       value = value >> 4;
       i = i + 1;
     };
@@ -235,12 +236,13 @@ module suitears::ascii_utils {
   public fun bytes_to_hex_string(bytes: vector<u8>): String {
     let length = vector::length(&bytes);
     let buffer = b"0x";
+    let hex_symbols = HEX_SYMBOLS;
 
     let i: u64 = 0;
     while (i < length) {
       let byte = *vector::borrow(&bytes, i);
-      vector::push_back(&mut buffer, *vector::borrow(&HEX_SYMBOLS, (byte >> 4 & 0xf as u64)));
-      vector::push_back(&mut buffer, *vector::borrow(&HEX_SYMBOLS, (byte & 0xf as u64)));
+      vector::push_back(&mut buffer, *vector::borrow(&hex_symbols, (byte >> 4 & 0xf as u64)));
+      vector::push_back(&mut buffer, *vector::borrow(&hex_symbols, (byte & 0xf as u64)));
       i = i + 1;
     };
     ascii::string(buffer)
