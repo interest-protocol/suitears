@@ -17,7 +17,7 @@ We particularly welcome support in the following areas:
 
 ## 📜 Design Rules
 
-Please follow the recommended [design rules](./design-rules.md).
+Please follow the recommended [design rules](https://docs.sui.io/concepts/sui-move-concepts/conventions).
 
 ## 🙋‍♀️ Opening an Issue
 
