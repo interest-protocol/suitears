@@ -122,34 +122,3 @@ module suitears::quest {
    }
 }
 
-
-module suitears::profile {
-
-  struct Profile {
-    age: u64
-  }
-
-  // Right
-  public fun age(self: &Profile):  u64 {
-    self.age
-  }
-
-  // Wrong
-  public fun profile_age(self: &Profile): u64 {
-    self.age
-  }
-}
-
-module suitears::defi {
-
-  use suitears::profile::{Self, Profile};
-
-  public fun get_tokens(profile: &Profile) {
-
-  //  // Right
-  //  let name = profile.age();
-
-  //  // Wrong
-  //  let name2 = profile.profile_age();
-  }
-}
