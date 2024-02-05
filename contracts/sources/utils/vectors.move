@@ -247,10 +247,6 @@ module suitears::vectors {
     }
   }
 
-  spec quick_sort {
-    pragma opaque;
-  }
-
   // === Private Functions ===    
 
   /*
