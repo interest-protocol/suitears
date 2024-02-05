@@ -186,10 +186,4 @@ module suitears::oracle {
 
     self.deviation = deviation;
   }
-
-  // === Public-Friend Functions ===
-
-  // === Private Functions ===
-
-  // === Test Functions ===
 }
