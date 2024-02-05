@@ -122,7 +122,7 @@ module suitears::oracle {
 
     let i = 0;
     let leader_price = 0;
-    let leader_time_stamp = 0;
+    let leader_timestamp = 0;
     let current_time = clock::timestamp_ms(c);
 
     while (num_of_feeds > i) {
@@ -135,7 +135,7 @@ module suitears::oracle {
 
       if (i == 0) {
         leader_price = report.price;
-        leader_time_stamp = report.timestamp;
+        leader_timestamp = report.timestamp;
       } else {
         let diff = math256::diff(leader_price, report.price);
         let deviation = math256::mul_div_up(diff, WAD, leader_price);
@@ -148,7 +148,7 @@ module suitears::oracle {
     Price {
       oracle,
       price: leader_price,
-      timestamp: leader_time_stamp          
+      timestamp: leader_timestamp          
     }
   }
 
