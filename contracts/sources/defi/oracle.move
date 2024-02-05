@@ -17,7 +17,7 @@ module suitears::oracle {
 
   // === Errors ===
 
-  const EOracleMustHaveRules: u64 = 0;
+  const EOracleMustHaveFeeds: u64 = 0;
   const EMustHavePositiveTimeLimit: u64 = 1;
   const EMustHavePositiveDeviation: u64 = 2;
   const ERequestAndOracleIdMismatch: u64 = 3;
@@ -72,7 +72,7 @@ module suitears::oracle {
     deviation: u256, 
     ctx: &mut TxContext
   ): Oracle<Witness> {
-    assert!(vector::length(&feeds) != 0, EOracleMustHaveRules);
+    assert!(vector::length(&feeds) != 0, EOracleMustHaveFeeds);
     assert!(time_limit != 0, EMustHavePositiveTimeLimit);
     assert!(deviation != 0, EMustHavePositiveDeviation);
 
