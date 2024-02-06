@@ -51,6 +51,7 @@ module suitears::oracle {
   struct Price {
     oracle: ID,
     price: u256,
+    decimals: u8,
     timestamp: u64    
   }
 
@@ -138,13 +139,14 @@ module suitears::oracle {
     Price {
       oracle,
       price: leader_price,
+      decimals: 18,
       timestamp: leader_timestamp          
     }
   }
 
-  public fun destroy_price(price: Price): (ID, u256, u64) {
-    let Price { oracle, price, timestamp } = price;
-    (oracle, price, timestamp)
+  public fun destroy_price(price: Price): (ID, u256, u8, u64) {
+    let Price { oracle, price,decimals, timestamp } = price;
+    (oracle, price, decimals, timestamp)
   }
 
   // === Public-View Functions ===
