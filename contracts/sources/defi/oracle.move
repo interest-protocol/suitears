@@ -12,9 +12,6 @@ module suitears::oracle {
   use suitears::math256;
   use suitears::owner::{Self, OwnerCap};
 
-
-  // === Friends ===
-
   // === Errors ===
 
   const EOracleMustHaveFeeds: u64 = 0;
@@ -60,10 +57,6 @@ module suitears::oracle {
 
   // === Public-Mutative Functions ===
 
-  public fun new_owner<Witness: drop>(wit: Witness, ctx: &mut TxContext): OwnerCap<Witness> {
-    owner::new(wit, vector[], ctx)
-  }
-
   public fun new<Witness: drop>(
     cap: &mut OwnerCap<Witness>,
     wit: Witness, 
@@ -88,7 +81,6 @@ module suitears::oracle {
 
     oracle
   }
-
 
   #[lint_allow(share_owned, custom_state_change)]
   public fun share<Witness: drop>(self: Oracle<Witness>) {
