@@ -2,6 +2,7 @@
 module suitears::vectors_tests {  
   use std::vector;
 
+  use sui::vec_set;
   use sui::test_utils::assert_eq;
 
   use suitears::vectors::{
@@ -10,6 +11,7 @@ module suitears::vectors_tests {
     lte, 
     gte, 
     quick_sort,
+    to_vec_set,
     find_upper_bound, 
     ascending_insertion_sort,
     descending_insertion_sort, 
@@ -145,4 +147,24 @@ module suitears::vectors_tests {
     quick_sort(&mut x, 0, len - 1);
     assert_eq(x, vector[1, 2, 5, 5, 6, 9]);      
   } 
+
+  #[test]
+  fun test_to_vec_set() {
+    assert_eq(vec_set::empty<u64>(), to_vec_set<u64>(vector[]));
+    assert_eq(vec_set::singleton(1), to_vec_set<u64>(vector[1]));
+
+    let set = vec_set::empty();
+    vec_set::insert(&mut set, 1);
+    vec_set::insert(&mut set, 5);
+    vec_set::insert(&mut set, 3);
+    vec_set::insert(&mut set, 4);
+
+    assert_eq(set, to_vec_set<u64>(vector[1,5,3,4]));
+  }
+
+  #[test]
+  #[expected_failure]
+  fun test_to_vec_set_duplicate() {
+    assert_eq(vec_set::empty<u64>(), to_vec_set(vector[0, 0]));    
+  }
 }
