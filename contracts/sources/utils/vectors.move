@@ -21,6 +21,17 @@ module suitears::vectors {
 
   // === Transform Functions ===    
 
+  /*
+  * @notice Transforms a vector into a `sui::vec_set::VecSet` to ensure that all values are unique. 
+  *
+  * @dev The order of the items remains the same.  
+  *
+  * @param v A vector.  
+  * @return VecSet It returns a copy of the items in the array in a `sui::vec_set::VecSet`. 
+  *
+  * aborts-if:   
+  * - There are repeated items in `v`.  
+  */
   public fun to_vec_set<T: copy + drop>(v: vector<T>): VecSet<T> {
     let len = vector::length(&v);
 
