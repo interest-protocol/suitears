@@ -10,12 +10,29 @@ module suitears::vectors {
 
   use std::vector;
 
+  use sui::vec_set::{Self, VecSet};
+
   use suitears::math64::average;
 
   // === Errors ===  
 
   /// @dev When you supply vectors of different lengths to a function requiring equal-length vectors.
   const EVectorLengthMismatch: u64 = 0;
+
+  // === Transform Functions ===    
+
+  public fun to_vec_set<T: copy + drop>(v: vector<T>): VecSet<T> {
+    let len = vector::length(&v);
+
+    let i = 0;
+    let set = vec_set::empty();
+    while (len > i) {
+      vec_set::insert(&mut set, *vector::borrow(&v, i));
+      i = i + 1;
+    };
+
+    set
+  }  
 
   // === Compare Functions ===  
 

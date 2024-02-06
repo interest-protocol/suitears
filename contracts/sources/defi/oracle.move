@@ -6,10 +6,12 @@ module suitears::oracle {
 
   use sui::transfer;
   use sui::clock::{Self, Clock};
-  use sui::object::{Self, UID, ID};  
   use sui::tx_context::TxContext;
+  use sui::vec_set::{Self, VecSet};
+  use sui::object::{Self, UID, ID};  
 
   use suitears::math256;
+  use suitears::vectors;
   use suitears::owner::{Self, OwnerCap};
 
   // === Errors ===
@@ -19,7 +21,7 @@ module suitears::oracle {
   const EMustHavePositiveDeviation: u64 = 2;
   const ERequestAndOracleIdMismatch: u64 = 3;
   const EWrongNumberOfReports: u64 = 4;
-  const EInvalidReportFeed: u64 = 5;
+  const EInvalidReportFeeds: u64 = 5;
   const EStalePriceReport: u64 = 6;
   const EPriceCannotBeZero: u64 = 7;
   const EPriceDeviationIsTooHigh: u64 =  8;
@@ -32,19 +34,19 @@ module suitears::oracle {
 
   struct Oracle<phantom Witness: drop> has key, store {
     id: UID,
-    feeds: vector<TypeName>,
+    feeds: VecSet<TypeName>,
     time_limit: u64,
     deviation: u256
   }  
 
   struct Report has store, copy, drop {
-    feed: TypeName,
     price: u256,
     timestamp: u64
   }
 
   struct Request {
     oracle: ID,
+    feeds: VecSet<TypeName>,
     reports: vector<Report>
   }
 
@@ -71,7 +73,7 @@ module suitears::oracle {
 
     let oracle = Oracle {
       id: object::new(ctx),
-      feeds,
+      feeds: vectors::to_vec_set(feeds),
       time_limit,
       deviation
     };
@@ -89,24 +91,25 @@ module suitears::oracle {
   public fun request<Witness: drop>(self: &Oracle<Witness>): Request {
     Request {
       oracle: object::id(self),
+      feeds: vec_set::empty(),
       reports: vector[],
     }
   }
 
   public fun report<Witness: drop>(request: &mut Request, _: Witness, timestamp: u64, price: u64, decimals: u8) {
+    vec_set::insert(&mut request.feeds, type_name::get<Witness>());
     vector::push_back(&mut request.reports, Report { 
-      feed: type_name::get<Witness>(),
       price: math256::mul_div_down((price as u256), WAD, math256::pow(10, (decimals as u256))),
       timestamp
      });
   }
 
-  public fun destroy_request<Witness: drop>(self: &Oracle<Witness>, request: Request, c:&Clock): Price {
-    let Request { oracle, reports } = request;  
+  public fun destroy_request<Witness: drop>(self: &Oracle<Witness>, request: Request, c: &Clock): Price {
+    let Request { oracle, reports, feeds } = request;  
 
     assert!(oracle == object::id(self), ERequestAndOracleIdMismatch);
 
-    let num_of_feeds = vector::length(&self.feeds);
+    let num_of_feeds = vec_set::size(&self.feeds);
     let num_of_reports = vector::length(&reports);
 
     assert!(num_of_feeds == num_of_reports, EWrongNumberOfReports);
@@ -116,11 +119,14 @@ module suitears::oracle {
     let leader_timestamp = 0;
     let current_time = clock::timestamp_ms(c);
 
+    let oracle_feeds = vec_set::into_keys(self.feeds);
+    let report_feeds = vec_set::into_keys(feeds);
+
     while (num_of_feeds > i) {
-      let feed = *vector::borrow(&self.feeds, i);
+      let feed = *vector::borrow(&oracle_feeds, i);
       let report = *vector::borrow(&reports, i);   
 
-      assert!(feed == report.feed, EInvalidReportFeed);
+      assert!(vector::contains(&report_feeds, &feed), EInvalidReportFeeds);
       assert!(report.timestamp + self.time_limit >= current_time, EStalePriceReport);
       assert!(report.price != 0, EPriceCannotBeZero);
 
@@ -152,7 +158,7 @@ module suitears::oracle {
   // === Public-View Functions ===
 
   public fun feeds<Witness: drop>(self: &Oracle<Witness>): vector<TypeName> {
-    self.feeds
+    vec_set::into_keys(self.feeds)
   }
 
   public fun time_limit<Witness: drop>(self: &Oracle<Witness>): u64 {
@@ -164,6 +170,18 @@ module suitears::oracle {
   }
 
   // === Admin Functions ===
+
+  public fun add<Witness: drop>(cap: &OwnerCap<Witness>, self: &mut Oracle<Witness>, feed: TypeName) {
+    owner::assert_ownership(cap, object::id(self));
+
+    vec_set::insert(&mut self.feeds, feed);
+  }  
+
+  public fun remove<Witness: drop>(cap: &OwnerCap<Witness>, self: &mut Oracle<Witness>, feed: TypeName) {
+    owner::assert_ownership(cap, object::id(self));
+
+    vec_set::remove(&mut self.feeds, &feed);
+  }    
 
   public fun update_time_limit<Witness: drop>(cap: &OwnerCap<Witness>, self: &mut Oracle<Witness>, time_limit: u64) {
     owner::assert_ownership(cap, object::id(self));
@@ -177,5 +195,5 @@ module suitears::oracle {
     assert!(deviation != 0, EMustHavePositiveDeviation);
 
     self.deviation = deviation;
-  }
+  }  
 }
