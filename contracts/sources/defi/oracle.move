@@ -32,7 +32,6 @@ module suitears::oracle {
 
   struct Oracle<phantom Witness: drop> has key, store {
     id: UID,
-    primary: TypeName,
     feeds: vector<TypeName>,
     time_limit: u64,
     deviation: u256
@@ -71,7 +70,6 @@ module suitears::oracle {
 
     let oracle = Oracle {
       id: object::new(ctx),
-      primary: *vector::borrow(&feeds, 0),
       feeds,
       time_limit,
       deviation
