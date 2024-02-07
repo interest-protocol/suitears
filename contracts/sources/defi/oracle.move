@@ -1,13 +1,14 @@
 /*
 * @title Oracle
 *
-* @notice Creates an `Oracle` that collects price reports from several feeds and ensures they are withing a price range and time limit. 
+* @notice Creates an `Oracle` that collects price reports from several feeds and ensures they are within a price range and time limit. 
 *
 * @dev The flow:  
 * - Request a hot potato to collect price feeds.  
+* - Collect price `Report`s from authorized feeds. 
 * - Destroy the `Request` to get the `Price` hot potato.  
 * - Pass the `Price` into the dApp that requires the price.  
-* - dApp destroys the `Price` to get the price reported.  
+* - dApp destroys the `Price` to get the price reported. 
 */
 module suitears::oracle {
   // === Imports ===
