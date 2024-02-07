@@ -8,9 +8,9 @@ module suitears::oracle_tests {
   use sui::test_utils::assert_eq;
   use sui::test_scenario::{Self as test, next_tx, ctx};
 
-  use suitears::owner;
   use suitears::supra_feed_test;
   use suitears::oracle::{Self, Oracle};
+  use suitears::owner::{Self, OwnerCap};
   use suitears::test_utils::{people, scenario};
   use suitears::pyth_feed_test::{Self, PythFeed};
   use suitears::switchboard_feed_test::{Self, SwitchboardFeed};
@@ -78,7 +78,6 @@ module suitears::oracle_tests {
     clock::destroy_for_testing(c);
     test::end(scenario);
   }
-
 
   #[test]
   #[expected_failure(abort_code = oracle::EOracleMustHaveFeeds)]
@@ -485,7 +484,303 @@ module suitears::oracle_tests {
     test::end(scenario);
   }
 
-}
+  #[test]
+  fun test_add() {
+   let scenario = scenario();
+    let (alice, _) = people();
+
+    let test = &mut scenario;
+
+    next_tx(test, alice);  
+    {
+      let cap = owner::new(CoinXOracle {}, vector[], ctx(test));
+
+      let oracle = oracle::new(
+        &mut cap,
+        CoinXOracle {},
+        vector[type_name::get<PythFeed>()],
+        TIME_LIMIT,
+        DEVIATION,
+        ctx(test)
+      );
+      
+      oracle::share(oracle);
+
+      transfer::public_transfer(cap, alice);
+    };   
+
+  next_tx(test, alice);
+    {
+      let oracle = test::take_shared<Oracle<CoinXOracle>>(test);
+      let cap = test::take_from_sender<OwnerCap<CoinXOracle>>(test);
+
+      assert_eq(vector[type_name::get<PythFeed>()], oracle::feeds(&oracle));
+
+      oracle::add(&cap, &mut oracle, type_name::get<SwitchboardFeed>());
+
+      assert_eq(vector[type_name::get<PythFeed>(), type_name::get<SwitchboardFeed>()], oracle::feeds(&oracle));
+
+      test::return_to_sender(test, cap);
+      test::return_shared(oracle);
+    };
+
+    test::end(scenario); 
+  } 
+
+  #[test]
+  #[expected_failure] 
+  fun test_add_invalid_cap() {
+   let scenario = scenario();
+    let (alice, _) = people();
+
+    let test = &mut scenario;
+
+    next_tx(test, alice);  
+    {
+      let cap = owner::new(CoinXOracle {}, vector[], ctx(test));
+
+      let oracle = oracle::new(
+        &mut cap,
+        CoinXOracle {},
+        vector[type_name::get<PythFeed>()],
+        TIME_LIMIT,
+        DEVIATION,
+        ctx(test)
+      );
+      
+      oracle::share(oracle);
+
+      transfer::public_transfer(cap, alice);
+    };   
+
+  next_tx(test, alice);
+    {
+      let oracle = test::take_shared<Oracle<CoinXOracle>>(test);
+      let cap = owner::new(CoinXOracle {}, vector[], ctx(test));
+
+      oracle::add(&cap, &mut oracle, type_name::get<SwitchboardFeed>());
+
+      transfer::public_transfer(cap, @0x0);
+      test::return_shared(oracle);
+    };
+
+    test::end(scenario); 
+  } 
+
+  #[test]
+  fun test_remove() {
+   let scenario = scenario();
+    let (alice, _) = people();
+
+    let test = &mut scenario;
+
+    next_tx(test, alice);  
+    {
+      let cap = owner::new(CoinXOracle {}, vector[], ctx(test));
+
+      let oracle = oracle::new(
+        &mut cap,
+        CoinXOracle {},
+        vector[type_name::get<PythFeed>(), type_name::get<SwitchboardFeed>()],
+        TIME_LIMIT,
+        DEVIATION,
+        ctx(test)
+      );
+      
+      oracle::share(oracle);
+
+      transfer::public_transfer(cap, alice);
+    };   
+
+  next_tx(test, alice);
+    {
+      let oracle = test::take_shared<Oracle<CoinXOracle>>(test);
+      let cap = test::take_from_sender<OwnerCap<CoinXOracle>>(test);
+
+      assert_eq(vector[type_name::get<PythFeed>(), type_name::get<SwitchboardFeed>()], oracle::feeds(&oracle));
+
+      oracle::remove(&cap, &mut oracle, type_name::get<SwitchboardFeed>());
+
+      assert_eq(vector[type_name::get<PythFeed>()], oracle::feeds(&oracle));
+
+      test::return_to_sender(test, cap);
+      test::return_shared(oracle);
+    };
+
+    test::end(scenario); 
+  }   
+
+  #[test]
+  #[expected_failure(abort_code = oracle::EOracleMustHaveFeeds)]
+  fun test_remove_zero_feeds() {
+   let scenario = scenario();
+    let (alice, _) = people();
+
+    let test = &mut scenario;
+
+    next_tx(test, alice);  
+    {
+      let cap = owner::new(CoinXOracle {}, vector[], ctx(test));
+
+      let oracle = oracle::new(
+        &mut cap,
+        CoinXOracle {},
+        vector[type_name::get<PythFeed>()],
+        TIME_LIMIT,
+        DEVIATION,
+        ctx(test)
+      );
+      
+      oracle::share(oracle);
+
+      transfer::public_transfer(cap, alice);
+    };   
+
+  next_tx(test, alice);
+    {
+      let oracle = test::take_shared<Oracle<CoinXOracle>>(test);
+      let cap = test::take_from_sender<OwnerCap<CoinXOracle>>(test);
+
+      oracle::remove(&cap, &mut oracle, type_name::get<PythFeed>());
+
+      test::return_to_sender(test, cap);
+      test::return_shared(oracle);
+    };
+
+    test::end(scenario); 
+  }  
+
+  #[test]
+  fun test_update_time_limit() {
+   let scenario = scenario();
+    let (alice, _) = people();
+
+    let test = &mut scenario;
+
+    next_tx(test, alice);  
+    {
+      let cap = owner::new(CoinXOracle {}, vector[], ctx(test));
+
+      let oracle = oracle::new(
+        &mut cap,
+        CoinXOracle {},
+        vector[type_name::get<PythFeed>()],
+        TIME_LIMIT,
+        DEVIATION,
+        ctx(test)
+      );
+
+      assert_eq(oracle::time_limit(&oracle), TIME_LIMIT);
+
+      oracle::update_time_limit(&cap, &mut oracle, TIME_LIMIT + 1);
+
+      assert_eq(oracle::time_limit(&oracle), TIME_LIMIT + 1);
+      
+      oracle::share(oracle);
+
+      transfer::public_transfer(cap, alice);
+    };   
+
+    test::end(scenario); 
+  }  
+
+  #[test]
+  #[expected_failure(abort_code = oracle::EMustHavePositiveTimeLimit)]
+  fun test_update_zero_time_limit() {
+   let scenario = scenario();
+    let (alice, _) = people();
+
+    let test = &mut scenario;
+
+    next_tx(test, alice);  
+    {
+      let cap = owner::new(CoinXOracle {}, vector[], ctx(test));
+
+      let oracle = oracle::new(
+        &mut cap,
+        CoinXOracle {},
+        vector[type_name::get<PythFeed>()],
+        TIME_LIMIT,
+        DEVIATION,
+        ctx(test)
+      );
+
+      oracle::update_time_limit(&cap, &mut oracle, 0);
+      
+      oracle::share(oracle);
+
+      transfer::public_transfer(cap, alice);
+    };   
+
+    test::end(scenario); 
+  }   
+
+  #[test]
+  fun test_update_deviation() {
+   let scenario = scenario();
+    let (alice, _) = people();
+
+    let test = &mut scenario;
+
+    next_tx(test, alice);  
+    {
+      let cap = owner::new(CoinXOracle {}, vector[], ctx(test));
+
+      let oracle = oracle::new(
+        &mut cap,
+        CoinXOracle {},
+        vector[type_name::get<PythFeed>()],
+        TIME_LIMIT,
+        DEVIATION,
+        ctx(test)
+      );
+
+      assert_eq(oracle::deviation(&oracle), DEVIATION);
+
+      oracle::update_deviation(&cap, &mut oracle, DEVIATION + 1);
+
+      assert_eq(oracle::deviation(&oracle), DEVIATION + 1);
+      
+      oracle::share(oracle);
+
+      transfer::public_transfer(cap, alice);
+    };   
+
+    test::end(scenario); 
+  }  
+
+  #[test]
+  #[expected_failure(abort_code = oracle::EMustHavePositiveDeviation)]
+  fun test_update_zero_deviation() {
+   let scenario = scenario();
+    let (alice, _) = people();
+
+    let test = &mut scenario;
+
+    next_tx(test, alice);  
+    {
+      let cap = owner::new(CoinXOracle {}, vector[], ctx(test));
+
+      let oracle = oracle::new(
+        &mut cap,
+        CoinXOracle {},
+        vector[type_name::get<PythFeed>()],
+        TIME_LIMIT,
+        DEVIATION,
+        ctx(test)
+      );
+
+      oracle::update_deviation(&cap, &mut oracle, 0);
+      
+      oracle::share(oracle);
+
+      transfer::public_transfer(cap, alice);
+    };   
+
+    test::end(scenario); 
+  }      
+}  
+
 
 #[test_only]
 module suitears::pyth_feed_test {

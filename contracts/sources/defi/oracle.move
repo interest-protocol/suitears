@@ -313,10 +313,10 @@ module suitears::oracle {
   * - the `Oracle` has 1 feed left.  
   */
   public fun remove<Witness: drop>(cap: &OwnerCap<Witness>, self: &mut Oracle<Witness>, feed: TypeName) {
-    assert!(vec_set::size(&self.feeds) > 1, EOracleMustHaveFeeds);
     owner::assert_ownership(cap, object::id(self));
 
     vec_set::remove(&mut self.feeds, &feed);
+    assert!(vec_set::size(&self.feeds) != 0, EOracleMustHaveFeeds);
   }    
 
   /*
