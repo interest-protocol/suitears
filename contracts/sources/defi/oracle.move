@@ -169,6 +169,7 @@ module suitears::oracle {
   * - a feed reports more than once.   
   */
   public fun report<Witness: drop>(request: &mut Request, _: Witness, timestamp: u64, price: u128, decimals: u8) {
+    assert!(price != 0, EPriceCannotBeZero);
     vec_set::insert(&mut request.feeds, type_name::get<Witness>());
     vector::push_back(&mut request.reports, Report { 
       price: math256::mul_div_down((price as u256), WAD, math256::pow(10, (decimals as u256))),
@@ -215,7 +216,6 @@ module suitears::oracle {
 
       assert!(vector::contains(&report_feeds, &feed), EInvalidReportFeeds);
       assert!(report.timestamp + self.time_limit >= current_time, EStalePriceReport);
-      assert!(report.price != 0, EPriceCannotBeZero);
 
       if (i == 0) {
         leader_price = report.price;
