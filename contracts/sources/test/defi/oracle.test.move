@@ -78,7 +78,101 @@ module suitears::oracle_tests {
     clock::destroy_for_testing(c);
     test::end(scenario);
   }
+
+
+  #[test]
+  #[expected_failure(abort_code = oracle::EOracleMustHaveFeeds)]
+  fun test_new_no_feeds() {
+   let scenario = scenario();
+    let (alice, _) = people();
+
+    let test = &mut scenario;
+
+
+    next_tx(test, alice);  
+    {
+      let cap = owner::new(CoinXOracle {}, vector[], ctx(test));
+
+      let oracle = oracle::new(
+        &mut cap,
+        CoinXOracle {},
+        vector[],
+        TIME_LIMIT,
+        DEVIATION,
+        ctx(test)
+      );
+      
+
+      oracle::share(oracle);
+
+      transfer::public_transfer(cap, alice);
+    };   
+    test::end(scenario); 
+  } 
+
+  #[test]
+  #[expected_failure(abort_code = oracle::EMustHavePositiveTimeLimit)]
+  fun test_new_zero_time_limit() {
+   let scenario = scenario();
+    let (alice, _) = people();
+
+    let test = &mut scenario;
+
+
+    next_tx(test, alice);  
+    {
+      let cap = owner::new(CoinXOracle {}, vector[], ctx(test));
+
+      let oracle = oracle::new(
+        &mut cap,
+        CoinXOracle {},
+        vector[type_name::get<PythFeed>()],
+        0,
+        DEVIATION,
+        ctx(test)
+      );
+      
+
+      oracle::share(oracle);
+
+      transfer::public_transfer(cap, alice);
+    };   
+    test::end(scenario); 
+  } 
+
+  #[test]
+  #[expected_failure(abort_code = oracle::EMustHavePositiveDeviation)]
+  fun test_new_zero_deviation() {
+   let scenario = scenario();
+    let (alice, _) = people();
+
+    let test = &mut scenario;
+
+
+    next_tx(test, alice);  
+    {
+      let cap = owner::new(CoinXOracle {}, vector[], ctx(test));
+
+      let oracle = oracle::new(
+        &mut cap,
+        CoinXOracle {},
+        vector[type_name::get<PythFeed>()],
+        1,
+        0,
+        ctx(test)
+      );
+      
+
+      oracle::share(oracle);
+
+      transfer::public_transfer(cap, alice);
+    };   
+    test::end(scenario); 
+  } 
+
 }
+
+
 
 #[test_only]
 module suitears::pyth_feed_test {
