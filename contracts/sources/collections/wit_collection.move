@@ -86,7 +86,7 @@ module suitears::wit_collection {
   }
 
   /*
-  * @notice Drops the wrapped struct `AcCollection<C>` and `C`. 
+  * @notice Drops the wrapped struct `WitCollection<C>` and `C`. 
   *
   * @param self The wrapped collection. 
   * @param _ The witness `W` in the `WitCollection<W, C>`. 
