@@ -516,7 +516,7 @@ module suitears::oracle_tests {
 
       assert_eq(vector[type_name::get<PythFeed>()], oracle::feeds(&oracle));
 
-      oracle::add(&cap, &mut oracle, type_name::get<SwitchboardFeed>());
+      oracle::add(&mut oracle, &cap, type_name::get<SwitchboardFeed>());
 
       assert_eq(vector[type_name::get<PythFeed>(), type_name::get<SwitchboardFeed>()], oracle::feeds(&oracle));
 
@@ -558,7 +558,7 @@ module suitears::oracle_tests {
       let oracle = test::take_shared<Oracle<CoinXOracle>>(test);
       let cap = owner::new(CoinXOracle {}, vector[], ctx(test));
 
-      oracle::add(&cap, &mut oracle, type_name::get<SwitchboardFeed>());
+      oracle::add(&mut oracle, &cap, type_name::get<SwitchboardFeed>());
 
       transfer::public_transfer(cap, @0x0);
       test::return_shared(oracle);
@@ -599,7 +599,7 @@ module suitears::oracle_tests {
 
       assert_eq(vector[type_name::get<PythFeed>(), type_name::get<SwitchboardFeed>()], oracle::feeds(&oracle));
 
-      oracle::remove(&cap, &mut oracle, type_name::get<SwitchboardFeed>());
+      oracle::remove(&mut oracle, &cap, type_name::get<SwitchboardFeed>());
 
       assert_eq(vector[type_name::get<PythFeed>()], oracle::feeds(&oracle));
 
@@ -641,7 +641,7 @@ module suitears::oracle_tests {
       let oracle = test::take_shared<Oracle<CoinXOracle>>(test);
       let cap = test::take_from_sender<OwnerCap<CoinXOracle>>(test);
 
-      oracle::remove(&cap, &mut oracle, type_name::get<PythFeed>());
+      oracle::remove(&mut oracle, &cap,type_name::get<PythFeed>());
 
       test::return_to_sender(test, cap);
       test::return_shared(oracle);
@@ -672,7 +672,7 @@ module suitears::oracle_tests {
 
       assert_eq(oracle::time_limit(&oracle), TIME_LIMIT);
 
-      oracle::update_time_limit(&cap, &mut oracle, TIME_LIMIT + 1);
+      oracle::update_time_limit(&mut oracle, &cap, TIME_LIMIT + 1);
 
       assert_eq(oracle::time_limit(&oracle), TIME_LIMIT + 1);
       
@@ -705,7 +705,7 @@ module suitears::oracle_tests {
         ctx(test)
       );
 
-      oracle::update_time_limit(&cap, &mut oracle, 0);
+      oracle::update_time_limit(&mut oracle, &cap, 0);
       
       oracle::share(oracle);
 
@@ -737,7 +737,7 @@ module suitears::oracle_tests {
 
       assert_eq(oracle::deviation(&oracle), DEVIATION);
 
-      oracle::update_deviation(&cap, &mut oracle, DEVIATION + 1);
+      oracle::update_deviation(&mut oracle, &cap,DEVIATION + 1);
 
       assert_eq(oracle::deviation(&oracle), DEVIATION + 1);
       
@@ -770,7 +770,7 @@ module suitears::oracle_tests {
         ctx(test)
       );
 
-      oracle::update_deviation(&cap, &mut oracle, 0);
+      oracle::update_deviation(&mut oracle, &cap,0);
       
       oracle::share(oracle);
 

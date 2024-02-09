@@ -295,7 +295,7 @@ module suitears::oracle {
   * aborts-if:  
   * - a duplicated `feed` is added.  
   */
-  public fun add<Witness: drop>(cap: &OwnerCap<Witness>, self: &mut Oracle<Witness>, feed: TypeName) {
+  public fun add<Witness: drop>(self: &mut Oracle<Witness>, cap: &OwnerCap<Witness>, feed: TypeName) {
     owner::assert_ownership(cap, object::id(self));
 
     vec_set::insert(&mut self.feeds, feed);
@@ -312,7 +312,7 @@ module suitears::oracle {
   * - the `cap` is not the owner of `self`.  
   * - the `Oracle` has 1 feed left.  
   */
-  public fun remove<Witness: drop>(cap: &OwnerCap<Witness>, self: &mut Oracle<Witness>, feed: TypeName) {
+  public fun remove<Witness: drop>(self: &mut Oracle<Witness>, cap: &OwnerCap<Witness>, feed: TypeName) {
     owner::assert_ownership(cap, object::id(self));
 
     vec_set::remove(&mut self.feeds, &feed);
@@ -330,7 +330,7 @@ module suitears::oracle {
   * - the `cap` is not the owner of `self`.    
   * - the `time_limit` cannot be zero. 
   */
-  public fun update_time_limit<Witness: drop>(cap: &OwnerCap<Witness>, self: &mut Oracle<Witness>, time_limit: u64) {
+  public fun update_time_limit<Witness: drop>(self: &mut Oracle<Witness>, cap: &OwnerCap<Witness>, time_limit: u64) {
     owner::assert_ownership(cap, object::id(self));
     assert!(time_limit != 0, EMustHavePositiveTimeLimit);
 
@@ -348,7 +348,7 @@ module suitears::oracle {
   * - the `cap` is not the owner of `self`.    
   * - the `deviation` is zero.  
   */
-  public fun update_deviation<Witness: drop>(cap: &OwnerCap<Witness>, self: &mut Oracle<Witness>, deviation: u256) {
+  public fun update_deviation<Witness: drop>(self: &mut Oracle<Witness>, cap: &OwnerCap<Witness>, deviation: u256) {
     owner::assert_ownership(cap, object::id(self));
     assert!(deviation != 0, EMustHavePositiveDeviation);
 
