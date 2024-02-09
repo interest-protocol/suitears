@@ -5,7 +5,7 @@
 *
 * @dev Wraps a struct with the store in a `PackageBox<T>` object to allow anyone to {borrow} `T` but only the module from the assigned package can {borrow_mut}.
 */
-module suitears::package_box {
+module examples::package_box {
   // === Imports ===
 
   use std::type_name::{Self, TypeName};
@@ -13,7 +13,7 @@ module suitears::package_box {
   use sui::object::{Self, UID};
   use sui::tx_context::TxContext;
 
-  use suitears::type_name_utils::assert_same_package;
+  use examples::type_name_utils::assert_same_package;
 
   // === Structs ===
 

@@ -3,7 +3,7 @@
 *
 * @notice A utility library to operate on `std::type_name`. 
 */
-module suitears::type_name_utils {
+module examples::type_name_utils {
   // === Imports === 
   
   use std::type_name::{Self, TypeName};
