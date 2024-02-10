@@ -283,13 +283,35 @@ module suitears::oracle {
     self.deviation
   }
 
+  /*
+  * @notice Allows extensions to read dynamic fields. 
+  *
+  * @param self An `Oracle` object.  
+  * @return `sui::object::UID`
+  */
+  public fun uid<Witness: drop>(self: &Oracle<Witness>): &UID {
+    &self.id
+  }
+
   // === Admin Functions ===
+
+  /*
+  * @notice Allows extensions to add/remove dynamic fields. 
+  *
+  * @param self An `Oracle` object.  
+  * @cap The `suitears::owner::OwnerCap` that owns the `self`.  
+  * @return `sui::object::UID`
+  */
+  public fun uid_mut<Witness: drop>(self: &mut Oracle<Witness>, cap: &OwnerCap<Witness>): &mut UID {
+    owner::assert_ownership(cap, object::id(self));
+    &mut self.id
+  }  
 
   /*
   * @notice Adds a feed Witness to an `Oracle`. 
   *
-  * @cap The `suitears::owner::OwnerCap` that owns the `self`.  
   * @param self An `Oracle` object.  
+  * @cap The `suitears::owner::OwnerCap` that owns the `self`.  
   * @param feed A Witness feed.    
   *
   * aborts-if:  
@@ -304,8 +326,8 @@ module suitears::oracle {
   /*
   * @notice Removes a feed Witness from an `Oracle`. 
   *
-  * @cap The `suitears::owner::OwnerCap` that owns the `self`.  
   * @param self An `Oracle` object.  
+  * @cap The `suitears::owner::OwnerCap` that owns the `self`.  
   * @param feed A Witness feed.    
   *
   * aborts-if:  
@@ -322,8 +344,8 @@ module suitears::oracle {
   /*
   * @notice Updates the time_limit of an `Oracle`. 
   *
-  * @cap The `suitears::owner::OwnerCap` that owns the `self`.  
   * @param self An `Oracle` object.  
+  * @cap The `suitears::owner::OwnerCap` that owns the `self`.  
   * @param time_limit The new time_limit.     
   *
   * aborts-if:  
@@ -340,8 +362,8 @@ module suitears::oracle {
   /*
   * @notice Updates the deviation of an `Oracle`. 
   *
-  * @cap The `suitears::owner::OwnerCap` that owns the `self`.  
-  * @param self An `Oracle` object.  
+  * @param self An `Oracle` object.
+  * @cap The `suitears::owner::OwnerCap` that owns the `self`.    
   * @param deviation The new deviation.   
   *
   * aborts-if:  
