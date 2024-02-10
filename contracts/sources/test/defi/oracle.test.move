@@ -80,36 +80,6 @@ module suitears::oracle_tests {
   }
 
   #[test]
-  #[expected_failure(abort_code = oracle::EOracleMustHaveFeeds)]
-  fun test_new_no_feeds() {
-   let scenario = scenario();
-    let (alice, _) = people();
-
-    let test = &mut scenario;
-
-
-    next_tx(test, alice);  
-    {
-      let cap = owner::new(CoinXOracle {}, vector[], ctx(test));
-
-      let oracle = oracle::new(
-        &mut cap,
-        CoinXOracle {},
-        vector[],
-        TIME_LIMIT,
-        DEVIATION,
-        ctx(test)
-      );
-      
-
-      oracle::share(oracle);
-
-      transfer::public_transfer(cap, alice);
-    };   
-    test::end(scenario); 
-  } 
-
-  #[test]
   #[expected_failure(abort_code = oracle::EMustHavePositiveTimeLimit)]
   fun test_new_zero_time_limit() {
    let scenario = scenario();
@@ -612,7 +582,7 @@ module suitears::oracle_tests {
 
   #[test]
   #[expected_failure(abort_code = oracle::EOracleMustHaveFeeds)]
-  fun test_remove_zero_feeds() {
+  fun test_request_with_no_feeds() {
    let scenario = scenario();
     let (alice, _) = people();
 
@@ -625,7 +595,7 @@ module suitears::oracle_tests {
       let oracle = oracle::new(
         &mut cap,
         CoinXOracle {},
-        vector[type_name::get<PythFeed>()],
+        vector[],
         TIME_LIMIT,
         DEVIATION,
         ctx(test)
@@ -641,7 +611,13 @@ module suitears::oracle_tests {
       let oracle = test::take_shared<Oracle<CoinXOracle>>(test);
       let cap = test::take_from_sender<OwnerCap<CoinXOracle>>(test);
 
-      oracle::remove(&mut oracle, &cap,type_name::get<PythFeed>());
+      let c = clock::create_for_testing(ctx(test));
+
+      let request = oracle::request(&oracle);
+
+      oracle::destroy_price(oracle::destroy_request(&oracle, request, &c));
+
+      clock::destroy_for_testing(c);
 
       test::return_to_sender(test, cap);
       test::return_shared(oracle);
