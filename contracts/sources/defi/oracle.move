@@ -98,7 +98,6 @@ module suitears::oracle {
   * @return Oracle. 
   *
   * aborts-if:  
-  * - `feeds` vector is empty. As an Oracle needs at least one price feed.   
   * - `feeds` vector has repeated values.
   * - `time_limit` must be higher than 0 milliseconds.  
   * - `deviation` must be higher than 0. 
@@ -111,7 +110,6 @@ module suitears::oracle {
     deviation: u256, 
     ctx: &mut TxContext
   ): Oracle<Witness> {
-    assert!(vector::length(&feeds) != 0, EOracleMustHaveFeeds);
     assert!(time_limit != 0, EMustHavePositiveTimeLimit);
     assert!(deviation != 0, EMustHavePositiveDeviation);
 
@@ -144,8 +142,12 @@ module suitears::oracle {
   *
   * @param self The `Request` will require all feeds from `Oracle` to be reported.  
   * @return `Request`.  
+  *
+  * aborts-if: 
+  * - `self.feed` is empty.  
   */
   public fun request<Witness: drop>(self: &Oracle<Witness>): Request {
+    assert!(vec_set::size(&self.feeds) != 0, EOracleMustHaveFeeds);
     Request {
       oracle: object::id(self),
       feeds: vec_set::empty(),
@@ -251,6 +253,16 @@ module suitears::oracle {
     (oracle, price, decimals, timestamp)
   }
 
+  /*
+  * @notice Destroys an `Oracle` object. 
+  *
+  * @param self An `Oracle` object.   
+  */
+  public fun destroy_oracle<Witness: drop>(self: Oracle<Witness>) {
+    let Oracle { id, feeds: _, time_limit: _, deviation: _ } = self;
+    object::delete(id);
+  }
+
   // === Public-View Functions ===
 
   /*
@@ -338,7 +350,6 @@ module suitears::oracle {
     owner::assert_ownership(cap, object::id(self));
 
     vec_set::remove(&mut self.feeds, &feed);
-    assert!(vec_set::size(&self.feeds) != 0, EOracleMustHaveFeeds);
   }    
 
   /*
