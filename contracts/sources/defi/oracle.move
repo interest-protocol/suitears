@@ -305,18 +305,42 @@ module suitears::oracle {
     &self.id
   }
 
+  /*
+  * @notice Returns the `sui::object::ID` of a Price's oracle. 
+  *
+  * @param self A `Price` potato.  
+  * @return ID
+  */
   public fun oracle(price: &Price): ID {
     price.oracle
   }
 
+  /*
+  * @notice Returns the price value of a `Price` hot potato. 
+  *
+  * @param self A `Price` potato.  
+  * @return u256
+  */
   public fun price(price: &Price): u256 {
     price.price
   }
 
+  /*
+  * @notice Returns the decimal houses of the price value. 
+  *
+  * @param self A `Price` potato.  
+  * @return u8
+  */
   public fun decimals(price: &Price): u8 {
     price.decimals
   }
 
+  /*
+  * @notice Returns the timestamp of the a `Price`. 
+  *
+  * @param self A `Price` potato.  
+  * @return u64
+  */
   public fun timestamp(price: &Price): u64 {
     price.timestamp
   }
