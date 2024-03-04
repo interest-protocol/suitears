@@ -305,6 +305,22 @@ module suitears::oracle {
     &self.id
   }
 
+  public fun oracle(price: &Price): ID {
+    price.oracle
+  }
+
+  public fun price(price: &Price): u256 {
+    price.price
+  }
+
+  public fun decimals(price: &Price): u8 {
+    price.decimals
+  }
+
+  public fun timestamp(price: &Price): u64 {
+    price.timestamp
+  }
+
   // === Admin Functions ===
 
   /*
