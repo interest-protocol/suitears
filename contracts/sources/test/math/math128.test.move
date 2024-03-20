@@ -4,6 +4,8 @@ module suitears::math128_tests {
   use sui::test_utils::assert_eq;
 
   use suitears::math128::{
+    add,
+    sub,
     min,
     max,
     mul,
@@ -220,6 +222,17 @@ module suitears::math128_tests {
     assert_eq(clamp(1, 1, 10), 1);
     assert_eq(clamp(0, 0, 100), 0);
     assert_eq(clamp(200, 100, 200), 200);
+  }
+
+  #[test]
+  fun test_add() {
+    assert_eq(add(2, 3), 5);
+  }
+
+  #[test]
+  fun testsub() {
+    assert_eq(sub(3, 2), 1);
+    assert_eq(sub(3, 3), 0);
   }
 
   #[test]
