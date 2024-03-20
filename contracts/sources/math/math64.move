@@ -200,6 +200,32 @@ module suitears::math64 {
   // === These functions will throw on overflow/underflow/zero division ===  
 
   /*
+  * @notice It performs `x` + `y`. 
+  *
+  * @dev It will throw on overflow. 
+  *
+  * @param x The first operand. 
+  * @param y The second operand. 
+  * @return u64. The result of `x` + `y`. 
+  */
+  public fun add(x: u64, y: u64): u64 {
+    x + y
+  }
+
+  /*
+  * @notice It performs `x` - `y`. 
+  *
+  * @dev It will throw on underflow. 
+  *
+  * @param x The first operand. 
+  * @param y The second operand. 
+  * @return u64. The result of `x` - `y`. 
+  */
+  public fun sub(x: u64, y: u64): u64 {
+    x - y
+  }
+
+  /*
   * @notice It performs `x` * `y`. 
   *
   * @dev It will throw on overflow. 
