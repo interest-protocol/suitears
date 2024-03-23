@@ -414,7 +414,7 @@ module suitears::oracle {
   * @notice Updates the deviation of an `Oracle`. 
   *
   * @param self An `Oracle` object.
-  * @cap The `suitears::owner::OwnerCap` that owns the `self`.    
+  * @param cap The `suitears::owner::OwnerCap` that owns the `self`.    
   * @param deviation The new deviation.   
   *
   * aborts-if:  
@@ -427,4 +427,29 @@ module suitears::oracle {
 
     self.deviation = deviation;
   }  
+
+  // === Test Functions ===
+
+  #[test_only]
+  /*
+  * @notice Creates a `Price` for testing purposes only. 
+  *
+  * @param oracle `sui::object::ID` of the`Oracle` this request was sent from.
+  * @param price The reported price.    
+  * @param decimals The decimals precision of `price`.   
+  * @param timestamp The timestamp in milliseconds in which the price was recorded.
+  */
+  public fun new_price_for_testing(
+    oracle: ID,
+    price: u256,
+    decimals: u8,
+    timestamp: u64
+  ): Price {
+    Price {
+      oracle,
+      price,
+      decimals,
+      timestamp
+    }
+  }
 }
