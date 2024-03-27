@@ -44,15 +44,14 @@ capabilities
 ├─ quest — "A wrapper that can only be unwrapped once a set of actions are completed"
 ├─ timelock — "Timelock capability to add a delay between actions"
 collections
-├─ ac_collection — "Capability access wrapper for collections"
 ├─ bitmap — "Bitmap implementation for sequential keys"
-├─ coin_decimals — "A collection that stores Coin decimals"
 ├─ wit_collection - "Witness access wrapper for collections"
 defi
 ├─ farm — "Farm module to reward coin holders over time"
 ├─ fund — "Struct to track shares associated with underlying deposits/withdrawals"
 ├─ linear_vesting_wallet — "Wallet that allows withdrawals according to a linear vesting"
 ├─ linear_vesting_wallet_with_clawback — "Wallet that distributes the tokens according to a linear vesting and allows the clawback owner to claim all unreleased coins
+├─ oracle — "An Oracle factory with security checks to ensure the price's liveness"
 ├─ vesting — "Virtual implementation of vesting schedules"
 governance
 ├─ dao — "Decentralized autonomous organization"
