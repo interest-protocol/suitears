@@ -44,7 +44,7 @@ module suitears::int {
 
   // === Structs ===
   
-  // @dev A wrapper to represent unsigned integers.
+  // @dev A wrapper to represent signed integers.
   struct Int has copy, drop, store {
     value: u256
   }
