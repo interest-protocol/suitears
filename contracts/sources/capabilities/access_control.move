@@ -258,7 +258,7 @@ module suitears::access_control {
   }
 
   /*
-  * @notice Checks if the an {AccessControl} object has a `role`.     
+  * @notice Checks if an {AccessControl} object has a `role`.     
   *
   * @param self The {AccessControl} object.  
   * @param role A role.
@@ -269,7 +269,7 @@ module suitears::access_control {
   }
 
   /*
-  * @notice Checks if the an {Admin} address has a `role`.     
+  * @notice Checks if an {Admin} address has a `role`.     
   *
   * @dev It does not throw if the `role` does not exist.
   *
@@ -287,7 +287,7 @@ module suitears::access_control {
   }
 
   /*
-  * @notice Checks if the an {Admin} has a `role`.     
+  * @notice Checks if an {Admin} has a `role`.     
   *
   * @dev It does not throw if the `role` does not exist.
   *
