@@ -40,6 +40,7 @@ airdrop
 ├─ airdrop — "A pull design airdrop that distributes the tokens after a specific date"
 ├─ linear_vesting_airdrop — "A pull design that distributes the tokens according to a linear vesting"
 capabilities
+├─ access_control — "Admin management module with dynamic roles"
 ├─ owner — "Owner capability to give access to multiple objects"
 ├─ quest — "A wrapper that can only be unwrapped once a set of actions are completed"
 ├─ timelock — "Timelock capability to add a delay between actions"
