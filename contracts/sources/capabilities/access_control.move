@@ -7,16 +7,15 @@ module suitears::access_control {
   // === Imports ===
 
   use sui::object::{Self, UID};
+  use sui::tx_context::TxContext;
   use sui::vec_map::{Self, VecMap};
   use sui::vec_set::{Self, VecSet};
-  use sui::tx_context::{Self, TxContext};
-
-  // === Friends ===
 
   // === Errors ===
 
-  const EInvalidRolesAddress: u64 = 0;
-  const ERoleNotInitiated: u64 = 1;
+  const EInvalidAccessControlAddress: u64 = 0;
+  const EMustBeADefaultAdmin: u64 = 1;
+  const ERoleDoesNotExist: u64 = 2;
 
   // === Constants ===
 
@@ -24,65 +23,145 @@ module suitears::access_control {
 
   // === Structs ===
 
-  struct Roles has key, store {
+  struct AccessControl has key, store {
    id: UID,
-   roles: VecMap<vector<u8>, RoleData>
-  }
-
-  struct RoleData has store {
-   has_role: VecSet<address>,
-   admin_role: vector<u8>
+   roles: VecMap<vector<u8>, VecSet<address>>
   }
 
   struct Admin has key, store {
    id: UID,
-   roles_address: address
+   access_control: address
   }
 
   // === Public-Mutative Functions ===
 
-  public fun new(ctx: &mut TxContext): Roles {
-   Roles {
+  public fun new(ctx: &mut TxContext): (AccessControl, Admin) {
+   let access_control = AccessControl {
     id: object::new(ctx),
     roles: vec_map::empty()
+   };
+
+   let default_admin = new_admin(&access_control, ctx);
+
+   let roles_set = vec_set::singleton(object::id_address(&default_admin));
+
+    vec_map::insert(&mut access_control.roles, DEFAULT_ADMIN_ROLE, roles_set);
+   
+    (access_control, default_admin)
+  }
+
+  public fun new_admin(self: &AccessControl, ctx: &mut TxContext): Admin {
+   Admin {
+    id: object::new(ctx),
+    access_control: object::id_address(self)
    }
   }
 
-  public fun new_admin(self: &Roles, ctx: &mut TxContext): Admin {
-   Admin {
-    id: object::new(ctx),
-    roles_address: object::id_address(self)
-   }
+  public fun new_role(admin: &Admin, self: &mut AccessControl, role: vector<u8>) {
+    assert_default_admin(admin, self);
+
+    if (!contains(self, role))
+      new_role_impl(self, role);
+  }
+
+  public fun grant(admin: &Admin, self: &mut AccessControl, role: vector<u8>, new_admin: address) {
+    assert_default_admin(admin, self);
+
+    if (contains(self, role))
+      vec_set::insert(vec_map::get_mut(&mut self.roles, &role), new_admin)
+    else
+      new_role_singleton_impl(self, role, new_admin);
+  }
+
+  public fun revoke(
+    admin: &Admin, 
+    self: &mut AccessControl, 
+    role: vector<u8>, 
+    old_admin: address
+  ) {
+    assert_default_admin(admin, self);
+    assert!(contains(self, role), ERoleDoesNotExist);
+
+    if (has_role_(old_admin, self, role)) 
+      vec_set::remove(vec_map::get_mut(&mut self.roles, &role), &old_admin);
+  }
+
+  public fun renounce(admin: &Admin, self: &mut AccessControl, role: vector<u8>) {
+    assert!(object::id_address(self) == admin.access_control, EInvalidAccessControlAddress);
+
+    let old_admin = object::id_address(admin);
+
+    if (has_role_(old_admin, self, role)) 
+      vec_set::remove(vec_map::get_mut(&mut self.roles, &role), &old_admin);
+  }
+
+  public fun destroy(admin: &Admin, self: AccessControl) {
+    assert_default_admin(admin, &self);
+
+    let AccessControl { id, roles: _ } = self;
+
+    object::delete(id);
+  }
+
+  public fun destroy_empty(admin: &Admin, self: AccessControl) {
+    assert_default_admin(admin, &self);
+
+    let AccessControl { id, roles } = self;
+
+    vec_map::destroy_empty(roles);
+    object::delete(id);
+  }
+
+  public fun destroy_account(admin: Admin) {
+    let Admin { id, access_control: _  } = admin;
+    object::delete(id);
   }
  
+  public fun destroy_role(admin: &Admin, self: &mut AccessControl, role: vector<u8>) {
+    assert_default_admin(admin, self);
+
+    if (contains(self, role)) {
+      vec_map::remove(&mut self.roles, &role);
+    };
+  }
+
   // === Public-View Functions ===
 
   public fun default_admin_role(): vector<u8> {
    DEFAULT_ADMIN_ROLE
   }
 
-  public fun has_role(self: &Roles, admin: &Admin, role: vector<u8>): bool {
-   assert!(object::id_address(self) == admin.roles_address, EInvalidRolesAddress);
-   assert!(vec_map::contains(&self.roles, &role), ERoleNotInitiated);
-
-   let role_data = vec_map::get(&self.roles, &role);
-
-   vec_set::contains(&role_data.has_role,&object::id_address(admin))
+  public fun contains(self: &AccessControl, role: vector<u8>): bool {
+    vec_map::contains(&self.roles, &role)
   }
 
-  public fun get_role_admin(self: &Roles, role: vector<u8>): vector<u8> {
-   assert!(vec_map::contains(&self.roles, &role), ERoleNotInitiated);
+  public fun has_role_(admin_address: address, self: &AccessControl, role: vector<u8>): bool {
+   if (!vec_map::contains(&self.roles, &role)) return false;
 
-   let role_data = vec_map::get(&self.roles, &role);
+   let roles = vec_map::get(&self.roles, &role);
 
-   role_data.admin_role
+   vec_set::contains(roles,&admin_address)
   }
 
-  // === Admin Functions ===
-
-  // === Public-Friend Functions ===
+  public fun has_role(admin: &Admin, self: &AccessControl, role: vector<u8>): bool {
+   let admin_address = object::id_address(self);
+   assert!(admin_address == admin.access_control, EInvalidAccessControlAddress);
+   
+   has_role_(admin_address, self, role)
+  }
 
   // === Private Functions ===
 
-  // === Test Functions ===
+  fun assert_default_admin(admin: &Admin, self: &AccessControl) {
+    assert!(object::id_address(self) == admin.access_control, EInvalidAccessControlAddress);
+    assert!(has_role(admin, self, DEFAULT_ADMIN_ROLE), EMustBeADefaultAdmin);
+  }
+
+  fun new_role_impl(self: &mut AccessControl, role: vector<u8>) {
+    vec_map::insert(&mut self.roles, role, vec_set::empty());
+  }
+
+  fun new_role_singleton_impl(self: &mut AccessControl, role: vector<u8>, recipient: address) {
+    vec_map::insert(&mut self.roles, role, vec_set::singleton(recipient));
+  }
 }
