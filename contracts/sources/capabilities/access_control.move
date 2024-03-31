@@ -43,9 +43,7 @@ module suitears::access_control {
 
    let default_admin = new_admin(&access_control, ctx);
 
-   let roles_set = vec_set::singleton(object::id_address(&default_admin));
-
-   vec_map::insert(&mut access_control.roles, DEFAULT_ADMIN_ROLE, roles_set);
+   new_role_singleton_impl(&mut access_control, DEFAULT_ADMIN_ROLE, object::id_address(&default_admin));
    
    (access_control, default_admin)
   }
