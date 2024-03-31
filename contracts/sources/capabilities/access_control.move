@@ -45,9 +45,9 @@ module suitears::access_control {
 
    let roles_set = vec_set::singleton(object::id_address(&default_admin));
 
-    vec_map::insert(&mut access_control.roles, DEFAULT_ADMIN_ROLE, roles_set);
+   vec_map::insert(&mut access_control.roles, DEFAULT_ADMIN_ROLE, roles_set);
    
-    (access_control, default_admin)
+   (access_control, default_admin)
   }
 
   public fun new_admin(self: &AccessControl, ctx: &mut TxContext): Admin {
