@@ -40,13 +40,12 @@ airdrop
 ├─ airdrop — "A pull design airdrop that distributes the tokens after a specific date"
 ├─ linear_vesting_airdrop — "A pull design that distributes the tokens according to a linear vesting"
 capabilities
-├─ access_control — "Admin management module with dynamic roles"
 ├─ owner — "Owner capability to give access to multiple objects"
 ├─ quest — "A wrapper that can only be unwrapped once a set of actions are completed"
 ├─ timelock — "Timelock capability to add a delay between actions"
 collections
 ├─ bitmap — "Bitmap implementation for sequential keys"
-├─ wit_collection - "Witness access wrapper for collections"
+├─ coin_decimals - "An object to store and fetch the decimals of a Coin"
 defi
 ├─ farm — "Farm module to reward coin holders over time"
 ├─ fund — "Struct to track shares associated with underlying deposits/withdrawals"
