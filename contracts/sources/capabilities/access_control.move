@@ -16,7 +16,7 @@ module suitears::access_control {
   /// The {Admin} was not created from {AccessControl}.  
   const EInvalidAccessControlAddress: u64 = 0;
   /// The {Admin} does not have the {SUPER_ADMIN_ROLE} role. 
-  const EMustBeADefaultAdmin: u64 = 1;
+  const EMustBeASuperAdmin: u64 = 1;
   /// The {AccessControl} does not have a role. 
   const ERoleDoesNotExist: u64 = 2;
 
@@ -56,11 +56,11 @@ module suitears::access_control {
     roles: vec_map::empty()
    };
 
-   let default_admin = new_admin(&access_control, ctx);
+   let super_admin = new_admin(&access_control, ctx);
 
-   new_role_singleton_impl(&mut access_control, SUPER_ADMIN_ROLE, object::id_address(&default_admin));
+   new_role_singleton_impl(&mut access_control, SUPER_ADMIN_ROLE, object::id_address(&super_admin));
    
-   (access_control, default_admin)
+   (access_control, super_admin)
   }
 
   /*
@@ -90,7 +90,7 @@ module suitears::access_control {
   * - `admin` was not created from the `self`.
   */
   public fun add(admin: &Admin, self: &mut AccessControl, role: vector<u8>) {
-    assert_default_admin(admin, self);
+    assert_super_admin(admin, self);
 
     if (!contains(self, role))
       new_role_impl(self, role);
@@ -110,7 +110,7 @@ module suitears::access_control {
   * - `admin` was not created from the `self`.
   */
   public fun remove(admin: &Admin, self: &mut AccessControl, role: vector<u8>) {
-    assert_default_admin(admin, self);
+    assert_super_admin(admin, self);
 
     if (contains(self, role)) {
       vec_map::remove(&mut self.roles, &role);
@@ -134,7 +134,7 @@ module suitears::access_control {
   * - `role` does not exist.
   */
   public fun grant(admin: &Admin, self: &mut AccessControl, role: vector<u8>, new_admin: address) {
-    assert_default_admin(admin, self);
+    assert_super_admin(admin, self);
     assert!(contains(self, role), ERoleDoesNotExist);
 
     if (contains(self, role))
@@ -165,7 +165,7 @@ module suitears::access_control {
     role: vector<u8>, 
     old_admin: address
   ) {
-    assert_default_admin(admin, self);
+    assert_super_admin(admin, self);
     assert!(contains(self, role), ERoleDoesNotExist);
 
     if (has_role_(old_admin, self, role)) 
@@ -207,7 +207,7 @@ module suitears::access_control {
   * - `admin` was not created from the `self`.
   */
   public fun destroy(admin: &Admin, self: AccessControl) {
-    assert_default_admin(admin, &self);
+    assert_super_admin(admin, &self);
 
     let AccessControl { id, roles: _ } = self;
 
@@ -228,7 +228,7 @@ module suitears::access_control {
   * - `self` is not empty.
   */
   public fun destroy_empty(admin: &Admin, self: AccessControl) {
-    assert_default_admin(admin, &self);
+    assert_super_admin(admin, &self);
 
     let AccessControl { id, roles } = self;
 
@@ -318,9 +318,9 @@ module suitears::access_control {
   * - `admin` is not a {SUPER_ADMIN_ROLE} {Admin}.
   * - `admin` was not created from the `self`.
   */
-  fun assert_default_admin(admin: &Admin, self: &AccessControl) {
+  fun assert_super_admin(admin: &Admin, self: &AccessControl) {
     assert!(object::id_address(self) == admin.access_control, EInvalidAccessControlAddress);
-    assert!(has_role(admin, self, SUPER_ADMIN_ROLE), EMustBeADefaultAdmin);
+    assert!(has_role(admin, self, SUPER_ADMIN_ROLE), EMustBeASuperAdmin);
   }
 
   /*
