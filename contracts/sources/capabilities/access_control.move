@@ -55,11 +55,19 @@ module suitears::access_control {
    }
   }
 
-  public fun new_role(admin: &Admin, self: &mut AccessControl, role: vector<u8>) {
+  public fun add_role(admin: &Admin, self: &mut AccessControl, role: vector<u8>) {
     assert_default_admin(admin, self);
 
     if (!contains(self, role))
       new_role_impl(self, role);
+  }
+
+  public fun remove_role(admin: &Admin, self: &mut AccessControl, role: vector<u8>) {
+    assert_default_admin(admin, self);
+
+    if (contains(self, role)) {
+      vec_map::remove(&mut self.roles, &role);
+    };
   }
 
   public fun grant(admin: &Admin, self: &mut AccessControl, role: vector<u8>, new_admin: address) {
@@ -114,14 +122,6 @@ module suitears::access_control {
   public fun destroy_account(admin: Admin) {
     let Admin { id, access_control: _  } = admin;
     object::delete(id);
-  }
- 
-  public fun destroy_role(admin: &Admin, self: &mut AccessControl, role: vector<u8>) {
-    assert_default_admin(admin, self);
-
-    if (contains(self, role)) {
-      vec_map::remove(&mut self.roles, &role);
-    };
   }
 
   // === Public-View Functions ===
