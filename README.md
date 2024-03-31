@@ -45,7 +45,7 @@ capabilities
 ├─ timelock — "Timelock capability to add a delay between actions"
 collections
 ├─ bitmap — "Bitmap implementation for sequential keys"
-├─ wit_collection - "Witness access wrapper for collections"
+├─ coin_decimals - "An object to store and fetch the decimals of a Coin"
 defi
 ├─ farm — "Farm module to reward coin holders over time"
 ├─ fund — "Struct to track shares associated with underlying deposits/withdrawals"
