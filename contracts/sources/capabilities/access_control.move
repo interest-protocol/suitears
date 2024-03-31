@@ -217,7 +217,7 @@ module suitears::access_control {
   /*
   * @notice Destroys an empty {AccessControl} object.     
   *
-  * @dev Careful, this is irreversible and will break this module logic.
+  * @dev Careful, this is irreversible.
   *
   * @param admin A {DEFAULT_ADMIN_ROLE} {Admin}.
   * @param self The {AccessControl} object.  
