@@ -135,7 +135,6 @@ module suitears::access_control {
   */
   public fun grant(admin: &Admin, self: &mut AccessControl, role: vector<u8>, new_admin: address) {
     assert_super_admin(admin, self);
-    assert!(contains(self, role), ERoleDoesNotExist);
 
     if (contains(self, role))
       vec_set::insert(vec_map::get_mut(&mut self.roles, &role), new_admin)
@@ -223,12 +222,9 @@ module suitears::access_control {
   * @param self The {AccessControl} object.  
   *
   * aborts-if 
-  * - `admin` is not a {SUPER_ADMIN_ROLE} {Admin}.
-  * - `admin` was not created from the `self`.
   * - `self` is not empty.
   */
-  public fun destroy_empty(admin: &Admin, self: AccessControl) {
-    assert_super_admin(admin, &self);
+  public fun destroy_empty(self: AccessControl) {
 
     let AccessControl { id, roles } = self;
 
@@ -255,6 +251,16 @@ module suitears::access_control {
   */
   public fun super_admin_role(): vector<u8> {
    SUPER_ADMIN_ROLE
+  }
+
+  /*
+  * @notice Returns the address of the {AccessControl} that created the `admin`.     
+  *
+  * @param admin An {Admin}.
+  * @return address.
+  */
+  public fun access_control(admin: &Admin): address {
+    admin.access_control
   }
 
   /*
@@ -300,10 +306,10 @@ module suitears::access_control {
   * - `admin` was not created from the `self`.
   */
   public fun has_role(admin: &Admin, self: &AccessControl, role: vector<u8>): bool {
-   let admin_address = object::id_address(self);
-   assert!(admin_address == admin.access_control, EInvalidAccessControlAddress);
+   let ac_address = object::id_address(self);
+   assert!(ac_address == admin.access_control, EInvalidAccessControlAddress);
    
-   has_role_(admin_address, self, role)
+   has_role_(object::id_address(admin), self, role)
   }
 
   // === Private Functions ===
@@ -319,7 +325,6 @@ module suitears::access_control {
   * - `admin` was not created from the `self`.
   */
   fun assert_super_admin(admin: &Admin, self: &AccessControl) {
-    assert!(object::id_address(self) == admin.access_control, EInvalidAccessControlAddress);
     assert!(has_role(admin, self, SUPER_ADMIN_ROLE), EMustBeASuperAdmin);
   }
 
