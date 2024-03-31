@@ -15,15 +15,15 @@ module suitears::access_control {
 
   /// The {Admin} was not created from {AccessControl}.  
   const EInvalidAccessControlAddress: u64 = 0;
-  /// The {Admin} does not have the {DEFAULT_ADMIN_ROLE} role. 
+  /// The {Admin} does not have the {SUPER_ADMIN_ROLE} role. 
   const EMustBeADefaultAdmin: u64 = 1;
   /// The {AccessControl} does not have a role. 
   const ERoleDoesNotExist: u64 = 2;
 
   // === Constants ===
 
-  /// {DEFAULT_ADMIN_ROLE}
-  const DEFAULT_ADMIN_ROLE: vector<u8> = b"DEFAULT_ADMIN_ROLE";
+  /// {SUPER_ADMIN_ROLE}
+  const SUPER_ADMIN_ROLE: vector<u8> = b"SUPER_ADMIN_ROLE";
 
   // === Structs ===
 
@@ -42,13 +42,13 @@ module suitears::access_control {
   // === Public-Mutative Functions ===
 
   /*
-  * @notice It creates an {AccessControl} and an {Admin} with the {DEFAULT_ADMIN_ROLE}.  
+  * @notice It creates an {AccessControl} and an {Admin} with the {SUPER_ADMIN_ROLE}.  
   *
   * @dev This is the admin of this module. This capability can create other admins.
   * The {AccessControl} can be shared or stored inside another shared object.
   *
   * @return {AccessControl}. It stores the role's data.  
-  * @return {Admin}. The {DEFAULT_ADMIN_ROLE} {Admin}. 
+  * @return {Admin}. The {SUPER_ADMIN_ROLE} {Admin}. 
   */
   public fun new(ctx: &mut TxContext): (AccessControl, Admin) {
    let access_control = AccessControl {
@@ -58,7 +58,7 @@ module suitears::access_control {
 
    let default_admin = new_admin(&access_control, ctx);
 
-   new_role_singleton_impl(&mut access_control, DEFAULT_ADMIN_ROLE, object::id_address(&default_admin));
+   new_role_singleton_impl(&mut access_control, SUPER_ADMIN_ROLE, object::id_address(&default_admin));
    
    (access_control, default_admin)
   }
@@ -81,12 +81,12 @@ module suitears::access_control {
   *
   * @dev It will not throw if the `role` has already been added. 
   *
-  * @param admin A {DEFAULT_ADMIN_ROLE} {Admin}.
+  * @param admin A {SUPER_ADMIN_ROLE} {Admin}.
   * @param self The {AccessControl} object.  
   * @param role The role to be added to the `self`.
   *
   * aborts-if 
-  * - `admin` is not a {DEFAULT_ADMIN_ROLE} {Admin}.
+  * - `admin` is not a {SUPER_ADMIN_ROLE} {Admin}.
   * - `admin` was not created from the `self`.
   */
   public fun add(admin: &Admin, self: &mut AccessControl, role: vector<u8>) {
@@ -101,12 +101,12 @@ module suitears::access_control {
   *
   * @dev It will not throw if the `role` does not exist. 
   *
-  * @param admin A {DEFAULT_ADMIN_ROLE} {Admin}.
+  * @param admin A {SUPER_ADMIN_ROLE} {Admin}.
   * @param self The {AccessControl} object.  
   * @param role The role to be removed from the `self`.
   *
   * aborts-if 
-  * - `admin` is not a {DEFAULT_ADMIN_ROLE} {Admin}.
+  * - `admin` is not a {SUPER_ADMIN_ROLE} {Admin}.
   * - `admin` was not created from the `self`.
   */
   public fun remove(admin: &Admin, self: &mut AccessControl, role: vector<u8>) {
@@ -123,13 +123,13 @@ module suitears::access_control {
   * @dev The `new_admin` is the `sui::object::id_address` of an {Admin}.
   * It will not throw if the `new_admin` already has the `role`.
   *
-  * @param admin A {DEFAULT_ADMIN_ROLE} {Admin}.
+  * @param admin A {SUPER_ADMIN_ROLE} {Admin}.
   * @param self The {AccessControl} object.  
   * @param role The role to be granted to the `new_admin`.
   * @param new_admin The address of an {Admin}.
   *
   * aborts-if 
-  * - `admin` is not a {DEFAULT_ADMIN_ROLE} {Admin}.
+  * - `admin` is not a {SUPER_ADMIN_ROLE} {Admin}.
   * - `admin` was not created from the `self`.
   * - `role` does not exist.
   */
@@ -149,13 +149,13 @@ module suitears::access_control {
   * @dev The `old_admin` is the `sui::object::id_address` of an {Admin}.
   * It will not throw if the `old_admin` does not have the `role`.
   *
-  * @param admin A {DEFAULT_ADMIN_ROLE} {Admin}.
+  * @param admin A {SUPER_ADMIN_ROLE} {Admin}.
   * @param self The {AccessControl} object.  
   * @param role The role to be removed from the `old_admin`.
   * @param old_admin The address of an {Admin}.
   *
   * aborts-if 
-  * - `admin` is not a {DEFAULT_ADMIN_ROLE} {Admin}.
+  * - `admin` is not a {SUPER_ADMIN_ROLE} {Admin}.
   * - `admin` was not created from the `self`.
   * - `role` does not exist.
   */
@@ -199,11 +199,11 @@ module suitears::access_control {
   * @dev Careful, this is irreversible and will break this module logic.
   * It does not check if the {AccessControl} has any roles registered.
   *
-  * @param admin A {DEFAULT_ADMIN_ROLE} {Admin}.
+  * @param admin A {SUPER_ADMIN_ROLE} {Admin}.
   * @param self The {AccessControl} object.  
   *
   * aborts-if 
-  * - `admin` is not a {DEFAULT_ADMIN_ROLE} {Admin}.
+  * - `admin` is not a {SUPER_ADMIN_ROLE} {Admin}.
   * - `admin` was not created from the `self`.
   */
   public fun destroy(admin: &Admin, self: AccessControl) {
@@ -219,11 +219,11 @@ module suitears::access_control {
   *
   * @dev Careful, this is irreversible.
   *
-  * @param admin A {DEFAULT_ADMIN_ROLE} {Admin}.
+  * @param admin A {SUPER_ADMIN_ROLE} {Admin}.
   * @param self The {AccessControl} object.  
   *
   * aborts-if 
-  * - `admin` is not a {DEFAULT_ADMIN_ROLE} {Admin}.
+  * - `admin` is not a {SUPER_ADMIN_ROLE} {Admin}.
   * - `admin` was not created from the `self`.
   * - `self` is not empty.
   */
@@ -249,12 +249,12 @@ module suitears::access_control {
   // === Public-View Functions ===
 
   /*
-  * @notice Returns the {DEFAULT_ADMIN_ROLE}.     
+  * @notice Returns the {SUPER_ADMIN_ROLE}.     
   *
-  * @return {DEFAULT_ADMIN_ROLE}.
+  * @return {SUPER_ADMIN_ROLE}.
   */
-  public fun default_admin_role(): vector<u8> {
-   DEFAULT_ADMIN_ROLE
+  public fun super_admin_role(): vector<u8> {
+   SUPER_ADMIN_ROLE
   }
 
   /*
@@ -309,18 +309,18 @@ module suitears::access_control {
   // === Private Functions ===
 
   /*
-  * @notice Asserts that the {Admin} has the {DEFAULT_ADMIN_ROLE} and was created from the `self`.     
+  * @notice Asserts that the {Admin} has the {SUPER_ADMIN_ROLE} and was created from the `self`.     
   *
   * @param admin An {Admin}.
   * @param self The {AccessControl} object.  
   *
   * aborts-if 
-  * - `admin` is not a {DEFAULT_ADMIN_ROLE} {Admin}.
+  * - `admin` is not a {SUPER_ADMIN_ROLE} {Admin}.
   * - `admin` was not created from the `self`.
   */
   fun assert_default_admin(admin: &Admin, self: &AccessControl) {
     assert!(object::id_address(self) == admin.access_control, EInvalidAccessControlAddress);
-    assert!(has_role(admin, self, DEFAULT_ADMIN_ROLE), EMustBeADefaultAdmin);
+    assert!(has_role(admin, self, SUPER_ADMIN_ROLE), EMustBeADefaultAdmin);
   }
 
   /*
