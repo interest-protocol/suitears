@@ -1,7 +1,7 @@
 /*
 * @title Access Control
 *
-* @dev It allows an admin to manage access control via roles.
+* @notice It allows an admin to manage access control via roles.
 */
 module suitears::access_control {
   // === Imports ===
