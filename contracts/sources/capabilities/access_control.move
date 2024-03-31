@@ -64,6 +64,7 @@ module suitears::access_control {
 
   public fun grant(admin: &Admin, self: &mut AccessControl, role: vector<u8>, new_admin: address) {
     assert_default_admin(admin, self);
+    assert!(contains(self, role), ERoleDoesNotExist);
 
     if (contains(self, role))
       vec_set::insert(vec_map::get_mut(&mut self.roles, &role), new_admin)
