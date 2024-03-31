@@ -55,14 +55,14 @@ module suitears::access_control {
    }
   }
 
-  public fun add_role(admin: &Admin, self: &mut AccessControl, role: vector<u8>) {
+  public fun add(admin: &Admin, self: &mut AccessControl, role: vector<u8>) {
     assert_default_admin(admin, self);
 
     if (!contains(self, role))
       new_role_impl(self, role);
   }
 
-  public fun remove_role(admin: &Admin, self: &mut AccessControl, role: vector<u8>) {
+  public fun remove(admin: &Admin, self: &mut AccessControl, role: vector<u8>) {
     assert_default_admin(admin, self);
 
     if (contains(self, role)) {
