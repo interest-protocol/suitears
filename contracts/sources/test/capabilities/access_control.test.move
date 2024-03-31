@@ -1,9 +1,9 @@
 #[test_only]
 module suitears::acess_control_tests {
 
-  use sui::tx_context::dummy;
   use sui::object::id_address;
   use sui::test_utils::{assert_eq, destroy};
+  use sui::tx_context::{dummy, new_from_hint};
 
   use suitears::access_control;
 
@@ -147,4 +147,116 @@ module suitears::acess_control_tests {
     destroy(ac);
     access_control::destroy_account(super_admin);
   }   
+
+  #[test]
+  #[expected_failure(abort_code = access_control::EMustBeASuperAdmin)] 
+  fun test_add_error_case() {
+   let (ac, super_admin) = access_control::new(&mut dummy());
+
+   let admin = access_control::new_admin(&ac, &mut dummy());
+
+   access_control::add(&admin, &mut ac, TEST_ROLE);
+
+   destroy(ac);
+   destroy(admin);
+   destroy(super_admin);       
+  }
+
+  #[test]
+  #[expected_failure(abort_code = access_control::EMustBeASuperAdmin)] 
+  fun test_remove_error_case() {
+   let (ac, super_admin) = access_control::new(&mut dummy());
+
+   let admin = access_control::new_admin(&ac, &mut dummy());
+
+   access_control::remove(&admin, &mut ac, TEST_ROLE);
+
+   destroy(ac);
+   destroy(admin);
+   destroy(super_admin);       
+  }  
+
+  #[test]
+  #[expected_failure(abort_code = access_control::EMustBeASuperAdmin)] 
+  fun test_grant_error_case_no_super_admin() {
+   let (ac, super_admin) = access_control::new(&mut dummy());
+
+   let admin = access_control::new_admin(&ac, &mut dummy());
+
+   access_control::grant(&super_admin, &mut ac, TEST_ROLE, id_address(&admin));
+
+   access_control::remove(&admin, &mut ac, TEST_ROLE);
+
+   destroy(ac);
+   destroy(admin);
+   destroy(super_admin);       
+  }    
+
+  #[test]
+  #[expected_failure(abort_code = access_control::ERoleDoesNotExist)] 
+  fun test_revoke_error_case_role_does_not_exist() {
+   let (ac, super_admin) = access_control::new(&mut dummy());
+
+   let admin = access_control::new_admin(&ac, &mut dummy());
+
+   access_control::revoke(&super_admin, &mut ac, TEST_ROLE, id_address(&admin));
+
+   destroy(ac);
+   destroy(admin);
+   destroy(super_admin);       
+  }
+
+  #[test]
+  #[expected_failure(abort_code = access_control::EMustBeASuperAdmin)] 
+  fun test_revoke_error_must_be_super_admin() {
+   let (ac, super_admin) = access_control::new(&mut dummy());
+
+   let admin = access_control::new_admin(&ac, &mut dummy());
+
+   access_control::grant(&admin, &mut ac, TEST_ROLE, id_address(&admin));
+
+   access_control::revoke(&admin, &mut ac, TEST_ROLE, id_address(&admin));
+
+   destroy(ac);
+   destroy(admin);
+   destroy(super_admin);       
+  } 
+
+  #[test]
+  #[expected_failure(abort_code = access_control::EInvalidAccessControlAddress)] 
+  fun test_renounce_wrong_access_control() {
+   let (ac, super_admin) = access_control::new(&mut dummy());
+   let (ac2, super_admin2) = access_control::new(&mut new_from_hint(@0x5, 1, 2, 3, 4));
+
+   let admin = access_control::new_admin(&ac2, &mut new_from_hint(@0x6, 1, 2, 3, 4));
+
+   access_control::renounce(&admin, &mut ac, TEST_ROLE);
+
+   destroy(ac);
+   destroy(ac2);
+   destroy(admin);
+   destroy(super_admin);
+   destroy(super_admin2);       
+  }  
+
+  #[test]
+  #[expected_failure(abort_code = access_control::EMustBeASuperAdmin)] 
+  fun test_destroy_error_must_be_super_admin() {
+   let (ac, super_admin) = access_control::new(&mut dummy());
+
+   let admin = access_control::new_admin(&ac, &mut dummy());
+
+   access_control::destroy(&admin, ac);
+   destroy(admin);
+   destroy(super_admin);       
+  }    
+
+  #[test]
+  #[expected_failure] 
+  fun test_destroy_empty_error_must_be_super_admin() {
+   let (ac, super_admin) = access_control::new(&mut dummy());
+
+   access_control::destroy_empty( ac);
+   destroy(super_admin);       
+  }          
 }
