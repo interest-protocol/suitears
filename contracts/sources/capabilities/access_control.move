@@ -218,7 +218,6 @@ module suitears::access_control {
   *
   * @dev Careful, this is irreversible.
   *
-  * @param admin A {SUPER_ADMIN_ROLE} {Admin}.
   * @param self The {AccessControl} object.  
   *
   * aborts-if 
