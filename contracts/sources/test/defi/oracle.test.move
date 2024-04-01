@@ -5,7 +5,8 @@ module suitears::oracle_tests {
   use sui::clock;
   use sui::object;
   use sui::transfer;
-  use sui::test_utils::assert_eq;
+  use sui::tx_context::dummy;
+  use sui::test_utils::{assert_eq, destroy};
   use sui::test_scenario::{Self as test, next_tx, ctx};
 
   use suitears::supra_feed_test;
@@ -754,7 +755,44 @@ module suitears::oracle_tests {
     };   
 
     test::end(scenario); 
-  }      
+  }  
+
+  #[test]
+  fun test_destroy_oracle() {
+    let cap = owner::new(CoinXOracle {}, vector[], &mut dummy());
+
+    let oracle = oracle::new(
+      &mut cap,
+      CoinXOracle {},
+      vector[type_name::get<PythFeed>()],
+      TIME_LIMIT,
+      DEVIATION,
+      &mut dummy()
+    );
+
+    oracle::destroy_oracle(oracle, &cap);
+    destroy(cap);
+  }
+
+  #[test]
+  #[expected_failure(abort_code = owner::ENotAllowed)]
+  fun test_destroy_oracle_wrong_cap_error() {
+    let cap = owner::new(CoinXOracle {}, vector[], &mut dummy());
+    let cap2 = owner::new(CoinXOracle {}, vector[], &mut dummy());
+
+    let oracle = oracle::new(
+      &mut cap,
+      CoinXOracle {},
+      vector[type_name::get<PythFeed>()],
+      TIME_LIMIT,
+      DEVIATION,
+      &mut dummy()
+    );
+
+    oracle::destroy_oracle(oracle, &cap2);
+    destroy(cap);
+    destroy(cap2);
+  }        
 }  
 
 

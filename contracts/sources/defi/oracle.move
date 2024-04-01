@@ -256,9 +256,14 @@ module suitears::oracle {
   /*
   * @notice Destroys an `Oracle` object. 
   *
-  * @param self An `Oracle` object.   
+  * @param self An `Oracle` object.  
+  * @param cap The `suitears::owner::OwnerCap` that owns the `self`.  
+  *
+  * aborts-if:  
+  * - the `cap` is not the owner of `self`.   
   */
-  public fun destroy_oracle<Witness: drop>(self: Oracle<Witness>) {
+  public fun destroy_oracle<Witness: drop>(self: Oracle<Witness>, cap: &OwnerCap<Witness>) {
+    owner::assert_ownership(cap, object::id(&self));
     let Oracle { id, feeds: _, time_limit: _, deviation: _ } = self;
     object::delete(id);
   }
@@ -351,7 +356,7 @@ module suitears::oracle {
   * @notice Allows extensions to add/remove dynamic fields. 
   *
   * @param self An `Oracle` object.  
-  * @cap The `suitears::owner::OwnerCap` that owns the `self`.  
+  * @param cap The `suitears::owner::OwnerCap` that owns the `self`.  
   * @return `sui::object::UID`
   */
   public fun uid_mut<Witness: drop>(self: &mut Oracle<Witness>, cap: &OwnerCap<Witness>): &mut UID {
@@ -363,7 +368,7 @@ module suitears::oracle {
   * @notice Adds a feed Witness to an `Oracle`. 
   *
   * @param self An `Oracle` object.  
-  * @cap The `suitears::owner::OwnerCap` that owns the `self`.  
+  * @param cap The `suitears::owner::OwnerCap` that owns the `self`.  
   * @param feed A Witness feed.    
   *
   * aborts-if:  
@@ -379,7 +384,7 @@ module suitears::oracle {
   * @notice Removes a feed Witness from an `Oracle`. 
   *
   * @param self An `Oracle` object.  
-  * @cap The `suitears::owner::OwnerCap` that owns the `self`.  
+  * @param cap The `suitears::owner::OwnerCap` that owns the `self`.  
   * @param feed A Witness feed.    
   *
   * aborts-if:  
@@ -396,7 +401,7 @@ module suitears::oracle {
   * @notice Updates the time_limit of an `Oracle`. 
   *
   * @param self An `Oracle` object.  
-  * @cap The `suitears::owner::OwnerCap` that owns the `self`.  
+  * @param cap The `suitears::owner::OwnerCap` that owns the `self`.  
   * @param time_limit The new time_limit.     
   *
   * aborts-if:  
