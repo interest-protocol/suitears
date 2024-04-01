@@ -15,7 +15,7 @@ subdir = "contracts"
 rev = "main"
 
 [addresses]
-suitears = "0x2085d89f5df00bf6d628748b02a0f23f5d512dc4a23e22d74efeb2c8c86005e0"
+suitears = "0xf7334947a5037552a94cee15fc471dbda71bf24d46c97ee24e1fdac38e26644c"
 ```
 
 For testnet:
@@ -27,7 +27,7 @@ subdir = "contracts"
 rev = "testnet"
 
 [addresses]
-suitears = "0xc4b1d677a42cd00fff967199133d217f5e52a8fbd6a68c2363da33e4da1dee67"
+suitears = "0xbd097359082272fdef8e9ce53815264d0142d6209f3f0cb48ee31c10aaf846d5"
 ```
 
 ## Contracts
@@ -40,7 +40,6 @@ airdrop
 ├─ airdrop — "A pull design airdrop that distributes the tokens after a specific date"
 ├─ linear_vesting_airdrop — "A pull design that distributes the tokens according to a linear vesting"
 capabilities
-├─ access_control — "Admin management module via dynamic roles"
 ├─ owner — "Owner capability to give access to multiple objects"
 ├─ quest — "A wrapper that can only be unwrapped once a set of actions are completed"
 ├─ timelock — "Timelock capability to add a delay between actions"
