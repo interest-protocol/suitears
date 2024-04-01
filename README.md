@@ -27,7 +27,7 @@ subdir = "contracts"
 rev = "testnet"
 
 [addresses]
-suitears = "0x901b511b878f90f1b833df46648224b913df60f8b3165086caba6f59e75d6e98"
+suitears = "0xc4b1d677a42cd00fff967199133d217f5e52a8fbd6a68c2363da33e4da1dee67"
 ```
 
 ## Contracts
