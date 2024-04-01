@@ -44,41 +44,41 @@ module suitears::multi_reward_farm {
   
   struct Account<phantom StakeCoin> has key, store {
     id: UID,
-    // The `sui::object::ID` of the farm to which this account belongs to. 
-    farm_id: ID,
-    // The amount of {StakeCoin} the user has in the {Farm}.  
+    /// The `sui::object::id_address` of the farm to which this account belongs to. 
+    farm_address: address,
+    /// The amount of {StakeCoin} the user has in the {Farm}.  
     amount: u64,
-    // `sui::vec_map::VecMap` from Coin `std::type_name::TypeName` to {AccountReward}.  
+    /// `sui::vec_map::VecMap` from Coin `std::type_name::TypeName` to {AccountReward}.  
     rewards_map: VecMap<TypeName, AccountReward>
   }
 
   struct AccountReward has store {
-    // The amount of Reward Coin the user has accrued.
+    /// The amount of Reward Coin the user has accrued.
     amount: u64,
-    // Amount of rewards the {Farm} has already paid the user.  
+    /// Amount of rewards the {Farm} has already paid the user.  
     debt: u256
   }
 
   struct Farm<phantom StakeCoin> has key, store {
     id: UID,
-    // Last timestamp that the farm was updated. 
+    /// Last timestamp that the farm was updated. 
     last_reward_timestamp: u64,
-    // {StakeCoin} deposited in this farm. 
+    /// {StakeCoin} deposited in this farm. 
     balance_stake_coin: Balance<StakeCoin>,
-    // The decimal scalar of the {StakeCoin}.  
+    /// The decimal scalar of the {StakeCoin}.  
     stake_coin_decimal_factor: u64,
-    // `sui::vec_map::VecMap` from Coin `std::type_name::TypeName` to {PoolReward}.  
+    /// `sui::vec_map::VecMap` from Coin `std::type_name::TypeName` to {PoolReward}.  
     rewards_map: VecMap<TypeName, PoolReward>,
-    // The `sui::object::ID` of the {OwnerCap} that "owns" this farm. 
-    owned_by: ID
+    /// The `sui::object::id_address` of the {OwnerCap} that "owns" this farm. 
+    owned_by: address
   }
 
   struct PoolReward has store {
-    // The timestamp in seconds that this farm will start distributing rewards.  
+    /// The timestamp in seconds that this farm will start distributing rewards.  
     start_timestamp: u64,
-    // Amount of {RewardCoin} to give to stakers per second.  
+    /// Amount of {RewardCoin} to give to stakers per second.  
     rewards_per_second: u64,
-    // Total amount of rewards per share distributed by this farm.   
+    /// Total amount of rewards per share distributed by this farm.   
     accrued_rewards_per_share: u256,
   }
 }
