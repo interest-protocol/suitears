@@ -256,9 +256,14 @@ module suitears::oracle {
   /*
   * @notice Destroys an `Oracle` object. 
   *
-  * @param self An `Oracle` object.   
+  * @param self An `Oracle` object.  
+  * @param cap The `suitears::owner::OwnerCap` that owns the `self`.  
+  *
+  * aborts-if:  
+  * - the `cap` is not the owner of `self`.   
   */
-  public fun destroy_oracle<Witness: drop>(self: Oracle<Witness>) {
+  public fun destroy_oracle<Witness: drop>(self: Oracle<Witness>, cap: &OwnerCap<Witness>) {
+    owner::assert_ownership(cap, object::id(&self));
     let Oracle { id, feeds: _, time_limit: _, deviation: _ } = self;
     object::delete(id);
   }
@@ -308,7 +313,7 @@ module suitears::oracle {
   /*
   * @notice Returns the `sui::object::ID` of a Price's oracle. 
   *
-  * @param self A `Price` potato.  
+  * @param price A `Price` potato.  
   * @return ID
   */
   public fun oracle(price: &Price): ID {
@@ -318,7 +323,7 @@ module suitears::oracle {
   /*
   * @notice Returns the price value of a `Price` hot potato. 
   *
-  * @param self A `Price` potato.  
+  * @param price A `Price` potato.  
   * @return u256
   */
   public fun price(price: &Price): u256 {
@@ -328,7 +333,7 @@ module suitears::oracle {
   /*
   * @notice Returns the decimal houses of the price value. 
   *
-  * @param self A `Price` potato.  
+  * @param price A `Price` potato.  
   * @return u8
   */
   public fun decimals(price: &Price): u8 {
@@ -338,7 +343,7 @@ module suitears::oracle {
   /*
   * @notice Returns the timestamp of the a `Price`. 
   *
-  * @param self A `Price` potato.  
+  * @param price A `Price` potato.  
   * @return u64
   */
   public fun timestamp(price: &Price): u64 {
@@ -351,8 +356,11 @@ module suitears::oracle {
   * @notice Allows extensions to add/remove dynamic fields. 
   *
   * @param self An `Oracle` object.  
-  * @cap The `suitears::owner::OwnerCap` that owns the `self`.  
+  * @param cap The `suitears::owner::OwnerCap` that owns the `self`.  
   * @return `sui::object::UID`
+  *
+  * aborts-if:  
+  * - the `cap` is not the owner of `self`.    
   */
   public fun uid_mut<Witness: drop>(self: &mut Oracle<Witness>, cap: &OwnerCap<Witness>): &mut UID {
     owner::assert_ownership(cap, object::id(self));
@@ -363,7 +371,7 @@ module suitears::oracle {
   * @notice Adds a feed Witness to an `Oracle`. 
   *
   * @param self An `Oracle` object.  
-  * @cap The `suitears::owner::OwnerCap` that owns the `self`.  
+  * @param cap The `suitears::owner::OwnerCap` that owns the `self`.  
   * @param feed A Witness feed.    
   *
   * aborts-if:  
@@ -379,7 +387,7 @@ module suitears::oracle {
   * @notice Removes a feed Witness from an `Oracle`. 
   *
   * @param self An `Oracle` object.  
-  * @cap The `suitears::owner::OwnerCap` that owns the `self`.  
+  * @param cap The `suitears::owner::OwnerCap` that owns the `self`.  
   * @param feed A Witness feed.    
   *
   * aborts-if:  
@@ -396,7 +404,7 @@ module suitears::oracle {
   * @notice Updates the time_limit of an `Oracle`. 
   *
   * @param self An `Oracle` object.  
-  * @cap The `suitears::owner::OwnerCap` that owns the `self`.  
+  * @param cap The `suitears::owner::OwnerCap` that owns the `self`.  
   * @param time_limit The new time_limit.     
   *
   * aborts-if:  
