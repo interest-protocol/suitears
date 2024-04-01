@@ -313,7 +313,7 @@ module suitears::oracle {
   /*
   * @notice Returns the `sui::object::ID` of a Price's oracle. 
   *
-  * @param self A `Price` potato.  
+  * @param price A `Price` potato.  
   * @return ID
   */
   public fun oracle(price: &Price): ID {
@@ -323,7 +323,7 @@ module suitears::oracle {
   /*
   * @notice Returns the price value of a `Price` hot potato. 
   *
-  * @param self A `Price` potato.  
+  * @param price A `Price` potato.  
   * @return u256
   */
   public fun price(price: &Price): u256 {
@@ -333,7 +333,7 @@ module suitears::oracle {
   /*
   * @notice Returns the decimal houses of the price value. 
   *
-  * @param self A `Price` potato.  
+  * @param price A `Price` potato.  
   * @return u8
   */
   public fun decimals(price: &Price): u8 {
@@ -343,7 +343,7 @@ module suitears::oracle {
   /*
   * @notice Returns the timestamp of the a `Price`. 
   *
-  * @param self A `Price` potato.  
+  * @param price A `Price` potato.  
   * @return u64
   */
   public fun timestamp(price: &Price): u64 {
@@ -358,6 +358,9 @@ module suitears::oracle {
   * @param self An `Oracle` object.  
   * @param cap The `suitears::owner::OwnerCap` that owns the `self`.  
   * @return `sui::object::UID`
+  *
+  * aborts-if:  
+  * - the `cap` is not the owner of `self`.    
   */
   public fun uid_mut<Witness: drop>(self: &mut Oracle<Witness>, cap: &OwnerCap<Witness>): &mut UID {
     owner::assert_ownership(cap, object::id(self));

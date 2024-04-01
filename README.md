@@ -15,7 +15,7 @@ subdir = "contracts"
 rev = "main"
 
 [addresses]
-suitears = "0x2085d89f5df00bf6d628748b02a0f23f5d512dc4a23e22d74efeb2c8c86005e0"
+suitears = "0xf7334947a5037552a94cee15fc471dbda71bf24d46c97ee24e1fdac38e26644c"
 ```
 
 For testnet:
@@ -27,7 +27,7 @@ subdir = "contracts"
 rev = "testnet"
 
 [addresses]
-suitears = "0x901b511b878f90f1b833df46648224b913df60f8b3165086caba6f59e75d6e98"
+suitears = "0xbd097359082272fdef8e9ce53815264d0142d6209f3f0cb48ee31c10aaf846d5"
 ```
 
 ## Contracts
