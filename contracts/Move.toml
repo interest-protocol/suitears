@@ -4,8 +4,8 @@ version = "0.0.2"
 published-at = "0xbd097359082272fdef8e9ce53815264d0142d6209f3f0cb48ee31c10aaf846d5"
 
 [dependencies]
-MoveStdlib = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/move-stdlib", rev = "framework/mainnet" }
-Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/mainnet" }
+MoveStdlib = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/move-stdlib", rev = "framework/testnet" }
+Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/testnet" }
 
 [addresses]
 suitears = "0xbd097359082272fdef8e9ce53815264d0142d6209f3f0cb48ee31c10aaf846d5"
