@@ -15,7 +15,7 @@ subdir = "contracts"
 rev = "main"
 
 [addresses]
-suitears = "0xb32168662dae81b75ef91c6792c1b0eaedb791fa707eef0f58093fbce4db3790"
+suitears = "0xf7334947a5037552a94cee15fc471dbda71bf24d46c97ee24e1fdac38e26644c"
 ```
 
 For testnet:
@@ -27,7 +27,7 @@ subdir = "contracts"
 rev = "testnet"
 
 [addresses]
-suitears = "0x1180cab80b5b3f5c002f70fba79035ef70e809eafacb34e788e7f0b24a97840f"
+suitears = "0xbd097359082272fdef8e9ce53815264d0142d6209f3f0cb48ee31c10aaf846d5"
 ```
 
 ## Contracts
@@ -44,15 +44,14 @@ capabilities
 ├─ quest — "A wrapper that can only be unwrapped once a set of actions are completed"
 ├─ timelock — "Timelock capability to add a delay between actions"
 collections
-├─ ac_collection — "Capability access wrapper for collections"
 ├─ bitmap — "Bitmap implementation for sequential keys"
-├─ coin_decimals — "A collection that stores Coin decimals"
-├─ wit_collection - "Witness access wrapper for collections"
+├─ coin_decimals - "An object to store and fetch the decimals of a Coin"
 defi
 ├─ farm — "Farm module to reward coin holders over time"
 ├─ fund — "Struct to track shares associated with underlying deposits/withdrawals"
 ├─ linear_vesting_wallet — "Wallet that allows withdrawals according to a linear vesting"
 ├─ linear_vesting_wallet_with_clawback — "Wallet that distributes the tokens according to a linear vesting and allows the clawback owner to claim all unreleased coins
+├─ oracle — "An Oracle factory with security checks to ensure the price's liveness"
 ├─ vesting — "Virtual implementation of vesting schedules"
 governance
 ├─ dao — "Decentralized autonomous organization"
