@@ -123,7 +123,7 @@ module suitears::coin_decimals {
   * aborts-if:  
   * - `cap` does not own the `self`.    
   */
-  public fun remove_and_destroy<CoinType>(self: &mut CoinDecimals, cap: &mut OwnerCap<CoinDecimalsWitness>) {
+  public fun remove_and_destroy<CoinType>(self: &mut CoinDecimals, cap: &OwnerCap<CoinDecimalsWitness>) {
     owner::assert_ownership(cap, object::id(self));
     let decimals = df::remove(&mut self.id, type_name::get<CoinType>());
     let Decimals { decimals:  _, scalar: _} = decimals;
@@ -138,7 +138,7 @@ module suitears::coin_decimals {
   * aborts-if:  
   * - `cap` does not own the `self`.    
   */
-  public fun destroy(self: CoinDecimals, cap: &mut OwnerCap<CoinDecimalsWitness>) {
+  public fun destroy(self: CoinDecimals, cap: &OwnerCap<CoinDecimalsWitness>) {
     owner::assert_ownership(cap, object::id(&self));
     let CoinDecimals { id } = self;
     object::delete(id);
