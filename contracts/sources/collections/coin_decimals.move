@@ -115,7 +115,7 @@ module suitears::coin_decimals {
   }
 
   /*
-  * @notice Removes the dynamic field and destroys it for the `CoinType` from `self`.
+  * @notice Removes the {Decimals} dynamic field and destroys it for `CoinType` from `self`.
   *
   * @param self A {CoinDecimals} object. 
   * @param cap An {OwnerCap<CoinDecimalsWitness>} that owns the `self`.
