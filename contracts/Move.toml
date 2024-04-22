@@ -1,6 +1,6 @@
 [package]
 name = "SuiTears"
-version = "0.0.2"
+version = "1.0.0-beta"
 published-at = "0xbd097359082272fdef8e9ce53815264d0142d6209f3f0cb48ee31c10aaf846d5"
 
 [dependencies]
