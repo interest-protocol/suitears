@@ -15,8 +15,12 @@ module suitears::coin_decimals {
   use sui::object::{Self, UID};
   use sui::tx_context::TxContext;
   use sui::coin::{Self, CoinMetadata};
+  use suitears::owner::{Self, OwnerCap};
 
   // === Structs ===  
+
+  // @dev To associate the {OwnerCap} with this module. 
+  struct CoinDecimalsWitness has drop {}
 
   struct Decimals has store {
     // Decimals of a `sui::coin` 
@@ -33,12 +37,25 @@ module suitears::coin_decimals {
   // === Public Create Function ===
 
   /*
+  * @notice It creates an {OwnerCap<CoinDecimalsWitness>}. 
+  * It is used to provide admin capabilities to the holder.
+  *
+  * @return {OwnerCap<CoinDecimalsWitness}. 
+  */
+  public fun new_cap(ctx: &mut TxContext): OwnerCap<CoinDecimalsWitness> {
+    owner::new(CoinDecimalsWitness {}, vector[], ctx)
+  }
+
+  /*
   * @notice It creates a new {CoinDecimals}.  
   *
+  * @param cap An {OwnerCap<CoinDecimalsWitness>} that will own the new {CoinDecimals}.
   * @return {CoinDecimals}.
   */
-  public fun new(ctx: &mut TxContext): CoinDecimals {
-    CoinDecimals { id: object::new(ctx) }
+  public fun new(cap: &mut OwnerCap<CoinDecimalsWitness>, ctx: &mut TxContext): CoinDecimals {
+    let coin_decimals =  CoinDecimals { id: object::new(ctx) };
+    owner::add(cap, CoinDecimalsWitness {}, object::id(&coin_decimals));
+    coin_decimals
   }
 
   // === Public View Functions ===
@@ -95,5 +112,35 @@ module suitears::coin_decimals {
     if (contains<CoinType>(self)) return;
     let decimals = coin::get_decimals(coin_metadata);
     df::add(&mut self.id, type_name::get<CoinType>(), Decimals { decimals, scalar: pow(10, decimals) });
+  }
+
+  /*
+  * @notice Removes the dynamic field and destroys it for the `CoinType` from `self`.
+  *
+  * @param self A {CoinDecimals} object. 
+  * @param cap An {OwnerCap<CoinDecimalsWitness>} that owns the `self`.
+  *
+  * aborts-if:  
+  * - `cap` does not own the `self`.    
+  */
+  public fun remove_and_destroy<CoinType>(self: &mut CoinDecimals, cap: &mut OwnerCap<CoinDecimalsWitness>) {
+    owner::assert_ownership(cap, object::id(self));
+    let decimals = df::remove(&mut self.id, type_name::get<CoinType>());
+    let Decimals { decimals:  _, scalar: _} = decimals;
+  }
+
+  /*
+  * @notice Destroys the `self`.
+  *
+  * @param self A {CoinDecimals} object. 
+  * @param cap An {OwnerCap<CoinDecimalsWitness>} that owns the `self`.
+  *
+  * aborts-if:  
+  * - `cap` does not own the `self`.    
+  */
+  public fun destroy(self: CoinDecimals, cap: &mut OwnerCap<CoinDecimalsWitness>) {
+    owner::assert_ownership(cap, object::id(&self));
+    let CoinDecimals { id } = self;
+    object::delete(id);
   }
 }
