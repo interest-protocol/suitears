@@ -1,20 +1,18 @@
 #[test_only]
 module suitears::owner_tests {
-  
-  use sui::object;
-  use sui::tx_context;
+
   use sui::test_utils::assert_eq;
 
   use suitears::owner;
 
-  struct Witness has drop {}
+  public struct Witness has drop {}
 
   #[test]
   fun test_sucess_case() {
-    let ctx = tx_context::dummy();
+    let mut ctx = tx_context::dummy();
     let uid = object::new(&mut ctx);
 
-    let cap = owner::new(Witness{}, vector[], &mut ctx);
+    let mut cap = owner::new(Witness{}, vector[], &mut ctx);
 
     assert_eq(owner::contains(&cap, *object::uid_as_inner(&uid)), false);
 
@@ -49,12 +47,12 @@ module suitears::owner_tests {
   }
 
   #[test]
-  #[expected_failure(abort_code = owner::ENotAllowed)] 
+  #[expected_failure(abort_code = owner::ENotAllowed)]
   fun test_failure_case() {
-    let ctx = tx_context::dummy();
+    let mut ctx = tx_context::dummy();
     let uid = object::new(&mut ctx);
     let uid2 = object::new(&mut ctx);
-    let cap = owner::new(Witness{}, vector[], &mut ctx);
+    let mut cap = owner::new(Witness{}, vector[], &mut ctx);
 
     owner::add(&mut cap, Witness {}, *object::uid_as_inner(&uid));
     owner::assert_ownership(&cap, *object::uid_as_inner(&uid2));

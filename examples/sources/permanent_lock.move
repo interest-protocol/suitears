@@ -21,7 +21,7 @@ module examples::permanent_lock {
 
   // === Structs ===   
 
-  struct PermanentLock<T: store> has key, store {
+  public struct PermanentLock<T: store> has key, store {
     id: UID,
     // The timestamp in which the `data` was locked. 
     start: u64,
@@ -32,7 +32,7 @@ module examples::permanent_lock {
   }
 
   // Hot Potatoe to force the data to be locked again. 
-  struct Temporary<phantom T> {
+  public struct Temporary<phantom T> {
     // The `data` is relocked using the previous `time_delay`. 
     time_delay: u64, 
   }

@@ -11,14 +11,14 @@ module examples::request_lock_testss {
   use examples::request_lock;
   use examples::request_issuer_test;
 
-  struct Data has store, drop {
+  public struct Data has store, drop {
     value: u64
   }
 
   #[test]
   fun test_success_case() {
-    let ctx = tx_context::dummy();
-    let lock = request_issuer_test::create_lock();
+    let mut ctx = tx_context::dummy();
+    let mut lock = request_issuer_test::create_lock();
     
     request_lock::add(&mut lock, request_lock::new_request<request_one::Witness>(&mut ctx));
     request_lock::add(&mut lock, request_lock::new_request_with_payload<request_two::Witness, Data>(Data { value: 7 }, &mut ctx));
@@ -49,8 +49,8 @@ module examples::request_lock_testss {
   #[test]
   #[expected_failure(abort_code = request_lock::EWrongRequest)]
   fun test_wrong_complete_request() {
-    let ctx = tx_context::dummy();
-    let lock = request_issuer_test::create_lock();
+    let mut ctx = tx_context::dummy();
+    let mut lock = request_issuer_test::create_lock();
     
     request_lock::add(&mut lock, request_lock::new_request<request_one::Witness>(&mut ctx));
     request_lock::add(&mut lock, request_lock::new_request_with_payload<request_two::Witness, Data>(Data { value: 7 }, &mut ctx));
@@ -63,8 +63,8 @@ module examples::request_lock_testss {
   #[test]
   #[expected_failure(abort_code = request_lock::ERequestHasPayload)]
   fun test_wrong_complete_with_payload() {
-    let ctx = tx_context::dummy();
-    let lock = request_issuer_test::create_lock();
+    let mut ctx = tx_context::dummy();
+    let mut lock = request_issuer_test::create_lock();
     
     request_lock::add(&mut lock, request_lock::new_request<request_one::Witness>(&mut ctx));
     request_lock::add(&mut lock, request_lock::new_request_with_payload<request_two::Witness, Data>(Data { value: 7 }, &mut ctx));
@@ -78,8 +78,8 @@ module examples::request_lock_testss {
   #[test]
   #[expected_failure(abort_code = request_lock::ERequestHasPayload)]
   fun test_wrong_complete_with_no_payload() {
-    let ctx = tx_context::dummy();
-    let lock = request_issuer_test::create_lock();
+    let mut ctx = tx_context::dummy();
+    let mut lock = request_issuer_test::create_lock();
     
     request_lock::add(&mut lock, request_lock::new_request<request_one::Witness>(&mut ctx));
     request_lock::add(&mut lock, request_lock::new_request_with_payload<request_two::Witness, Data>(Data { value: 7 }, &mut ctx));
@@ -93,8 +93,8 @@ module examples::request_lock_testss {
   #[test]  
   #[expected_failure]
   fun test_invalid_destroy() {
-    let ctx = tx_context::dummy();
-    let lock = request_issuer_test::create_lock();
+    let mut ctx = tx_context::dummy();
+    let mut lock = request_issuer_test::create_lock();
     
     request_lock::add(&mut lock, request_lock::new_request<request_one::Witness>(&mut ctx));
     request_lock::add(&mut lock, request_lock::new_request_with_payload<request_two::Witness, Data>(Data { value: 7 }, &mut ctx));
@@ -110,7 +110,7 @@ module examples::request_issuer_test {
 
   use examples::request_lock::{Self, Lock};
 
-  struct Issuer has drop {}
+  public struct Issuer has drop {}
 
   public fun create_lock(): Lock<Issuer> {
     request_lock::new_lock(Issuer {})
@@ -123,7 +123,7 @@ module examples::request_one {
   use examples::request_lock::{Self, Lock};
   use examples::request_issuer_test::Issuer;
 
-  struct Witness has drop {}
+  public struct Witness has drop {}
 
   public fun complete(self: &mut Lock<Issuer>) {
     request_lock::complete(self, Witness{});
@@ -136,7 +136,7 @@ module examples::request_two {
   use examples::request_lock::{Self, Lock};
   use examples::request_issuer_test::Issuer;
 
-  struct Witness has drop {}
+  public struct Witness has drop {}
 
   public fun complete<Payload: store>(self: &mut Lock<Issuer>): Payload {
     request_lock::complete_with_payload(self, Witness{})

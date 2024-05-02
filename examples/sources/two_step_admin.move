@@ -18,12 +18,12 @@ module examples::two_step_admin {
 
   // The owner of this object can add and remove minters + update the metadata
   // * Important NO store key, so it cannot be transferred
-  struct AdminCap<phantom T: drop> has key {
+  public struct AdminCap<phantom T: drop> has key {
     id: UID
   }
 
   // shared object
-  struct TransferRequest<phantom T: drop> has key {
+  public struct TransferRequest<phantom T: drop> has key {
     id: UID,
     pending_admin: address,
     accepted: bool,

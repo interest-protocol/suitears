@@ -8,7 +8,7 @@ module suitears::fund_tests {
 
   #[test]
   fun test_case_one() {
-    let pool = fund::empty();
+    let mut pool = fund::empty();
 
     // Fund starts empty
     assert_eq(fund::underlying(&pool), 0);

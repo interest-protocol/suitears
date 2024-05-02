@@ -2,6 +2,7 @@
 name = "SuiTears"
 version = "0.0.2"
 published-at = "0xf7334947a5037552a94cee15fc471dbda71bf24d46c97ee24e1fdac38e26644c"
+edition = "2024.beta"
 
 [dependencies]
 MoveStdlib = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/move-stdlib", rev = "framework/mainnet" }

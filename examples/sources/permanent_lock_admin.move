@@ -13,7 +13,7 @@ module examples::permanent_lock_admin {
      * 2 -> Call Admin Function with &AdminCap<T>
      * 3 -> Call permanent_lock::relock_permanently to relock and store the AdminCap<T> again
      */
-    struct AdminCap<phantom T> has store {}
+    public struct AdminCap<phantom T> has store {}
 
     public fun create<T: drop>(otw: T, c: &Clock, time_delay: u64, ctx: &mut TxContext): PermanentLock<AdminCap<T>> {
       assert!(is_one_time_witness(&otw), EInvalidWitness);
