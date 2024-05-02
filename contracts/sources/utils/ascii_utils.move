@@ -47,9 +47,9 @@ module suitears::ascii_utils {
 
     let (haystack, needle) = (a, b);
     
-    let (i, end) = (0, ascii::length(&needle) - 1);
+    let (mut i, end) = (0, ascii::length(&needle) - 1);
     while (i + end < ascii::length(&haystack)) {
-      let j = end;
+      let mut j = end;
       loop {
         if (into_char(&haystack, i + j) == into_char(&needle, j)) {
           if (j == 0) {
@@ -75,9 +75,9 @@ module suitears::ascii_utils {
   * @return String. `a` + `b` => "hello" `append` "world" => "helloworld". 
   */
   public fun append(a: String, b: String): String {
-    let i = 0;
+    let mut i = 0;
     let b_length = ascii::length(&b);
-    let a_copy = a;
+    let mut a_copy = a;
     while (i < b_length) {
       ascii::push_char(&mut a_copy, into_char(&b, i));
       i = i + 1;
@@ -102,7 +102,7 @@ module suitears::ascii_utils {
 
     let bytes = ascii::into_bytes(s);
 
-    let (i, slice) = (i, vector<u8>[]);
+    let (mut i, mut slice) = (i, vector<u8>[]);
 
     while (i < j) {
       vector::push_back(&mut slice, *vector::borrow(&bytes, i));
@@ -139,7 +139,7 @@ module suitears::ascii_utils {
  * @return String. The lowercase `string`.   
  */
   public fun to_lower_case(string: String): String {
-    let (bytes, i) = (ascii::into_bytes(string), 0);
+    let (mut bytes, mut i) = (ascii::into_bytes(string), 0);
     while (i < vector::length(&bytes)) {
       let byte = vector::borrow_mut(&mut bytes, i);
       if (*byte >= 65u8 && *byte <= 90u8) *byte = *byte + 32u8;
@@ -155,7 +155,7 @@ module suitears::ascii_utils {
  * @return String. The uppercased `string`.   
  */
   public fun to_upper_case(string: String): String {
-    let (bytes, i) = (ascii::into_bytes(string), 0);
+    let (mut bytes, mut i) = (ascii::into_bytes(string), 0);
     while (i < vector::length(&bytes)) {
       let byte = vector::borrow_mut(&mut bytes, i);
       if (*byte >= 97u8 && *byte <= 122u8) *byte = *byte - 32u8;
@@ -170,11 +170,11 @@ module suitears::ascii_utils {
   * @param value A u128.  
   * @return String. The string representation of `value`. E.g. 128 => "128". 
   */
-  public fun u128_to_string(value: u128): String {
+  public fun u128_to_string(mut value: u128): String {
     if (value == 0) {
       return ascii::string(b"0")
     };
-    let buffer = vector::empty<u8>();
+    let mut buffer = vector::empty<u8>();
     while (value != 0) {
       vector::push_back(&mut buffer, ((48 + value % 10) as u8));
       value = value / 10;
@@ -193,8 +193,8 @@ module suitears::ascii_utils {
     if (value == 0) {
       return ascii::string(b"0x00")
     };
-    let temp: u128 = value;
-    let length: u128 = 0;
+    let mut temp: u128 = value;
+    let mut length: u128 = 0;
     while (temp != 0) {
       length = length + 1;
       temp = temp >> 8;
@@ -211,11 +211,11 @@ module suitears::ascii_utils {
   * @param length of the string.   
   * @return String. The HEX string representation of `value`. E.g. 10 => "0x0A". 
   */  
-  public fun u128_to_hex_string_fixed_length(value: u128, length: u128): String {
-    let buffer = vector::empty<u8>();
+  public fun u128_to_hex_string_fixed_length(mut value: u128, length: u128): String {
+    let mut buffer = vector::empty<u8>();
     let hex_symbols = HEX_SYMBOLS;
 
-    let i: u128 = 0;
+    let mut i: u128 = 0;
     while (i < length * 2) {
       vector::push_back(&mut buffer, *vector::borrow(&hex_symbols, (value & 0xf as u64)));
       value = value >> 4;
@@ -235,10 +235,10 @@ module suitears::ascii_utils {
   */  
   public fun bytes_to_hex_string(bytes: vector<u8>): String {
     let length = vector::length(&bytes);
-    let buffer = b"0x";
+    let mut buffer = b"0x";
     let hex_symbols = HEX_SYMBOLS;
 
-    let i: u64 = 0;
+    let mut i: u64 = 0;
     while (i < length) {
       let byte = *vector::borrow(&bytes, i);
       vector::push_back(&mut buffer, *vector::borrow(&hex_symbols, (byte >> 4 & 0xf as u64)));
@@ -258,10 +258,10 @@ module suitears::ascii_utils {
   * @return String. The `ascii::String` representation of `addr`. 
   */    
   public fun addr_into_string(addr: address): String {
-    let ascii_bytes = vector::empty<u8>();
+    let mut ascii_bytes = vector::empty<u8>();
 
     let addr_bytes = bcs::to_bytes(&addr);
-    let i = 0;
+    let mut i = 0;
     while (i < vector::length(&addr_bytes)) {
       // split the byte into halves
       let low: u8 = *vector::borrow(&addr_bytes, i) % 16u8;

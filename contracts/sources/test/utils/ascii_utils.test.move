@@ -8,7 +8,7 @@ module suitears::ascii_utils_tests {
   use suitears::ascii_utils::{
     slice,
     append,
-    contains, 
+    contains,
     into_char,
     u8_to_ascii,
     ascii_to_u8,
@@ -18,7 +18,7 @@ module suitears::ascii_utils_tests {
     addr_into_string,
     u128_to_hex_string,
     bytes_to_hex_string,
-    u128_to_hex_string_fixed_length, 
+    u128_to_hex_string_fixed_length,
   };
 
   const MAX_U128: u128 = 340282366920938463463374607431768211455;
@@ -36,12 +36,12 @@ module suitears::ascii_utils_tests {
 
   #[test]
   fun test_slice() {
-    let type = string(b"0x21a31ea6f1924898b78f06f0d929f3b91a2748c0::schema::Schema");
+    let `type` = string(b"0x21a31ea6f1924898b78f06f0d929f3b91a2748c0::schema::Schema");
 
-    let slice = slice(type, 0, 42);
+    let slice = slice(`type`, 0, 42);
     assert_eq(string(b"0x21a31ea6f1924898b78f06f0d929f3b91a2748c0"), slice);
 
-    let slice = slice(type, 44, length(&type));
+    let slice = slice(`type`, 44, length(&`type`));
     assert_eq(string(b"schema::Schema"), slice);
   }
 
@@ -57,10 +57,10 @@ module suitears::ascii_utils_tests {
     let string = ascii::string(b"HeLLo WorLd");
     let lower = to_lower_case(string);
     let upper = to_upper_case(string);
-    
+
     assert_eq(lower, ascii::string(b"hello world"));
     assert_eq(upper, ascii::string(b"HELLO WORLD"));
-  }   
+  }
 
   #[test]
   fun test_u128_to_string() {
@@ -106,25 +106,25 @@ module suitears::ascii_utils_tests {
   fun test_decompose_type() {
     let scenario = test_scenario::begin(@0x5);
     {
-      let type = string(b"0x21a31ea6f1924898b78f06f0d929f3b91a2748c0::schema::Schema");
+      let `type` = string(b"0x21a31ea6f1924898b78f06f0d929f3b91a2748c0::schema::Schema");
       let delimeter = string(b"::");
-      contains(type, delimeter);
+      contains(`type`, delimeter);
 
-      assert_eq(contains(type, string(b"1a31e")), true);
+      assert_eq(contains(`type`, string(b"1a31e")), true);
     };
     test_scenario::end(scenario);
   }
 
   #[test]
   fun test_addr_into_string() {
-    let scenario = test_scenario::begin(@0x5);
+    let mut scenario = test_scenario::begin(@0x5);
     let _ctx = test_scenario::ctx(&mut scenario);
     {
       let string = addr_into_string(@0x23a);
       assert_eq(string(b"000000000000000000000000000000000000000000000000000000000000023a"), string);
     };
     test_scenario::end(scenario);
-  } 
+  }
 
   #[test]
   fun test_u8_to_ascii() {

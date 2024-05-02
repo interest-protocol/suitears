@@ -33,7 +33,7 @@ module suitears::linear_vesting_airdrop {
   // @dev Thrown if a user submits an empty proof.
   const EInvalidProof: u64 = 3;
 
-  struct Airdrop<phantom T> has key, store { 
+  public struct Airdrop<phantom T> has key, store { 
     id: UID,
     // Total amount of airdrop coins
     balance: Balance<T>,

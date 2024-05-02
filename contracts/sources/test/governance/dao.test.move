@@ -35,19 +35,19 @@ module suitears::dao_tests {
   const PROPOSAL_ACTION_DELAY: u64 = 11;
   const PROPOSAL_QUORUM_VOTES: u64 = 2341;
 
-  struct InterestDAO has drop {}
+  public struct InterestDAO has drop {}
 
-  struct AuthorizedWitness has drop {}
+  public struct AuthorizedWitness has drop {}
 
   #[test]
   #[lint_allow(share_owned)]
   fun initiates_correctly() {
-    let scenario = scenario();
+    let mut scenario = scenario();
     let (alice, _) = people();
 
     let test = &mut scenario;
 
-    let c = clock::create_for_testing(ctx(test));
+    let mut c = clock::create_for_testing(ctx(test));
 
     set_up(test);
 
@@ -72,7 +72,7 @@ module suitears::dao_tests {
     // Test proposal
     next_tx(test, alice);
     {
-      let dao = test::take_shared<Dao<InterestDAO>>(test);
+      let mut dao = test::take_shared<Dao<InterestDAO>>(test);
       
       clock::increment_for_testing(&mut c, 123);
 
@@ -107,7 +107,7 @@ module suitears::dao_tests {
     // test votes
     next_tx(test, alice);
     {
-      let proposal = test::take_shared<Proposal<InterestDAO>>(test);
+      let mut proposal = test::take_shared<Proposal<InterestDAO>>(test);
       clock::increment_for_testing(&mut c, DAO_VOTING_DELAY + 1);
 
       let vote = dao::cast_vote<InterestDAO, S_ETH>(
@@ -136,18 +136,18 @@ module suitears::dao_tests {
   #[test]
   #[lint_allow(share_owned)]
   fun test_end_to_end_sucessful_not_executable_proposal() {
-    let scenario = scenario();
+    let mut scenario = scenario();
     let (alice, bob) = people();
 
     let test = &mut scenario;
 
-    let c = clock::create_for_testing(ctx(test));
+    let mut c = clock::create_for_testing(ctx(test));
 
     set_up(test);
 
     next_tx(test, alice);  
     {
-      let dao = test::take_shared<Dao<InterestDAO>>(test);
+      let mut dao = test::take_shared<Dao<InterestDAO>>(test);
       
       clock::increment_for_testing(&mut c, 123);
 
@@ -171,7 +171,7 @@ module suitears::dao_tests {
     // 30 NO votes
     next_tx(test, bob);
     {
-      let proposal = test::take_shared<Proposal<InterestDAO>>(test);
+      let mut proposal = test::take_shared<Proposal<InterestDAO>>(test);
 
       clock::increment_for_testing(&mut c, DAO_VOTING_DELAY + 1);
 
@@ -193,7 +193,7 @@ module suitears::dao_tests {
     // 70 YES votes
     next_tx(test, alice);
     {
-      let proposal = test::take_shared<Proposal<InterestDAO>>(test);
+      let mut proposal = test::take_shared<Proposal<InterestDAO>>(test);
 
       let vote = dao::cast_vote<InterestDAO, S_ETH>(
         &mut proposal,
@@ -211,7 +211,7 @@ module suitears::dao_tests {
     // Queue the proposal
     next_tx(test, alice);
     {
-      let proposal = test::take_shared<Proposal<InterestDAO>>(test);
+      let mut proposal = test::take_shared<Proposal<InterestDAO>>(test);
 
       clock::increment_for_testing(&mut c, DAO_VOTING_PERIOD);
 
@@ -237,18 +237,18 @@ module suitears::dao_tests {
   #[test]
   #[lint_allow(share_owned)]
   fun test_end_to_end_defeated_proposal() {
-  let scenario = scenario();
+  let mut scenario = scenario();
     let (alice, bob) = people();
 
     let test = &mut scenario;
 
-    let c = clock::create_for_testing(ctx(test));
+    let mut c = clock::create_for_testing(ctx(test));
 
     set_up(test);
 
     next_tx(test, alice);  
     {
-      let dao = test::take_shared<Dao<InterestDAO>>(test);
+      let mut dao = test::take_shared<Dao<InterestDAO>>(test);
       
       clock::increment_for_testing(&mut c, 123);
 
@@ -272,7 +272,7 @@ module suitears::dao_tests {
     // 30 NO votes
     next_tx(test, bob);
     {
-      let proposal = test::take_shared<Proposal<InterestDAO>>(test);
+      let mut proposal = test::take_shared<Proposal<InterestDAO>>(test);
 
       clock::increment_for_testing(&mut c, DAO_VOTING_DELAY + 1);
 
@@ -293,7 +293,7 @@ module suitears::dao_tests {
 
     next_tx(test, alice);
     {
-      let proposal = test::take_shared<Proposal<InterestDAO>>(test);
+      let mut proposal = test::take_shared<Proposal<InterestDAO>>(test);
 
       clock::increment_for_testing(&mut c, DAO_VOTING_DELAY + 1);
 
@@ -336,18 +336,18 @@ module suitears::dao_tests {
   #[test]
   #[lint_allow(share_owned)]
   fun test_vote_mechanisms() {
-    let scenario = scenario();
+    let mut scenario = scenario();
     let (_, bob) = people();
 
     let test = &mut scenario;
 
-    let c = clock::create_for_testing(ctx(test));
+    let mut c = clock::create_for_testing(ctx(test));
 
     set_up_with_proposal(test, &c);
 
     next_tx(test, bob);
     {
-      let proposal = test::take_shared<Proposal<InterestDAO>>(test);
+      let mut proposal = test::take_shared<Proposal<InterestDAO>>(test);
 
       clock::increment_for_testing(&mut c, DAO_VOTING_DELAY + 1);
 
@@ -368,8 +368,8 @@ module suitears::dao_tests {
 
     next_tx(test, bob);
     {
-      let proposal = test::take_shared<Proposal<InterestDAO>>(test);
-      let vote = test::take_from_sender<Vote<InterestDAO, S_ETH>>(test);
+      let mut proposal = test::take_shared<Proposal<InterestDAO>>(test);
+      let mut vote = test::take_from_sender<Vote<InterestDAO, S_ETH>>(test);
 
       assert_eq(dao::for_votes(&proposal), 0);
       assert_eq(dao::against_votes(&proposal), 900);
@@ -390,7 +390,7 @@ module suitears::dao_tests {
     
     next_tx(test, bob);
     {
-      let proposal = test::take_shared<Proposal<InterestDAO>>(test);
+      let mut proposal = test::take_shared<Proposal<InterestDAO>>(test);
       let vote = test::take_from_sender<Vote<InterestDAO, S_ETH>>(test);
 
       let revoked_coin = dao::revoke_vote<InterestDAO, S_ETH>(
@@ -409,7 +409,7 @@ module suitears::dao_tests {
 
     next_tx(test, bob);
     {
-      let proposal = test::take_shared<Proposal<InterestDAO>>(test);
+      let mut proposal = test::take_shared<Proposal<InterestDAO>>(test);
 
       assert_eq(dao::state(&proposal, &c), ACTIVE);
 
@@ -459,7 +459,7 @@ module suitears::dao_tests {
   #[lint_allow(share_owned)]
   #[expected_failure(abort_code = dao::EInvalidOTW)]
   fun test_no_otw_dao() {
-    let scenario = scenario();
+    let mut scenario = scenario();
     let (alice, _) = people();
 
     let test = &mut scenario;  
@@ -487,7 +487,7 @@ module suitears::dao_tests {
   #[lint_allow(share_owned)]
   #[expected_failure(abort_code = dao::EInvalidQuorumRate)]
   fun test_zero_dao_quorum_rate() {
-    let scenario = scenario();
+    let mut scenario = scenario();
     let (alice, _) = people();
 
     let test = &mut scenario;  
@@ -514,7 +514,7 @@ module suitears::dao_tests {
   #[lint_allow(share_owned)]
   #[expected_failure(abort_code = dao::EInvalidQuorumRate)]
   fun test_zero_dao_out_of_bounds_quorum_rate() {
-    let scenario = scenario();
+    let mut scenario = scenario();
     let (alice, _) = people();
 
     let test = &mut scenario;  
@@ -541,7 +541,7 @@ module suitears::dao_tests {
   #[lint_allow(share_owned)]
   #[expected_failure(abort_code = dao::EActionDelayTooShort)]
   fun test_proposal_low_action_delay() {
-    let scenario = scenario();
+    let mut scenario = scenario();
     let (alice, _) = people();
 
     let test = &mut scenario;
@@ -552,7 +552,7 @@ module suitears::dao_tests {
 
     next_tx(test, alice);  
     {
-      let dao = test::take_shared<Dao<InterestDAO>>(test);
+      let mut dao = test::take_shared<Dao<InterestDAO>>(test);
 
       let proposal = dao::propose(
         &mut dao,
@@ -577,7 +577,7 @@ module suitears::dao_tests {
   #[lint_allow(share_owned)]
   #[expected_failure(abort_code = dao::EMinQuorumVotesTooSmall)]
   fun test_proposal_low_quorum_votes() {
-    let scenario = scenario();
+    let mut scenario = scenario();
     let (alice, _) = people();
 
     let test = &mut scenario;
@@ -588,7 +588,7 @@ module suitears::dao_tests {
 
     next_tx(test, alice);  
     {
-      let dao = test::take_shared<Dao<InterestDAO>>(test);
+      let mut dao = test::take_shared<Dao<InterestDAO>>(test);
 
       let proposal = dao::propose(
         &mut dao,
@@ -613,7 +613,7 @@ module suitears::dao_tests {
   #[lint_allow(share_owned)]
   #[expected_failure(abort_code = dao::EEmptyHash)]
   fun test_proposal_no_hash() {
-    let scenario = scenario();
+    let mut scenario = scenario();
     let (alice, _) = people();
 
     let test = &mut scenario;
@@ -624,7 +624,7 @@ module suitears::dao_tests {
 
     next_tx(test, alice);  
     {
-      let dao = test::take_shared<Dao<InterestDAO>>(test);
+      let mut dao = test::take_shared<Dao<InterestDAO>>(test);
 
       let proposal = dao::propose(
         &mut dao,
@@ -649,7 +649,7 @@ module suitears::dao_tests {
   #[lint_allow(share_owned)]
   #[expected_failure(abort_code = dao::EProposalMustBeActive)]
   fun test_vote_on_pending_proposal() {
-    let scenario = scenario();
+    let mut scenario = scenario();
     let (alice, _) = people();
 
     let test = &mut scenario;
@@ -660,7 +660,7 @@ module suitears::dao_tests {
 
     next_tx(test, alice);
     {
-      let proposal = test::take_shared<Proposal<InterestDAO>>(test);
+      let mut proposal = test::take_shared<Proposal<InterestDAO>>(test);
 
       let vote = dao::cast_vote<InterestDAO, S_ETH>(
         &mut proposal,
@@ -683,18 +683,18 @@ module suitears::dao_tests {
   #[lint_allow(share_owned)]
   #[expected_failure(abort_code = dao::EProposalMustBeActive)]
   fun test_vote_on_defeated_proposal() {
-    let scenario = scenario();
+    let mut scenario = scenario();
     let (alice, _) = people();
 
     let test = &mut scenario;
 
-    let c = clock::create_for_testing(ctx(test));
+    let mut c = clock::create_for_testing(ctx(test));
 
     set_up_with_proposal(test, &c);
 
     next_tx(test, alice);
     {
-      let proposal = test::take_shared<Proposal<InterestDAO>>(test);
+      let mut proposal = test::take_shared<Proposal<InterestDAO>>(test);
 
       clock::increment_for_testing(&mut c, PROPOSAL_ACTION_DELAY + 1);
 
@@ -713,7 +713,7 @@ module suitears::dao_tests {
 
     next_tx(test, alice);
     {
-      let proposal = test::take_shared<Proposal<InterestDAO>>(test);
+      let mut proposal = test::take_shared<Proposal<InterestDAO>>(test);
 
       clock::increment_for_testing(&mut c, DAO_VOTING_PERIOD + 1);
 
@@ -738,18 +738,18 @@ module suitears::dao_tests {
   #[lint_allow(share_owned)]
   #[expected_failure(abort_code = dao::EInvalidCoinType)]
   fun test_vote_with_wrong_coin_type() {
-    let scenario = scenario();
+    let mut scenario = scenario();
     let (alice, _) = people();
 
     let test = &mut scenario;
 
-    let c = clock::create_for_testing(ctx(test));
+    let mut c = clock::create_for_testing(ctx(test));
 
     set_up_with_proposal(test, &c);
 
     next_tx(test, alice);
     {
-      let proposal = test::take_shared<Proposal<InterestDAO>>(test);
+      let mut proposal = test::take_shared<Proposal<InterestDAO>>(test);
 
       clock::increment_for_testing(&mut c, PROPOSAL_ACTION_DELAY + 1);
 
@@ -774,18 +774,18 @@ module suitears::dao_tests {
   #[lint_allow(share_owned)]
   #[expected_failure(abort_code = dao::ECannotVoteWithZeroCoinValue)]
   fun test_vote_with_zero_coin() {
-    let scenario = scenario();
+    let mut scenario = scenario();
     let (alice, _) = people();
 
     let test = &mut scenario;
 
-    let c = clock::create_for_testing(ctx(test));
+    let mut c = clock::create_for_testing(ctx(test));
 
     set_up_with_proposal(test, &c);
 
     next_tx(test, alice);
     {
-      let proposal = test::take_shared<Proposal<InterestDAO>>(test);
+      let mut proposal = test::take_shared<Proposal<InterestDAO>>(test);
 
       clock::increment_for_testing(&mut c, PROPOSAL_ACTION_DELAY + 1);
 
@@ -810,19 +810,19 @@ module suitears::dao_tests {
   #[lint_allow(share_owned)]
   #[expected_failure(abort_code = dao::EProposalMustBeActive)]
   fun test_change_vote_on_agreed_proposal() {
-    let scenario = scenario();
+    let mut scenario = scenario();
     let (alice, bob) = people();
 
     let test = &mut scenario;
 
-    let c = clock::create_for_testing(ctx(test));
+    let mut c = clock::create_for_testing(ctx(test));
 
     set_up_with_proposal(test, &c);
 
     // 30 NO votes
     next_tx(test, bob);
     {
-      let proposal = test::take_shared<Proposal<InterestDAO>>(test);
+      let mut proposal = test::take_shared<Proposal<InterestDAO>>(test);
 
       clock::increment_for_testing(&mut c, DAO_VOTING_DELAY + 1);
 
@@ -844,7 +844,7 @@ module suitears::dao_tests {
     // 70 YES votes
     next_tx(test, alice);
     {
-      let proposal = test::take_shared<Proposal<InterestDAO>>(test);
+      let mut proposal = test::take_shared<Proposal<InterestDAO>>(test);
 
       let vote = dao::cast_vote<InterestDAO, S_ETH>(
         &mut proposal,
@@ -861,11 +861,11 @@ module suitears::dao_tests {
 
     next_tx(test, alice);
     {
-      let proposal = test::take_shared<Proposal<InterestDAO>>(test);
+      let mut proposal = test::take_shared<Proposal<InterestDAO>>(test);
 
       clock::increment_for_testing(&mut c, DAO_VOTING_PERIOD);
 
-      let vote = test::take_from_sender<Vote<InterestDAO, S_ETH>>(test);
+      let mut vote = test::take_from_sender<Vote<InterestDAO, S_ETH>>(test);
 
       dao::change_vote(
         &mut proposal,
@@ -886,12 +886,12 @@ module suitears::dao_tests {
   #[lint_allow(share_owned)]
   #[expected_failure(abort_code = dao::EVoteAndProposalIdMismatch)]
   fun test_change_vote_on_wrong_proposal() {
-    let scenario = scenario();
+    let mut scenario = scenario();
     let (alice, bob) = people();
 
     let test = &mut scenario;
 
-    let c = clock::create_for_testing(ctx(test));
+    let mut c = clock::create_for_testing(ctx(test));
 
     let proposal1_id;
     let proposal2_id;
@@ -900,7 +900,7 @@ module suitears::dao_tests {
 
     next_tx(test, alice);  
     {
-      let dao = test::take_shared<Dao<InterestDAO>>(test);
+      let mut dao = test::take_shared<Dao<InterestDAO>>(test);
       
       clock::increment_for_testing(&mut c, 123);
 
@@ -939,7 +939,7 @@ module suitears::dao_tests {
     // 30 NO votes
     next_tx(test, bob);
     {
-      let proposal = test::take_shared<Proposal<InterestDAO>>(test);
+      let mut proposal = test::take_shared<Proposal<InterestDAO>>(test);
 
       clock::increment_for_testing(&mut c, DAO_VOTING_DELAY + 1);
 
@@ -961,7 +961,7 @@ module suitears::dao_tests {
     // 70 YES votes
     next_tx(test, alice);
     {
-      let proposal = test::take_shared_by_id<Proposal<InterestDAO>>(test, *option::borrow(& proposal1_id));
+      let mut proposal = test::take_shared_by_id<Proposal<InterestDAO>>(test, *option::borrow(& proposal1_id));
 
       let vote = dao::cast_vote<InterestDAO, S_ETH>(
         &mut proposal,
@@ -980,9 +980,9 @@ module suitears::dao_tests {
     {
       let proposal = test::take_shared_by_id<Proposal<InterestDAO>>(test, *option::borrow(& proposal1_id));
       let dao = test::take_shared<Dao<InterestDAO>>(test);
-      let proposal2 = test::take_shared_by_id<Proposal<InterestDAO>>(test, *option::borrow(& proposal2_id));
+      let mut proposal2 = test::take_shared_by_id<Proposal<InterestDAO>>(test, *option::borrow(& proposal2_id));
 
-      let vote = test::take_from_sender<Vote<InterestDAO, S_ETH>>(test);
+      let mut vote = test::take_from_sender<Vote<InterestDAO, S_ETH>>(test);
 
       dao::change_vote(
         &mut proposal2,
@@ -1005,7 +1005,7 @@ module suitears::dao_tests {
   #[lint_allow(share_owned)]
   #[expected_failure(abort_code = dao::EProposalMustBeActive)]
   fun test_revoke_vote_on_pending_proposal() {
-    let scenario = scenario();
+    let mut scenario = scenario();
     let (alice, _) = people();
 
     let test = &mut scenario;
@@ -1016,7 +1016,7 @@ module suitears::dao_tests {
 
     next_tx(test, alice);
     {
-      let proposal = test::take_shared<Proposal<InterestDAO>>(test);
+      let mut proposal = test::take_shared<Proposal<InterestDAO>>(test);
 
       let vote = dao::cast_vote<InterestDAO, S_ETH>(
         &mut proposal,
@@ -1033,7 +1033,7 @@ module suitears::dao_tests {
 
     next_tx(test, alice);
     {
-      let proposal = test::take_shared<Proposal<InterestDAO>>(test);
+      let mut proposal = test::take_shared<Proposal<InterestDAO>>(test);
       let vote = test::take_from_sender<Vote<InterestDAO, S_ETH>>(test);
 
       burn_for_testing(dao::revoke_vote(
@@ -1054,12 +1054,12 @@ module suitears::dao_tests {
   #[lint_allow(share_owned)]
   #[expected_failure(abort_code = dao::EVoteAndProposalIdMismatch)]
   fun test_revoke_vote_on_wrong_proposal() {
-    let scenario = scenario();
+    let mut scenario = scenario();
     let (alice, _) = people();
 
     let test = &mut scenario;
 
-    let c = clock::create_for_testing(ctx(test));
+    let mut c = clock::create_for_testing(ctx(test));
 
     let proposal1_id;
     let proposal2_id;
@@ -1068,7 +1068,7 @@ module suitears::dao_tests {
 
     next_tx(test, alice);  
     {
-      let dao = test::take_shared<Dao<InterestDAO>>(test);
+      let mut dao = test::take_shared<Dao<InterestDAO>>(test);
       
       clock::increment_for_testing(&mut c, 123);
 
@@ -1107,7 +1107,7 @@ module suitears::dao_tests {
     // 30 NO votes
     next_tx(test, alice);
     {
-      let proposal = test::take_shared<Proposal<InterestDAO>>(test);
+      let mut proposal = test::take_shared<Proposal<InterestDAO>>(test);
 
       clock::increment_for_testing(&mut c, DAO_VOTING_DELAY + 1);
 
@@ -1128,7 +1128,7 @@ module suitears::dao_tests {
 
     next_tx(test, alice);
     {
-      let proposal = test::take_shared_by_id<Proposal<InterestDAO>>(test, *option::borrow(& proposal1_id));
+      let mut proposal = test::take_shared_by_id<Proposal<InterestDAO>>(test, *option::borrow(& proposal1_id));
       let dao = test::take_shared<Dao<InterestDAO>>(test);
       let proposal2 = test::take_shared_by_id<Proposal<InterestDAO>>(test, *option::borrow(& proposal2_id));
 
@@ -1154,18 +1154,18 @@ module suitears::dao_tests {
   #[lint_allow(share_owned)]
   #[expected_failure(abort_code = dao::EProposalMustBeActive)]
   fun test_unstake_vote_on_pending_proposal() {
-    let scenario = scenario();
+    let mut scenario = scenario();
     let (alice, _) = people();
 
     let test = &mut scenario;
 
-    let c = clock::create_for_testing(ctx(test));
+    let mut c = clock::create_for_testing(ctx(test));
 
     set_up_with_proposal(test, &c);
 
     next_tx(test, alice);
     {
-      let proposal = test::take_shared<Proposal<InterestDAO>>(test);
+      let mut proposal = test::take_shared<Proposal<InterestDAO>>(test);
 
       let vote = dao::cast_vote<InterestDAO, S_ETH>(
         &mut proposal,
@@ -1205,12 +1205,12 @@ module suitears::dao_tests {
   #[lint_allow(share_owned)]
   #[expected_failure(abort_code = dao::EVoteAndProposalIdMismatch)]
   fun test_unstake_vote_on_wrong_proposal() {
-    let scenario = scenario();
+    let mut scenario = scenario();
     let (alice, _) = people();
 
     let test = &mut scenario;
 
-    let c = clock::create_for_testing(ctx(test));
+    let mut c = clock::create_for_testing(ctx(test));
 
     let proposal1_id;
     let proposal2_id;
@@ -1219,7 +1219,7 @@ module suitears::dao_tests {
 
     next_tx(test, alice);  
     {
-      let dao = test::take_shared<Dao<InterestDAO>>(test);
+      let mut dao = test::take_shared<Dao<InterestDAO>>(test);
       
       clock::increment_for_testing(&mut c, 123);
 
@@ -1258,7 +1258,7 @@ module suitears::dao_tests {
     // 30 NO votes
     next_tx(test, alice);
     {
-      let proposal = test::take_shared<Proposal<InterestDAO>>(test);
+      let mut proposal = test::take_shared<Proposal<InterestDAO>>(test);
 
       clock::increment_for_testing(&mut c, DAO_VOTING_DELAY + 1);
 
@@ -1344,7 +1344,7 @@ module suitears::dao_tests {
 
     next_tx(test, alice);  
     {
-      let dao = test::take_shared<Dao<InterestDAO>>(test);
+      let mut dao = test::take_shared<Dao<InterestDAO>>(test);
 
       let proposal = dao::propose(
         &mut dao,

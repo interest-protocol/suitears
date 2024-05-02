@@ -38,7 +38,7 @@ module suitears::airdrop {
 
   // === Struct ===  
 
-  struct Airdrop<phantom T> has key, store { 
+  public struct Airdrop<phantom T> has key, store { 
     id: UID,
     // Total amount of airdrop coins
     balance: Balance<T>,

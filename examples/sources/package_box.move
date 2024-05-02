@@ -17,7 +17,7 @@ module examples::package_box {
 
   // === Structs ===
 
-  struct PackageBox<T: store> has key, store {
+  public struct PackageBox<T: store> has key, store {
     id: UID,
     // Wrapped `T`PackageBox<
     content: T,

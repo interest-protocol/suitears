@@ -39,7 +39,7 @@ module suitears::airdrop_utils {
     amount: u64, 
     sender: address
   ): u256 {
-    let payload = bcs::to_bytes(&sender);
+    let mut payload = bcs::to_bytes(&sender);
 
     vector::append(&mut payload, bcs::to_bytes(&amount));
     let leaf = hash::sha3_256(payload);

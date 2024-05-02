@@ -12,7 +12,7 @@ module suitears::fund {
 
   // === Structs === 
 
-  struct Fund has store, copy, drop {
+  public struct Fund has store, copy, drop {
     // The amount of shares issued based on the underlying amount.  
     shares: u128,
     // The amount of assets in the fund. 

@@ -23,7 +23,7 @@ module suitears::linear_vesting_wallet_clawback {
   const EInvalidStart: u64 = 0;
 
   // Must be shared to allow both the clawback and recipient owners to interact with it.  
-  struct Wallet<phantom T> has key {
+  public struct Wallet<phantom T> has key {
     id: UID,
     // Amount of tokens to give to the holder of the wallet
     balance: Balance<T>,
@@ -37,10 +37,10 @@ module suitears::linear_vesting_wallet_clawback {
   }
 
   // @dev The {OwnerCap<RecipientWitness>} with this witness can claim the coins over time. 
-  struct RecipientWitness has drop {}
+  public struct RecipientWitness has drop {}
 
   // @dev The {OwnerCap<ClawBackWitness>} with this witness can clawback the all not releasable coins. 
-  struct ClawBackWitness has drop {}
+  public struct ClawBackWitness has drop {}
 
   // === Public Create Function ===  
 

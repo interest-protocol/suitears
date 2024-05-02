@@ -18,7 +18,7 @@ module suitears::coin_decimals {
 
   // === Structs ===  
 
-  struct Decimals has store {
+  public struct Decimals has store {
     // Decimals of a `sui::coin` 
     decimals: u8,
     // The scalar of a `sui::coin`'s decimals. It is calculated by 10^decimals.  
@@ -26,7 +26,7 @@ module suitears::coin_decimals {
     scalar: u64
   }
 
-  struct CoinDecimals has key, store {
+  public struct CoinDecimals has key, store {
     id: UID
   }
 

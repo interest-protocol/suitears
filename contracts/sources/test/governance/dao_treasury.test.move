@@ -22,11 +22,11 @@ module suitears::dao_treasury_tests {
 
   const FLASH_LOAN_FEE: u64 = 5000000; // 0.5%
 
-  struct InterestDAO has drop {}
+  public struct InterestDAO has drop {}
 
   #[test]
   fun test_treasury_view_functions() {
-    let scenario = scenario();
+    let mut scenario = scenario();
     let (alice, _) = people();
 
     let test = &mut scenario;
@@ -38,7 +38,7 @@ module suitears::dao_treasury_tests {
     // Dao is initialized correctly
     next_tx(test, alice);  
     {
-      let treasury = test::take_shared<DaoTreasury<InterestDAO>>(test);
+      let mut treasury = test::take_shared<DaoTreasury<InterestDAO>>(test);
       let dao = test::take_shared<Dao<InterestDAO>>(test);
 
       assert_eq(dao_treasury::balance<InterestDAO, S_ETH>(&treasury), 0);
@@ -57,7 +57,7 @@ module suitears::dao_treasury_tests {
 
   #[test]
   fun test_flash_loan() {
-    let scenario = scenario();
+    let mut scenario = scenario();
     let (alice, _) = people();
 
     let test = &mut scenario;
@@ -69,12 +69,12 @@ module suitears::dao_treasury_tests {
     // Dao is initialized correctly
     next_tx(test, alice); 
     {
-      let treasury = test::take_shared<DaoTreasury<InterestDAO>>(test);
+      let mut treasury = test::take_shared<DaoTreasury<InterestDAO>>(test);
       let dao = test::take_shared<Dao<InterestDAO>>(test);
 
       dao_treasury::donate<InterestDAO, S_ETH>(&mut treasury, mint_for_testing(1234, ctx(test)), ctx(test));
 
-      let (borrowed_coin, receipt) = dao_treasury::flash_loan<InterestDAO, S_ETH>(
+      let (mut borrowed_coin, receipt) = dao_treasury::flash_loan<InterestDAO, S_ETH>(
         &mut treasury,
         1234,
         ctx(test)
@@ -106,7 +106,7 @@ module suitears::dao_treasury_tests {
   #[lint_allow(share_owned)]
   #[expected_failure(abort_code = dao_treasury::ERepayAmountTooLow)]
   fun test_low_flash_loan_repay() {
-    let scenario = scenario();
+    let mut scenario = scenario();
     let (alice, _) = people();
 
     let test = &mut scenario;
@@ -118,12 +118,12 @@ module suitears::dao_treasury_tests {
     // Dao is initialized correctly
     next_tx(test, alice); 
     {
-      let treasury = test::take_shared<DaoTreasury<InterestDAO>>(test);
+      let mut treasury = test::take_shared<DaoTreasury<InterestDAO>>(test);
       let dao = test::take_shared<Dao<InterestDAO>>(test);
 
       dao_treasury::donate<InterestDAO, S_ETH>(&mut treasury, mint_for_testing(1234, ctx(test)), ctx(test));
 
-      let (borrowed_coin, receipt) = dao_treasury::flash_loan<InterestDAO, S_ETH>(
+      let (mut borrowed_coin, receipt) = dao_treasury::flash_loan<InterestDAO, S_ETH>(
         &mut treasury,
         1234,
         ctx(test)

@@ -12,16 +12,16 @@ module suitears::linear_vesting_wallet_clawback_tests {
 
   #[test]
   fun test_end_to_end_with_no_clawback() {
-    let ctx = tx_context::dummy();
+    let mut ctx = tx_context::dummy();
 
     let start = 1;
     let end = 8;
     let coin_amount = 1234567890;
 
     let total_coin = coin::mint_for_testing<SUI>(coin_amount, &mut ctx);
-    let c = clock::create_for_testing(&mut ctx);
+    let mut c = clock::create_for_testing(&mut ctx);
 
-    let (owner_cap, recipient_cap, wallet) = linear_vesting_wallet_clawback::new(total_coin, &c, start, end, &mut ctx);
+    let (owner_cap, recipient_cap, mut wallet) = linear_vesting_wallet_clawback::new(total_coin, &c, start, end, &mut ctx);
 
     assert_eq(linear_vesting_wallet_clawback::balance(&wallet), coin_amount);
     assert_eq(linear_vesting_wallet_clawback::start(&wallet), start);
@@ -63,16 +63,16 @@ module suitears::linear_vesting_wallet_clawback_tests {
 
   #[test]
   fun test_end_to_end_with_clawback() {
-    let ctx = tx_context::dummy();
+    let mut ctx = tx_context::dummy();
 
     let start = 1;
     let end = 8;
     let coin_amount = 1234567890;
 
     let total_coin = coin::mint_for_testing<SUI>(coin_amount, &mut ctx);
-    let c = clock::create_for_testing(&mut ctx);
+    let mut c = clock::create_for_testing(&mut ctx);
 
-    let (owner_cap, recipient_cap, wallet) = linear_vesting_wallet_clawback::new(total_coin, &c, start, end, &mut ctx);
+    let (owner_cap, recipient_cap, mut wallet) = linear_vesting_wallet_clawback::new(total_coin, &c, start, end, &mut ctx);
 
     assert_eq(linear_vesting_wallet_clawback::balance(&wallet), coin_amount);
     assert_eq(linear_vesting_wallet_clawback::start(&wallet), start);
@@ -134,14 +134,14 @@ module suitears::linear_vesting_wallet_clawback_tests {
   #[test]
   #[expected_failure(abort_code = linear_vesting_wallet_clawback::EInvalidStart)] 
   fun test_invalid_start_time() {
-    let ctx = tx_context::dummy();
+    let mut ctx = tx_context::dummy();
 
     let start = 2;
     let end = 8;
     let coin_amount = 1234567890;
 
     let total_coin = coin::mint_for_testing<SUI>(coin_amount, &mut ctx);
-    let c = clock::create_for_testing(&mut ctx);
+    let mut c = clock::create_for_testing(&mut ctx);
     clock::increment_for_testing(&mut c, 3);
 
     let (owner_cap, recipient_cap, wallet) = linear_vesting_wallet_clawback::new(total_coin, &c, start, end, &mut ctx);
@@ -155,7 +155,7 @@ module suitears::linear_vesting_wallet_clawback_tests {
   #[test]
   #[expected_failure] 
   fun test_destroy_non_zero_wallet() {
-    let ctx = tx_context::dummy();
+    let mut ctx = tx_context::dummy();
 
     let start = 2;
     let end = 8;

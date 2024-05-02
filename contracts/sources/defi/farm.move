@@ -37,9 +37,9 @@ module suitears::farm {
   // === Structs ===  
 
   // @dev To associate the {OwnerCap} with this module. 
-  struct FarmWitness has drop {}
+  public struct FarmWitness has drop {}
   
-  struct Account<phantom StakeCoin, phantom RewardCoin> has key, store {
+  public struct Account<phantom StakeCoin, phantom RewardCoin> has key, store {
     id: UID,
     // The `sui::object::ID` of the farm to which this account belongs to. 
     farm_id: ID,
@@ -49,7 +49,7 @@ module suitears::farm {
     reward_debt: u256
   }
 
-  struct Farm<phantom StakeCoin, phantom RewardCoin> has key, store {
+  public struct Farm<phantom StakeCoin, phantom RewardCoin> has key, store {
     id: UID,
     // Amount of {RewardCoin} to give to stakers per second.  
     rewards_per_second: u64,
@@ -71,29 +71,29 @@ module suitears::farm {
 
   // === Events ===  
 
-  struct NewFarm<phantom StakeCoin, phantom RewardCoin> has drop, copy {
+  public struct NewFarm<phantom StakeCoin, phantom RewardCoin> has drop, copy {
     farm: ID,
     cap: ID,
   }
 
-  struct AddReward<phantom StakeCoin, phantom RewardCoin> has drop, copy {
+  public struct AddReward<phantom StakeCoin, phantom RewardCoin> has drop, copy {
     farm: ID,
     value: u64
   }
 
-  struct Stake<phantom StakeCoin, phantom RewardCoin> has copy, drop {
+  public struct Stake<phantom StakeCoin, phantom RewardCoin> has copy, drop {
     farm: ID,
     stake_amount: u64,
     reward_amount: u64
   }
 
-  struct Unstake<phantom StakeCoin, phantom RewardCoin> has copy, drop {
+  public struct Unstake<phantom StakeCoin, phantom RewardCoin> has copy, drop {
     farm: ID,
     unstake_amount: u64,
     reward_amount: u64
   }
 
-  struct NewRewardRate<phantom StakeCoin, phantom RewardCoin> has copy, drop {
+  public struct NewRewardRate<phantom StakeCoin, phantom RewardCoin> has copy, drop {
     farm: ID,
     rate: u64
   }
@@ -357,7 +357,7 @@ module suitears::farm {
 
     let stake_amount = coin::value(&stake_coin);
 
-    let reward_coin = coin::zero<RewardCoin>(ctx);
+    let mut reward_coin = coin::zero<RewardCoin>(ctx);
 
     if (account.amount != 0) {
       let pending_reward = calculate_pending_rewards(
@@ -418,8 +418,8 @@ module suitears::farm {
       farm.accrued_rewards_per_share
     );
 
-    let stake_coin = coin::zero<StakeCoin>(ctx);
-    let reward_coin = coin::zero<RewardCoin>(ctx);
+    let mut stake_coin = coin::zero<StakeCoin>(ctx);
+    let mut reward_coin = coin::zero<RewardCoin>(ctx);
 
     if (amount != 0) {
       account.amount = account.amount - amount;

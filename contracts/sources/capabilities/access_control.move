@@ -27,13 +27,13 @@ module suitears::access_control {
 
   // === Structs ===
 
-  struct AccessControl has key, store {
+  public struct AccessControl has key, store {
    id: UID,
    /// Map to store a role => set of addresses with said role.
    roles: VecMap<vector<u8>, VecSet<address>>
   }
 
-  struct Admin has key, store {
+  public struct Admin has key, store {
    id: UID,
    /// Address of the {AccessControl} this capability belongs to.
    access_control: address
@@ -51,7 +51,7 @@ module suitears::access_control {
   * @return {Admin}. The {SUPER_ADMIN_ROLE} {Admin}. 
   */
   public fun new(ctx: &mut TxContext): (AccessControl, Admin) {
-   let access_control = AccessControl {
+   let mut access_control = AccessControl {
     id: object::new(ctx),
     roles: vec_map::empty()
    };

@@ -35,8 +35,8 @@ module suitears::vectors {
   public fun to_vec_set<T: copy + drop>(v: vector<T>): VecSet<T> {
     let len = vector::length(&v);
 
-    let i = 0;
-    let set = vec_set::empty();
+    let mut i = 0;
+    let mut set = vec_set::empty();
     while (len > i) {
       vec_set::insert(&mut set, *vector::borrow(&v, i));
       i = i + 1;
@@ -64,8 +64,8 @@ module suitears::vectors {
       return 0
     };
 
-    let low = 0;
-    let high = vector::length(&vec);
+    let mut low = 0;
+    let mut high = vector::length(&vec);
 
     while (low < high) {
       let mid = average(low, high);
@@ -98,7 +98,7 @@ module suitears::vectors {
   * - `a` and `b` have different lengths. 
   */
   public fun lt(a: vector<u8>, b: vector<u8>): bool {
-    let i = 0;
+    let mut i = 0;
     let len = vector::length(&a);
     assert!(len == vector::length(&b), EVectorLengthMismatch);
 
@@ -124,7 +124,7 @@ module suitears::vectors {
   * - `a` and `b` have different lengths. 
   */
   public fun gt(a: vector<u8>, b: vector<u8>): bool {
-    let i = 0;
+    let mut i = 0;
     let len = vector::length(&a);
     assert!(len == vector::length(&b), EVectorLengthMismatch);
 
@@ -150,7 +150,7 @@ module suitears::vectors {
   * - `a` and `b` have different lengths. 
   */
   public fun lte(a: vector<u8>, b: vector<u8>): bool {
-    let i = 0;
+    let mut i = 0;
     let len = vector::length(&a);
     assert!(len == vector::length(&b), EVectorLengthMismatch);
 
@@ -176,7 +176,7 @@ module suitears::vectors {
   * - `a` and `b` have different lengths. 
   */
   public fun gte(a: vector<u8>, b: vector<u8>): bool {
-    let i = 0;
+    let mut i = 0;
     let len = vector::length(&a);
     assert!(len == vector::length(&b), EVectorLengthMismatch);
 
@@ -199,13 +199,13 @@ module suitears::vectors {
   * @param a The vector to sort. 
   * @return vector<u256>. Sorted `a`.
   */
-  public fun ascending_insertion_sort(a: vector<u256>): vector<u256> {
+  public fun ascending_insertion_sort(mut a: vector<u256>): vector<u256> {
     let len = vector::length(&a);
-    let i = 1;
+    let mut i = 1;
 
     while (len > i) {
       let x = *vector::borrow(&a, i);
-      let curr = i;
+      let mut curr = i;
       let j = 0;
 
       while (len > j) {
@@ -229,13 +229,13 @@ module suitears::vectors {
   * @param a The vector to sort. 
   * @return vector<u256>. Sorted `a`.
   */
-  public fun descending_insertion_sort(a: vector<u256>): vector<u256> {
+  public fun descending_insertion_sort(mut a: vector<u256>): vector<u256> {
     let len = vector::length(&a);
-    let i = 1;
+    let mut i = 1;
 
     while (len > i) {
       let x = *vector::borrow(&a, i);
-      let curr = i;
+      let mut curr = i;
       let j = 0;
 
       while (len > j) {
@@ -288,8 +288,8 @@ module suitears::vectors {
   */  
   fun partion(values: &mut vector<u256>, left: u64, right: u64): u64 {
     let pivot: u64 = left;
-    let index: u64 = pivot + 1;
-    let i: u64 = index;
+    let mut index: u64 = pivot + 1;
+    let mut i: u64 = index;
     
     while (i <= right) {
       if ((*vector::borrow(values, i)) < (*vector::borrow(values, pivot))) {

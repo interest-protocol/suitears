@@ -17,17 +17,17 @@ module suitears::linear_vesting_airdrop_tests {
   #[test]
   #[lint_allow(share_owned)]
   fun test_get_airdrop() {
-    let scenario = scenario();
+    let mut scenario = scenario();
     let alice = @0x94fbcf49867fd909e6b2ecf2802c4b2bba7c9b2d50a13abbb75dbae0216db82a;
     let bob = @0xb4536519beaef9d9207af2b5f83ae35d4ac76cc288ab9004b39254b354149d27;
 
     let test = &mut scenario;
 
-    let c = clock::create_for_testing(ctx(test));
+    let mut c = clock::create_for_testing(ctx(test));
 
     next_tx(test, alice); 
     {
-      let airdrop = airdrop::new(
+      let mut airdrop = airdrop::new(
         mint_for_testing<SUI>(1000, ctx(test)),
         x"59d3298db60c8c3ea35d3de0f43e297df7f27d8c3ba02555bcd7a2eee106aace",
         1,
@@ -60,7 +60,7 @@ module suitears::linear_vesting_airdrop_tests {
 
     next_tx(test, bob); 
     {
-      let airdrop = test::take_shared<Airdrop<SUI>>(test);
+      let mut airdrop = test::take_shared<Airdrop<SUI>>(test);
 
       let wallet = airdrop::get_airdrop(
         &mut airdrop, 
@@ -91,7 +91,7 @@ module suitears::linear_vesting_airdrop_tests {
   #[lint_allow(share_owned)]
   #[expected_failure(abort_code = airdrop::EInvalidRoot)]
   fun test_error_invalid_root() {
-    let scenario = scenario();
+    let mut scenario = scenario();
     let alice = @0x94fbcf49867fd909e6b2ecf2802c4b2bba7c9b2d50a13abbb75dbae0216db82a;
 
     let test = &mut scenario;
@@ -119,12 +119,12 @@ module suitears::linear_vesting_airdrop_tests {
   #[lint_allow(share_owned)]
   #[expected_failure(abort_code = airdrop::EInvalidStartTime)]
   fun test_error_invalid_create_time() {
-    let scenario = scenario();
+    let mut scenario = scenario();
     let alice = @0x94fbcf49867fd909e6b2ecf2802c4b2bba7c9b2d50a13abbb75dbae0216db82a;
 
     let test = &mut scenario;
 
-    let c = clock::create_for_testing(ctx(test));
+    let mut c = clock::create_for_testing(ctx(test));
     clock::increment_for_testing(&mut c, 2);
 
     next_tx(test, alice); 
@@ -148,16 +148,16 @@ module suitears::linear_vesting_airdrop_tests {
   #[lint_allow(share_owned)]
   #[expected_failure(abort_code = airdrop::EAlreadyClaimed)]
   fun test_error_trying_to_claim_again() {
-    let scenario = scenario();
+    let mut scenario = scenario();
     let alice = @0x94fbcf49867fd909e6b2ecf2802c4b2bba7c9b2d50a13abbb75dbae0216db82a;
 
     let test = &mut scenario;
 
-    let c = clock::create_for_testing(ctx(test));
+    let mut c = clock::create_for_testing(ctx(test));
 
     next_tx(test, alice); 
     {
-      let airdrop = airdrop::new(
+      let mut airdrop = airdrop::new(
         mint_for_testing<SUI>(1000, ctx(test)),
         x"59d3298db60c8c3ea35d3de0f43e297df7f27d8c3ba02555bcd7a2eee106aace",
         1,
@@ -198,16 +198,16 @@ module suitears::linear_vesting_airdrop_tests {
   #[lint_allow(share_owned)]
   #[expected_failure]
   fun test_error_wrong_amount() {
-    let scenario = scenario();
+    let mut scenario = scenario();
     let alice = @0x94fbcf49867fd909e6b2ecf2802c4b2bba7c9b2d50a13abbb75dbae0216db82a;
 
     let test = &mut scenario;
 
-    let c = clock::create_for_testing(ctx(test));
+    let mut c = clock::create_for_testing(ctx(test));
 
     next_tx(test, alice); 
     {
-      let airdrop = airdrop::new(
+      let mut airdrop = airdrop::new(
         mint_for_testing<SUI>(1000, ctx(test)),
         x"59d3298db60c8c3ea35d3de0f43e297df7f27d8c3ba02555bcd7a2eee106aace",
         1,

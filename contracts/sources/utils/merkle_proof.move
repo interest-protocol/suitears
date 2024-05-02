@@ -57,10 +57,10 @@ module suitears::merkle_proof {
     root: vector<u8>,
     leaf: vector<u8>
   ): (bool, u256) {  
-    let computed_hash = leaf;
+    let mut computed_hash = leaf;
     let proof_length = vector::length(proof);
-    let i = 0;
-    let j = 0;
+    let mut i = 0;
+    let mut j = 0;
 
     while (i < proof_length) {
       j = j * 2;
@@ -89,9 +89,9 @@ module suitears::merkle_proof {
   * @return root. Root of the Merkle Tree.  
   */
   fun process_proof(proof: &vector<vector<u8>>, leaf: vector<u8>): vector<u8> {
-    let computed_hash = leaf;
+    let mut computed_hash = leaf;
     let proof_length = vector::length(proof);
-    let i = 0;
+    let mut i = 0;
 
     while (i < proof_length) {
       computed_hash = hash_pair(computed_hash, *vector::borrow(proof, i));
@@ -119,7 +119,7 @@ module suitears::merkle_proof {
   * @param b Bytes to be appended and hashed. 
   * @return vector<u8>. The result of hasing `a` and `b`. 
   */
-  fun efficient_hash(a: vector<u8>, b: vector<u8>): vector<u8> {
+  fun efficient_hash(mut a: vector<u8>, b: vector<u8>): vector<u8> {
     vector::append(&mut a, b);
     hash::sha3_256(a)
   }

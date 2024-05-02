@@ -7,14 +7,14 @@ module suitears::timelock_tests {
 
   use suitears::timelock;
 
-  struct Data has store, drop {
+  public struct Data has store, drop {
     value: u64
   }
 
   #[test]
   fun test_success_case() {
-    let ctx = tx_context::dummy();
-    let c = clock::create_for_testing(&mut ctx);
+    let mut ctx = tx_context::dummy();
+    let mut c = clock::create_for_testing(&mut ctx);
     let unlock_time = 1000;    
 
     let lock = timelock::lock(Data { value: 7 }, &c, unlock_time, &mut ctx);
@@ -33,8 +33,8 @@ module suitears::timelock_tests {
   #[test]
   #[expected_failure(abort_code = timelock::EInvalidTime)] 
   fun test_wrong_lock_time() {
-    let ctx = tx_context::dummy();
-    let c = clock::create_for_testing(&mut ctx);
+    let mut ctx = tx_context::dummy();
+    let mut c = clock::create_for_testing(&mut ctx);
     clock::set_for_testing(&mut c, 10);
     let unlock_time = 10;    
 
@@ -48,8 +48,8 @@ module suitears::timelock_tests {
   #[test]
   #[expected_failure(abort_code = timelock::ETooEarly)] 
   fun test_wrong_unlock_time() {
-    let ctx = tx_context::dummy();
-    let c = clock::create_for_testing(&mut ctx);
+    let mut ctx = tx_context::dummy();
+    let mut c = clock::create_for_testing(&mut ctx);
     let unlock_time = 10;    
 
     let lock = timelock::lock(Data { value: 7 }, &c, unlock_time, &mut ctx);

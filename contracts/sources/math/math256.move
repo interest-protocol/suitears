@@ -301,11 +301,11 @@ module suitears::math256 {
   * @param e The exponent.  
   * @return u256. The result of n^e. 
   */
-  public fun pow(n: u256, e: u256): u256 {
+  public fun pow(mut n: u256, mut e: u256): u256 {
       if (e == 0) {
             1
         } else {
-            let p = 1;
+            let mut p = 1;
             while (e > 1) {
                 if (e % 2 == 1) {
                     p = p * n;
@@ -325,8 +325,8 @@ module suitears::math256 {
   */
   public fun sum(nums: vector<u256>): u256 {
     let len = vector::length(&nums);
-    let i = 0;
-    let sum = 0;
+    let mut i = 0;
+    let mut sum = 0;
     
     while (i < len){
       sum = sum + *vector::borrow(&nums, i);
@@ -377,7 +377,7 @@ module suitears::math256 {
   public fun sqrt_down(x: u256): u256 {
     if (x == 0) return 0;
 
-    let result = 1 << ((log2_down(x) >> 1) as u8);
+    let mut result = 1 << ((log2_down(x) >> 1) as u8);
 
     result = (result + x / result) >> 1;
     result = (result + x / result) >> 1;
@@ -409,8 +409,8 @@ module suitears::math256 {
   * @param x The operand.  
   * @return u256. Log2(x). 
   */ 
-  public fun log2_down(x: u256): u8 {
-    let result = 0;
+  public fun log2_down(mut x: u256): u8 {
+    let mut result = 0;
     if (x >> 128 > 0) {
       x = x >> 128;
       result = result + 128;
@@ -469,8 +469,8 @@ module suitears::math256 {
   * @param x The operand.  
   * @return u256. Log10(x). 
   */ 
-  public fun log10_down(x: u256): u8 {
-    let result = 0;
+  public fun log10_down(mut x: u256): u8 {
+    let mut result = 0;
 
     if (x >= 10000000000000000000000000000000000000000000000000000000000000000) {
       x = x / 10000000000000000000000000000000000000000000000000000000000000000;
@@ -525,8 +525,8 @@ module suitears::math256 {
   * @param x The operand.  
   * @return u256. Log256(x). 
   */ 
-  public fun log256_down(x: u256): u8 {
-    let result = 0;
+  public fun log256_down(mut x: u256): u8 {
+    let mut result = 0;
 
     if (x >> 128 > 0) {
       x = x >> 128;

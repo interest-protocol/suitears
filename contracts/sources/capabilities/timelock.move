@@ -22,7 +22,7 @@ module suitears::timelock {
 
   // === Struct ===  
 
-  struct Timelock<T: store> has key, store {
+  public struct Timelock<T: store> has key, store {
     id: UID,
     // The unlock time in milliseconds. 
     unlock_time: u64,

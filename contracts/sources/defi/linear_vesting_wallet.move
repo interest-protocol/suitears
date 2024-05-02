@@ -21,7 +21,7 @@ module suitears::linear_vesting_wallet {
 
   // === Structs ===  
 
-  struct Wallet<phantom T> has key, store {
+  public struct Wallet<phantom T> has key, store {
     id: UID,
     // Amount of tokens to give to the holder of the wallet
     balance: Balance<T>,

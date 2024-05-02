@@ -164,19 +164,19 @@ module suitears::fixed_point_wad {
 
     assert!(int::lt(x, int::from_u256(135305999368893231589)), EOverflow);
 
-    let x =   int::div_down(int::shl(x, 78), int::from_u256(pow(5, 18)));
+    let mut x =   int::div_down(int::shl(x, 78), int::from_u256(pow(5, 18)));
 
     let k = int::shr(int::add(int::div_down(int::shl(x, 96), int::from_u256(54916777467707473351141471128)), int::from_u256(pow(2, 95))), 96);
 
     x = int::sub(x, int::mul(k, int::from_u256(54916777467707473351141471128)));
 
-    let y = int::add(x, int::from_u256(1346386616545796478920950773328));
+    let mut y = int::add(x, int::from_u256(1346386616545796478920950773328));
     y = int::add(int::shr(int::mul(y, x), 96), int::from_u256(57155421227552351082224309758442));
-    let p = int::sub(int::add(y, x), int::from_u256(94201549194550492254356042504812));
+    let mut p = int::sub(int::add(y, x), int::from_u256(94201549194550492254356042504812));
     p = int::add(int::shr(int::mul(p, y), 96), int::from_u256(28719021644029726153956944680412240));
     p = int::add(int::mul(p, x), int::from_u256(4385272521454847904659076985693276 << 96));
 
-    let q = int::sub(x, int::from_u256(2855989394907223263936484059900));
+    let mut q = int::sub(x, int::from_u256(2855989394907223263936484059900));
     q = int::add(int::shr(int::mul(q, x), 96), int::from_u256(50020603652535783019961831881945));
 
     q = int::sub(int::shr(int::mul(q, x), 96), int::from_u256(533845033583426703283633433725380));
@@ -200,7 +200,7 @@ module suitears::fixed_point_wad {
   * aborts-if
   *   - `x` is negative or zero. 
   */
-  public fun ln(x: Int): Int {
+  public fun ln(mut x: Int): Int {
     assert!(int::is_positive(x) && !int::is_zero(x), EUndefined);
 
     let k = int::sub(int::from_u8(log2_down(int::to_u256(x))), int::from_u256(96));
@@ -208,7 +208,7 @@ module suitears::fixed_point_wad {
     x = int::shl(x, int::to_u8(int::sub(int::from_u8(159), k)));    
     x = int::from_u256(int::value(x) >> 159);
 
-    let p = int::add(x, int::from_u256(3273285459638523848632254066296));
+    let mut p = int::add(x, int::from_u256(3273285459638523848632254066296));
     p = int::add(int::shr(int::mul(p, x), 96), int::from_u256(24828157081833163892658089445524));
     p = int::add(int::shr(int::mul(p, x), 96), int::from_u256(43456485725739037958740375743393));
     p = int::sub(int::shr(int::mul(p, x), 96), int::from_u256(11111509109440967052023855526967));
@@ -216,7 +216,7 @@ module suitears::fixed_point_wad {
     p = int::sub(int::shr(int::mul(p, x), 96), int::from_u256(14706773417378608786704636184526));
     p = int::sub(int::mul(p, x), int::from_u256(795164235651350426258249787498 << 96));
 
-    let q = int::add(x,int::from_u256(5573035233440673466300451813936));
+    let mut q = int::add(x,int::from_u256(5573035233440673466300451813936));
     q = int::add(int::shr(int::mul(q, x), 96), int::from_u256(71694874799317883764090561454958));
     q = int::add(int::shr(int::mul(q, x), 96), int::from_u256(283447036172924575727196451306956));
     q = int::add(int::shr(int::mul(q, x), 96), int::from_u256(401686690394027663651624208769553));
@@ -224,7 +224,7 @@ module suitears::fixed_point_wad {
     q = int::add(int::shr(int::mul(q, x), 96), int::from_u256(31853899698501571402653359427138));
     q = int::add(int::shr(int::mul(q, x), 96), int::from_u256(909429971244387300277376558375));
 
-    let r = int::div_down(p, q);
+    let mut r = int::div_down(p, q);
     r = int::mul(r,int::from_u256(1677202110996718588342820967067443963516166));
     r = int::add(r, int::mul(int::from_u256(16597577552685614221487285958193947469193820559219878177908093499208371) , k));           
     r = int::add(r, int::from_u256(600920179829731861736702779321621459595472258049074101567377883020018308));

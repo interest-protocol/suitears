@@ -7,7 +7,7 @@ module suitears::test_utils {
 
   use sui::test_scenario::{Self as test, Scenario};
 
-  public fun assert_approx_the_same(x: u256, y: u256, precision: u128) {
+  public fun assert_approx_the_same(mut x: u256, mut y: u256, precision: u128) {
     if (x < y) {
       let tmp = x;
       x = y;

@@ -16,24 +16,24 @@ module suitears::oracle_tests {
   use suitears::pyth_feed_test::{Self, PythFeed};
   use suitears::switchboard_feed_test::{Self, SwitchboardFeed};
 
-  struct CoinXOracle has drop {}
-  struct CoinYOracle has drop {}
+  public struct CoinXOracle has drop {}
+  public struct CoinYOracle has drop {}
   
   const DEVIATION: u256 = 20000000000000000;
   const TIME_LIMIT: u64 = 100;
   
   #[test]
   fun test_oracle_flow() {
-    let scenario = scenario();
+    let mut scenario = scenario();
     let (alice, _) = people();
 
     let test = &mut scenario;
 
-    let c = clock::create_for_testing(ctx(test));
+    let mut c = clock::create_for_testing(ctx(test));
 
     next_tx(test, alice);  
     {
-      let cap = owner::new(CoinXOracle {}, vector[], ctx(test));
+      let mut cap = owner::new(CoinXOracle {}, vector[], ctx(test));
 
       let oracle = oracle::new(
         &mut cap,
@@ -57,7 +57,7 @@ module suitears::oracle_tests {
     {
       let oracle = test::take_shared<Oracle<CoinXOracle>>(test);
 
-      let request = oracle::request(&oracle);
+      let mut request = oracle::request(&oracle);
 
       pyth_feed_test::report(&mut request, 50, 1500000000000000000000, 18);
       switchboard_feed_test::report(&mut request, 35, 1470000000000, 9);
@@ -83,7 +83,7 @@ module suitears::oracle_tests {
   #[test]
   #[expected_failure(abort_code = oracle::EMustHavePositiveTimeLimit)]
   fun test_new_zero_time_limit() {
-   let scenario = scenario();
+   let mut scenario = scenario();
     let (alice, _) = people();
 
     let test = &mut scenario;
@@ -91,7 +91,7 @@ module suitears::oracle_tests {
 
     next_tx(test, alice);  
     {
-      let cap = owner::new(CoinXOracle {}, vector[], ctx(test));
+      let mut cap = owner::new(CoinXOracle {}, vector[], ctx(test));
 
       let oracle = oracle::new(
         &mut cap,
@@ -113,7 +113,7 @@ module suitears::oracle_tests {
   #[test]
   #[expected_failure(abort_code = oracle::EMustHavePositiveDeviation)]
   fun test_new_zero_deviation() {
-   let scenario = scenario();
+   let mut scenario = scenario();
     let (alice, _) = people();
 
     let test = &mut scenario;
@@ -121,7 +121,7 @@ module suitears::oracle_tests {
 
     next_tx(test, alice);  
     {
-      let cap = owner::new(CoinXOracle {}, vector[], ctx(test));
+      let mut cap = owner::new(CoinXOracle {}, vector[], ctx(test));
 
       let oracle = oracle::new(
         &mut cap,
@@ -142,7 +142,7 @@ module suitears::oracle_tests {
   #[test]
   #[expected_failure(abort_code = oracle::ERequestAndOracleIdMismatch)]
   fun test_destroy_request_wrong_oracle() {
-   let scenario = scenario();
+   let mut scenario = scenario();
     let (alice, _) = people();
 
     let test = &mut scenario;
@@ -151,8 +151,8 @@ module suitears::oracle_tests {
 
     next_tx(test, alice);  
     {
-      let cap = owner::new(CoinXOracle {}, vector[], ctx(test));
-      let cap_2 = owner::new(CoinYOracle {}, vector[], ctx(test));
+      let mut cap = owner::new(CoinXOracle {}, vector[], ctx(test));
+      let mut cap_2 = owner::new(CoinYOracle {}, vector[], ctx(test));
 
       let oracle = oracle::new(
         &mut cap,
@@ -201,7 +201,7 @@ module suitears::oracle_tests {
   #[test]
   #[expected_failure(abort_code = oracle::EWrongNumberOfReports)]
   fun test_destroy_request_wrong_number_of_reports() {
-   let scenario = scenario();
+   let mut scenario = scenario();
     let (alice, _) = people();
 
     let test = &mut scenario;
@@ -210,7 +210,7 @@ module suitears::oracle_tests {
 
     next_tx(test, alice);  
     {
-      let cap = owner::new(CoinXOracle {}, vector[], ctx(test));
+      let mut cap = owner::new(CoinXOracle {}, vector[], ctx(test));
 
       let oracle = oracle::new(
         &mut cap,
@@ -230,7 +230,7 @@ module suitears::oracle_tests {
     {
       let oracle = test::take_shared<Oracle<CoinXOracle>>(test);
 
-      let request = oracle::request(&oracle);
+      let mut request = oracle::request(&oracle);
 
       pyth_feed_test::report(&mut request, 50, 1500000000000000000000, 18);
 
@@ -248,7 +248,7 @@ module suitears::oracle_tests {
   #[test]
   #[expected_failure(abort_code = oracle::EInvalidReportFeeds)]
   fun test_destroy_request_invalid_report_feeds() {
-   let scenario = scenario();
+   let mut scenario = scenario();
     let (alice, _) = people();
 
     let test = &mut scenario;
@@ -257,7 +257,7 @@ module suitears::oracle_tests {
 
     next_tx(test, alice);  
     {
-      let cap = owner::new(CoinXOracle {}, vector[], ctx(test));
+      let mut cap = owner::new(CoinXOracle {}, vector[], ctx(test));
 
       let oracle = oracle::new(
         &mut cap,
@@ -277,7 +277,7 @@ module suitears::oracle_tests {
     {
       let oracle = test::take_shared<Oracle<CoinXOracle>>(test);
 
-      let request = oracle::request(&oracle);
+      let mut request = oracle::request(&oracle);
 
       pyth_feed_test::report(&mut request, 50, 1500000000000000000000, 18);
       supra_feed_test::report(&mut request, 50, 1500000000000000000000, 18);
@@ -296,16 +296,16 @@ module suitears::oracle_tests {
   #[test]
   #[expected_failure(abort_code = oracle::EStalePriceReport)]  
   fun test_destroy_request_stale_price() {
-    let scenario = scenario();
+    let mut scenario = scenario();
     let (alice, _) = people();
 
     let test = &mut scenario;
 
-    let c = clock::create_for_testing(ctx(test));
+    let mut c = clock::create_for_testing(ctx(test));
 
     next_tx(test, alice);  
     {
-      let cap = owner::new(CoinXOracle {}, vector[], ctx(test));
+      let mut cap = owner::new(CoinXOracle {}, vector[], ctx(test));
 
       let oracle = oracle::new(
         &mut cap,
@@ -329,7 +329,7 @@ module suitears::oracle_tests {
     {
       let oracle = test::take_shared<Oracle<CoinXOracle>>(test);
 
-      let request = oracle::request(&oracle);
+      let mut request = oracle::request(&oracle);
 
       pyth_feed_test::report(&mut request, 50, 1500000000000000000000, 18);
       switchboard_feed_test::report(&mut request, 29, 1470000000000, 9);
@@ -350,16 +350,16 @@ module suitears::oracle_tests {
   #[test]
   #[expected_failure(abort_code = oracle::EPriceCannotBeZero)]  
   fun test_report_zero_price() {
-    let scenario = scenario();
+    let mut scenario = scenario();
     let (alice, _) = people();
 
     let test = &mut scenario;
 
-    let c = clock::create_for_testing(ctx(test));
+    let mut c = clock::create_for_testing(ctx(test));
 
     next_tx(test, alice);  
     {
-      let cap = owner::new(CoinXOracle {}, vector[], ctx(test));
+      let mut cap = owner::new(CoinXOracle {}, vector[], ctx(test));
 
       let oracle = oracle::new(
         &mut cap,
@@ -383,7 +383,7 @@ module suitears::oracle_tests {
     {
       let oracle = test::take_shared<Oracle<CoinXOracle>>(test);
 
-      let request = oracle::request(&oracle);
+      let mut request = oracle::request(&oracle);
 
       pyth_feed_test::report(&mut request, 50, 1500000000000000000000, 18);
       switchboard_feed_test::report(&mut request, 30, 0, 9);
@@ -404,16 +404,16 @@ module suitears::oracle_tests {
   #[test]
   #[expected_failure(abort_code = oracle::EPriceDeviationIsTooHigh)]  
   fun test_destroy_request_wrong_deviation() {
-    let scenario = scenario();
+    let mut scenario = scenario();
     let (alice, _) = people();
 
     let test = &mut scenario;
 
-    let c = clock::create_for_testing(ctx(test));
+    let mut c = clock::create_for_testing(ctx(test));
 
     next_tx(test, alice);  
     {
-      let cap = owner::new(CoinXOracle {}, vector[], ctx(test));
+      let mut cap = owner::new(CoinXOracle {}, vector[], ctx(test));
 
       let oracle = oracle::new(
         &mut cap,
@@ -437,7 +437,7 @@ module suitears::oracle_tests {
     {
       let oracle = test::take_shared<Oracle<CoinXOracle>>(test);
 
-      let request = oracle::request(&oracle);
+      let mut request = oracle::request(&oracle);
 
       pyth_feed_test::report(&mut request, 50, 1500000000000000000000, 18);
       switchboard_feed_test::report(&mut request, 35, 1469999999999, 9);
@@ -457,14 +457,14 @@ module suitears::oracle_tests {
 
   #[test]
   fun test_add() {
-   let scenario = scenario();
+   let mut scenario = scenario();
     let (alice, _) = people();
 
     let test = &mut scenario;
 
     next_tx(test, alice);  
     {
-      let cap = owner::new(CoinXOracle {}, vector[], ctx(test));
+      let mut cap = owner::new(CoinXOracle {}, vector[], ctx(test));
 
       let oracle = oracle::new(
         &mut cap,
@@ -482,7 +482,7 @@ module suitears::oracle_tests {
 
   next_tx(test, alice);
     {
-      let oracle = test::take_shared<Oracle<CoinXOracle>>(test);
+      let mut oracle = test::take_shared<Oracle<CoinXOracle>>(test);
       let cap = test::take_from_sender<OwnerCap<CoinXOracle>>(test);
 
       assert_eq(vector[type_name::get<PythFeed>()], oracle::feeds(&oracle));
@@ -501,14 +501,14 @@ module suitears::oracle_tests {
   #[test]
   #[expected_failure] 
   fun test_add_invalid_cap() {
-   let scenario = scenario();
+   let mut scenario = scenario();
     let (alice, _) = people();
 
     let test = &mut scenario;
 
     next_tx(test, alice);  
     {
-      let cap = owner::new(CoinXOracle {}, vector[], ctx(test));
+      let mut cap = owner::new(CoinXOracle {}, vector[], ctx(test));
 
       let oracle = oracle::new(
         &mut cap,
@@ -526,7 +526,7 @@ module suitears::oracle_tests {
 
   next_tx(test, alice);
     {
-      let oracle = test::take_shared<Oracle<CoinXOracle>>(test);
+      let mut oracle = test::take_shared<Oracle<CoinXOracle>>(test);
       let cap = owner::new(CoinXOracle {}, vector[], ctx(test));
 
       oracle::add(&mut oracle, &cap, type_name::get<SwitchboardFeed>());
@@ -540,14 +540,14 @@ module suitears::oracle_tests {
 
   #[test]
   fun test_remove() {
-   let scenario = scenario();
+   let mut scenario = scenario();
     let (alice, _) = people();
 
     let test = &mut scenario;
 
     next_tx(test, alice);  
     {
-      let cap = owner::new(CoinXOracle {}, vector[], ctx(test));
+      let mut cap = owner::new(CoinXOracle {}, vector[], ctx(test));
 
       let oracle = oracle::new(
         &mut cap,
@@ -565,7 +565,7 @@ module suitears::oracle_tests {
 
   next_tx(test, alice);
     {
-      let oracle = test::take_shared<Oracle<CoinXOracle>>(test);
+      let mut oracle = test::take_shared<Oracle<CoinXOracle>>(test);
       let cap = test::take_from_sender<OwnerCap<CoinXOracle>>(test);
 
       assert_eq(vector[type_name::get<PythFeed>(), type_name::get<SwitchboardFeed>()], oracle::feeds(&oracle));
@@ -584,14 +584,14 @@ module suitears::oracle_tests {
   #[test]
   #[expected_failure(abort_code = oracle::EOracleMustHaveFeeds)]
   fun test_request_with_no_feeds() {
-   let scenario = scenario();
+   let mut scenario = scenario();
     let (alice, _) = people();
 
     let test = &mut scenario;
 
     next_tx(test, alice);  
     {
-      let cap = owner::new(CoinXOracle {}, vector[], ctx(test));
+      let mut cap = owner::new(CoinXOracle {}, vector[], ctx(test));
 
       let oracle = oracle::new(
         &mut cap,
@@ -629,16 +629,16 @@ module suitears::oracle_tests {
 
   #[test]
   fun test_update_time_limit() {
-   let scenario = scenario();
+   let mut scenario = scenario();
     let (alice, _) = people();
 
     let test = &mut scenario;
 
     next_tx(test, alice);  
     {
-      let cap = owner::new(CoinXOracle {}, vector[], ctx(test));
+      let mut cap = owner::new(CoinXOracle {}, vector[], ctx(test));
 
-      let oracle = oracle::new(
+      let mut oracle = oracle::new(
         &mut cap,
         CoinXOracle {},
         vector[type_name::get<PythFeed>()],
@@ -664,16 +664,16 @@ module suitears::oracle_tests {
   #[test]
   #[expected_failure(abort_code = oracle::EMustHavePositiveTimeLimit)]
   fun test_update_zero_time_limit() {
-   let scenario = scenario();
+   let mut scenario = scenario();
     let (alice, _) = people();
 
     let test = &mut scenario;
 
     next_tx(test, alice);  
     {
-      let cap = owner::new(CoinXOracle {}, vector[], ctx(test));
+      let mut cap = owner::new(CoinXOracle {}, vector[], ctx(test));
 
-      let oracle = oracle::new(
+      let mut oracle = oracle::new(
         &mut cap,
         CoinXOracle {},
         vector[type_name::get<PythFeed>()],
@@ -694,16 +694,16 @@ module suitears::oracle_tests {
 
   #[test]
   fun test_update_deviation() {
-   let scenario = scenario();
+   let mut scenario = scenario();
     let (alice, _) = people();
 
     let test = &mut scenario;
 
     next_tx(test, alice);  
     {
-      let cap = owner::new(CoinXOracle {}, vector[], ctx(test));
+      let mut cap = owner::new(CoinXOracle {}, vector[], ctx(test));
 
-      let oracle = oracle::new(
+      let mut oracle = oracle::new(
         &mut cap,
         CoinXOracle {},
         vector[type_name::get<PythFeed>()],
@@ -729,16 +729,16 @@ module suitears::oracle_tests {
   #[test]
   #[expected_failure(abort_code = oracle::EMustHavePositiveDeviation)]
   fun test_update_zero_deviation() {
-   let scenario = scenario();
+   let mut scenario = scenario();
     let (alice, _) = people();
 
     let test = &mut scenario;
 
     next_tx(test, alice);  
     {
-      let cap = owner::new(CoinXOracle {}, vector[], ctx(test));
+      let mut cap = owner::new(CoinXOracle {}, vector[], ctx(test));
 
-      let oracle = oracle::new(
+      let mut oracle = oracle::new(
         &mut cap,
         CoinXOracle {},
         vector[type_name::get<PythFeed>()],
@@ -759,7 +759,7 @@ module suitears::oracle_tests {
 
   #[test]
   fun test_destroy_oracle() {
-    let cap = owner::new(CoinXOracle {}, vector[], &mut dummy());
+    let mut cap = owner::new(CoinXOracle {}, vector[], &mut dummy());
 
     let oracle = oracle::new(
       &mut cap,
@@ -777,7 +777,7 @@ module suitears::oracle_tests {
   #[test]
   #[expected_failure(abort_code = owner::ENotAllowed)]
   fun test_destroy_oracle_wrong_cap_error() {
-    let cap = owner::new(CoinXOracle {}, vector[], &mut dummy());
+    let mut cap = owner::new(CoinXOracle {}, vector[], &mut dummy());
     let cap2 = owner::new(CoinXOracle {}, vector[], &mut dummy());
 
     let oracle = oracle::new(
@@ -801,7 +801,7 @@ module suitears::pyth_feed_test {
 
   use suitears::oracle::{Self, Request};
 
-  struct PythFeed has drop {}
+  public struct PythFeed has drop {}
 
   public fun report(request: &mut Request, timestamp: u64, price: u128, decimals: u8) {
     oracle::report(request, PythFeed {}, timestamp, price, decimals);
@@ -813,7 +813,7 @@ module suitears::switchboard_feed_test {
 
   use suitears::oracle::{Self, Request};
 
-  struct SwitchboardFeed has drop {}
+  public struct SwitchboardFeed has drop {}
 
   public fun report(request: &mut Request, timestamp: u64, price: u128, decimals: u8) {
     oracle::report(request, SwitchboardFeed {}, timestamp, price, decimals);
@@ -825,7 +825,7 @@ module suitears::supra_feed_test {
 
   use suitears::oracle::{Self, Request};
 
-  struct SupraFeed has drop {}
+  public struct SupraFeed has drop {}
 
   public fun report(request: &mut Request, timestamp: u64, price: u128, decimals: u8) {
     oracle::report(request, SupraFeed {}, timestamp, price, decimals);

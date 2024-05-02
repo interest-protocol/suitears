@@ -6,7 +6,7 @@ module suitears::s_eth {
   use sui::transfer;
   use sui::tx_context::{Self, TxContext};
 
-  struct S_ETH has drop {}
+  public struct S_ETH has drop {}
 
   #[lint_allow(share_owned)]
   fun init(witness: S_ETH, ctx: &mut TxContext) {
@@ -38,7 +38,7 @@ module suitears::s_btc {
   use sui::transfer;
   use sui::tx_context::{Self, TxContext};
 
-  struct S_BTC has drop {}
+  public struct S_BTC has drop {}
 
   #[lint_allow(share_owned)]
   fun init(witness: S_BTC, ctx: &mut TxContext) {

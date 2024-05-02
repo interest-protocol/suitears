@@ -23,7 +23,7 @@ module suitears::bitmap {
 
   // === Structs ===
 
-  struct Bitmap has key, store {
+  public struct Bitmap has key, store {
     id: UID
   }
 

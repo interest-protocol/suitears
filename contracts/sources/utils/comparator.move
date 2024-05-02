@@ -22,7 +22,7 @@ module suitears::comparator {
 
   // === Structs ===  
 
-  struct Result has drop {
+  public struct Result has drop {
     // @dev It will hold one of the following values: {SMALLER}, {EQUAL} or {GREATER}.  
     inner: u8,
   }
@@ -115,7 +115,7 @@ module suitears::comparator {
     let left_length = vector::length(&left);
     let right_length = vector::length(&right);
 
-    let idx = 0;
+    let mut idx = 0;
 
     while (idx < left_length && idx < right_length) {
     let left_byte = *vector::borrow(&left, idx);

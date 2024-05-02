@@ -5,7 +5,7 @@ module suitears::comparator_tests {
 
   use suitears::comparator::{compare, eq, gt, lt, lte, gte};
 
-  struct Complex has drop {
+  public struct Complex has drop {
     value0: vector<u128>,
     value1: u8,
     value2: u64,
@@ -61,13 +61,13 @@ module suitears::comparator_tests {
 
   #[test]
   public fun test_complex() {
-    let value0_0 = vector::empty();
+    let mut value0_0 = vector::empty();
     
     vector::push_back(&mut value0_0, 10);
     vector::push_back(&mut value0_0, 9);
     vector::push_back(&mut value0_0, 5);
 
-    let value0_1 = vector::empty();
+    let mut value0_1 = vector::empty();
     
     vector::push_back(&mut value0_1, 10);
     vector::push_back(&mut value0_1, 9);

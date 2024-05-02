@@ -21,7 +21,7 @@ module suitears::owner {
 
   // === Structs ===
 
-  struct OwnerCap<phantom T> has key, store {
+  public struct OwnerCap<phantom T> has key, store {
     id: UID,
     // VecSet of `sui::object::ID` that this capability owns. 
     of: VecSet<ID>
@@ -40,8 +40,8 @@ module suitears::owner {
   */
   public fun new<T: drop>(_: T, of: vector<ID>, ctx: &mut TxContext): OwnerCap<T> {
     let length = vector::length(&of);
-    let set = vec_set::empty();
-    let i = 0;
+    let mut set = vec_set::empty();
+    let mut i = 0;
     while (length > i) {
       vec_set::insert(&mut set, *vector::borrow(&of, i));
       i = i + 1;

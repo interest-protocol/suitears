@@ -13,7 +13,7 @@ module suitears::int {
 
   // === Friend modules ===
 
-  friend suitears::math64;
+  /* friend suitears::math64; */
 
   // === Constants ===
   
@@ -45,7 +45,7 @@ module suitears::int {
   // === Structs ===
   
   // @dev A wrapper to represent signed integers.
-  struct Int has copy, drop, store {
+  public struct Int has copy, drop, store {
     value: u256
   }
 
@@ -161,7 +161,7 @@ module suitears::int {
   * @return Int. The wrapped negative `value`.
   */
   public fun neg_from_u8(value: u8): Int {
-    let ret = from_u8(value);
+    let mut ret = from_u8(value);
     if (ret.value > 0) *&mut ret.value = MAX_U256 - ret.value + 1;
     ret
   }
@@ -173,7 +173,7 @@ module suitears::int {
   * @return Int. The wrapped negative `value`.
   */
   public fun neg_from_u16(value: u16): Int {
-    let ret = from_u16(value);
+    let mut ret = from_u16(value);
     if (ret.value > 0) *&mut ret.value = MAX_U256 - ret.value + 1;
     ret
   }
@@ -185,7 +185,7 @@ module suitears::int {
   * @return Int. The wrapped negative `value`.
   */
   public fun neg_from_u32(value: u32): Int {
-    let ret = from_u32(value);
+    let mut ret = from_u32(value);
     if (ret.value > 0) *&mut ret.value = MAX_U256 - ret.value + 1;
     ret
   }
@@ -197,7 +197,7 @@ module suitears::int {
   * @return Int. The wrapped negative `value`.
   */
   public fun neg_from_u64(value: u64): Int {
-    let ret = from_u64(value);
+    let mut ret = from_u64(value);
     if (ret.value > 0) *&mut ret.value = MAX_U256 - ret.value + 1;
     ret
   }
@@ -209,7 +209,7 @@ module suitears::int {
   * @return Int. The wrapped negative `value`.
   */
   public fun neg_from_u128(value: u128): Int {
-    let ret = from_u128(value);
+    let mut ret = from_u128(value);
     if (ret.value > 0) *&mut ret.value = MAX_U256 - ret.value + 1;
     ret
   }
@@ -221,7 +221,7 @@ module suitears::int {
   * @return Int. The wrapped negative `value`.
   */
   public fun neg_from_u256(value: u256): Int {
-    let ret = from_u256(value);
+    let mut ret = from_u256(value);
     if (ret.value > 0) *&mut ret.value = MAX_U256 - ret.value + 1;
     ret
   }
@@ -732,7 +732,7 @@ module suitears::int {
   * @param max The value that the self will wrap around. 
   * @return u256. The result after wrapping around.
   */
-  public(friend) fun wrap(self: Int, max: u256): u256 {
+  public(package) fun wrap(self: Int, max: u256): u256 {
     let max = from_u256(max);
 
     to_u256(if (is_neg(self)) add(self, max) else sub(self, mul(max, div_down(self, max))))

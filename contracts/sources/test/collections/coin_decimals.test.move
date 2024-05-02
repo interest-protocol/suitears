@@ -13,7 +13,7 @@ module suitears::coin_decimals_tests {
   
   #[test]
   fun test_case_one() {
-    let scenario = scenario();
+    let mut scenario = scenario();
     let (alice, _) = people();
 
     let test = &mut scenario;
@@ -25,7 +25,7 @@ module suitears::coin_decimals_tests {
       let btc_metadata = test::take_shared<CoinMetadata<S_BTC>>(test);
       let eth_metadata = test::take_shared<CoinMetadata<S_ETH>>(test);
 
-      let obj = coin_decimals::new(ctx(test));
+      let mut obj = coin_decimals::new(ctx(test));
 
       assert_eq(coin_decimals::contains<S_BTC>(&obj), false);
       assert_eq(coin_decimals::contains<S_ETH>(&obj), false);

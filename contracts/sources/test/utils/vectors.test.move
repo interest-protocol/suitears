@@ -121,28 +121,28 @@ module suitears::vectors_tests {
 
   #[test]
   fun test_quick_sort() {
-    let x = vector[12, 23, 4, 5, 2, 34, 1, 43, 54, 32, 45, 6, 7, 8, 9, 10, 21, 20];
+    let mut x = vector[12, 23, 4, 5, 2, 34, 1, 43, 54, 32, 45, 6, 7, 8, 9, 10, 21, 20];
     let len = vector::length(&x);
     quick_sort(&mut x, 0, len - 1);
     assert_eq(x, vector[1, 2, 4, 5, 6, 7, 8, 9, 10, 12, 20, 21, 23, 32, 34, 43, 45, 54]);
   
 
-    let x = vector[3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5];
+    let mut x = vector[3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5];
     let len = vector::length(&x);
     quick_sort(&mut x, 0, len - 1);
     assert_eq(x, vector[1, 1, 2, 3, 3, 4, 5, 5, 5, 6, 9]);
 
-    let x = vector[6, 5, 4, 3, 2, 1];
+    let mut x = vector[6, 5, 4, 3, 2, 1];
     let len = vector::length(&x);
     quick_sort(&mut x, 0, len - 1);
     assert_eq(x, vector[1, 2, 3, 4, 5, 6]);    
 
-    let x = vector[1, 2, 3, 4, 5, 6];
+    let mut x = vector[1, 2, 3, 4, 5, 6];
     let len = vector::length(&x);
     quick_sort(&mut x, 0, len - 1);
     assert_eq(x, vector[1, 2, 3, 4, 5, 6]);      
 
-    let x = vector[5, 2, 9, 1, 5, 6];
+    let mut x = vector[5, 2, 9, 1, 5, 6];
     let len = vector::length(&x);
     quick_sort(&mut x, 0, len - 1);
     assert_eq(x, vector[1, 2, 5, 5, 6, 9]);      
@@ -153,7 +153,7 @@ module suitears::vectors_tests {
     assert_eq(vec_set::empty<u64>(), to_vec_set<u64>(vector[]));
     assert_eq(vec_set::singleton(1), to_vec_set<u64>(vector[1]));
 
-    let set = vec_set::empty();
+    let mut set = vec_set::empty();
     vec_set::insert(&mut set, 1);
     vec_set::insert(&mut set, 5);
     vec_set::insert(&mut set, 3);

@@ -144,7 +144,7 @@ module suitears::dao {
 
   // === Structs ===
 
-  struct Dao<phantom OTW> has key, store {
+  public struct Dao<phantom OTW> has key, store {
     id: UID,
     // Voters must wait `voting_delay` in milliseconds to start voting on new proposals.
     voting_delay: u64,
@@ -166,7 +166,7 @@ module suitears::dao {
     admin_id: ID
   }
 
-  struct Proposal<phantom DaoWitness: drop> has key, store {
+  public struct Proposal<phantom DaoWitness: drop> has key, store {
     id: UID,
     // The user who created the proposal
     proposer: address,
@@ -201,14 +201,14 @@ module suitears::dao {
   }
 
  // @dev A Hot Potato to ensure that the borrowed Capability is returned to the {Dao}. 
-  struct CapabilityRequest {
+  public struct CapabilityRequest {
     // @dev The `sui::object::ID` of the borrowed Capability.   
     capability_id: ID,
     // @dev The {DAO} that owns said Capability.  
     dao_id: ID
   }
 
-  struct Vote<phantom DaoWitness: drop, phantom CoinType> has  key, store {
+  public struct Vote<phantom DaoWitness: drop, phantom CoinType> has  key, store {
     id: UID,
     // The amount of Coin the user has used to vote for the {Proposal}. 
     balance: Balance<CoinType>,
@@ -223,7 +223,7 @@ module suitears::dao {
 
   // Events
 
-  struct CreateDao<phantom OTW, phantom CoinType> has copy, drop {
+  public struct CreateDao<phantom OTW, phantom CoinType> has copy, drop {
     dao_id: ID,
     admin_id: ID,
     creator: address,
@@ -234,7 +234,7 @@ module suitears::dao {
     min_quorum_votes: u64
   }
 
-  struct UpdateDao<phantom OTW> has copy, drop {
+  public struct UpdateDao<phantom OTW> has copy, drop {
     dao_id: ID,
     voting_delay: u64, 
     voting_period: u64, 
@@ -243,12 +243,12 @@ module suitears::dao {
     min_quorum_votes: u64
   }
 
-  struct NewProposal<phantom DaoWitness> has copy, drop {
+  public struct NewProposal<phantom DaoWitness> has copy, drop {
     proposal_id: ID,
     proposer: address,
   }
 
-  struct CastVote<phantom DaoWitness, phantom CoinType> has copy, drop {
+  public struct CastVote<phantom DaoWitness, phantom CoinType> has copy, drop {
     voter: address, 
     proposal_id: ID,
     agree: bool,
@@ -256,7 +256,7 @@ module suitears::dao {
     value: u64
   }
 
-  struct ChangeVote<phantom DaoWitness, phantom CoinType> has copy, drop {
+  public struct ChangeVote<phantom DaoWitness, phantom CoinType> has copy, drop {
     voter: address, 
     proposal_id: ID,
     vote_id: ID,
@@ -265,14 +265,14 @@ module suitears::dao {
     value: u64
   }
 
-  struct RevokeVote<phantom DaoWitness, phantom CoinType> has copy, drop {
+  public struct RevokeVote<phantom DaoWitness, phantom CoinType> has copy, drop {
     voter: address, 
     proposal_id: ID,
     agree: bool,
     value: u64
   }
 
-  struct UnstakeVote<phantom DaoWitness, phantom CoinType> has copy, drop {
+  public struct UnstakeVote<phantom DaoWitness, phantom CoinType> has copy, drop {
     voter: address, 
     proposal_id: ID,
     agree: bool,

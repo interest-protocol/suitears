@@ -12,7 +12,7 @@ module suitears::bitmap_tests {
 
   #[test]
   fun test_starts_empty() {
-    let ctx = tx_context::dummy();
+    let mut ctx = tx_context::dummy();
     let map = bitmap::new(&mut ctx);
     assert_eq(bitmap::get(&map, KEY_A), false);
     assert_eq(bitmap::get(&map, KEY_B), false);
@@ -23,8 +23,8 @@ module suitears::bitmap_tests {
 
   #[test]
   fun test_case_one() {
-    let ctx = tx_context::dummy();
-    let map = bitmap::new(&mut ctx);
+    let mut ctx = tx_context::dummy();
+    let mut map = bitmap::new(&mut ctx);
 
     // Set KEY_A to true
     bitmap::set(&mut map, KEY_A);
@@ -60,8 +60,8 @@ module suitears::bitmap_tests {
 
   #[test]
   fun test_case_two() {
-    let ctx = tx_context::dummy();
-    let map = bitmap::new(&mut ctx); 
+    let mut ctx = tx_context::dummy();
+    let mut map = bitmap::new(&mut ctx); 
 
     // adds several keys
     bitmap::set(&mut map, KEY_A);
@@ -85,8 +85,8 @@ module suitears::bitmap_tests {
 
   #[test]
   fun test_case_three() {
-    let ctx = tx_context::dummy();
-    let map = bitmap::new(&mut ctx); 
+    let mut ctx = tx_context::dummy();
+    let mut map = bitmap::new(&mut ctx); 
 
     // adds several keys
     bitmap::set(&mut map, KEY_A);
@@ -112,8 +112,8 @@ module suitears::bitmap_tests {
 
   #[test]
   fun test_case_four() {
-    let ctx = tx_context::dummy();
-    let map = bitmap::new(&mut ctx); 
+    let mut ctx = tx_context::dummy();
+    let mut map = bitmap::new(&mut ctx); 
 
     bitmap::set(&mut map, KEY_A);
     bitmap::set(&mut map, KEY_C);  

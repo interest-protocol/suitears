@@ -306,8 +306,8 @@ module suitears::math128 {
   */
   public fun sum(nums: vector<u128>): u128 {
     let len = vector::length(&nums);
-    let i = 0;
-    let sum = 0;
+    let mut i = 0;
+    let mut sum = 0;
     
     while (i < len){
       sum = sum + *vector::borrow(&nums, i);

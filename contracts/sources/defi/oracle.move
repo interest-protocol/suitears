@@ -44,7 +44,7 @@ module suitears::oracle {
 
   // === Structs ===
 
-  struct Oracle<phantom Witness: drop> has key, store {
+  public struct Oracle<phantom Witness: drop> has key, store {
     id: UID,
     // Set of module Witnesses that are allowed to report prices.
     feeds: VecSet<TypeName>,
@@ -55,14 +55,14 @@ module suitears::oracle {
     deviation: u256
   }  
 
-  struct Report has store, copy, drop {
+  public struct Report has store, copy, drop {
     // Price  has 18 decimals.  
     price: u256,
     // Timestamp in milliseconds. 
     timestamp: u64
   }
 
-  struct Request {
+  public struct Request {
     // `sui::object::ID` of the`Oracle` this request was sent from.
     oracle: ID,
     // Set of Witnesses that reported the price. 
@@ -71,7 +71,7 @@ module suitears::oracle {
     reports: vector<Report>
   }
 
-  struct Price {
+  public struct Price {
     // `sui::object::ID` of the`Oracle` this request was sent from.
     oracle: ID,
     // The first reported price. 
@@ -204,9 +204,9 @@ module suitears::oracle {
 
     assert!(num_of_feeds == num_of_reports, EWrongNumberOfReports);
 
-    let i = 0;
-    let leader_price = 0;
-    let leader_timestamp = 0;
+    let mut i = 0;
+    let mut leader_price = 0;
+    let mut leader_timestamp = 0;
     let current_time = clock::timestamp_ms(c);
 
     let oracle_feeds = vec_set::into_keys(self.feeds);

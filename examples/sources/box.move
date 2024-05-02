@@ -16,13 +16,13 @@ module suitears::box {
 
   // === Structs ===
 
-  struct Box<T: store> has key, store {
+  public struct Box<T: store> has key, store {
     id: UID,
     // Wrapped `T`
     content: T
   }
 
-  struct BoxWitness has drop {}
+  public struct BoxWitness has drop {}
 
   // === Public Create Functions ===  
 

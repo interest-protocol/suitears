@@ -38,7 +38,7 @@ module suitears::fixed_point64 {
   // === Structs ===
 
   // @dev A type guard to identify a FixedPoint64.
-  struct FixedPoint64 has copy, drop, store { value: u128 }
+  public struct FixedPoint64 has copy, drop, store { value: u128 }
 
   // === Public-View Functions ===
 
@@ -414,7 +414,7 @@ module suitears::fixed_point64 {
   */
   public fun sqrt(x: FixedPoint64): FixedPoint64 {
     let y = x.value;
-    let z = (math128::sqrt_down(y) << 32 as u256);
+    let mut z = (math128::sqrt_down(y) << 32 as u256);
     z = (z + ((y as u256) << 64) / z) >> 1;
     FixedPoint64 {
       value: (z as u128)
@@ -457,7 +457,7 @@ module suitears::fixed_point64 {
     // 2^(remainder / ln2) = (2^(1/580))^exponent * exp(x / 2^64)
     let roottwo = 18468802611690918839;  // fixed point representation of 2^(1/580)
     // 2^(1/580) = roottwo(1 - eps), so the number we seek is roottwo^exponent (1 - eps * exponent)
-    let power = pow_raw(roottwo, (exponent as u128));
+    let mut power = pow_raw(roottwo, (exponent as u128));
     let eps_correction = 219071715585908898;
     power = power - ((power * eps_correction * exponent) >> 128);
     // x is fixed point number smaller than bigfactor/2^64 < 0.0011 so we need only 5 tayler steps
@@ -478,8 +478,8 @@ module suitears::fixed_point64 {
   * @param n The exponent. 
   * @return u256. The result of x^n. 
   */
-  fun pow_raw(x: u256, n: u128): u256 {
-    let res: u256 = 1 << 64;
+  fun pow_raw(mut x: u256, mut n: u128): u256 {
+    let mut res: u256 = 1 << 64;
     while (n != 0) {
       if (n & 1 != 0) {
         res = (res * x) >> 64;

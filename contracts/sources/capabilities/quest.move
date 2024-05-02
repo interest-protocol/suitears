@@ -28,7 +28,7 @@ module suitears::quest {
   // === Structs ===
 
   // @dev It wraps a {Reward} that can be redeemed if all `quest.required_tasks` are completed. 
-  struct Quest<Reward: store> has key, store {
+  public struct Quest<Reward: store> has key, store {
     id: UID,
     // Stores the Witnesses of all completed tasks
     required_tasks: VecSet<TypeName>,
@@ -111,7 +111,7 @@ module suitears::quest {
     let required_tasks = vec_set::into_keys(required_tasks);
     let completed_tasks = vec_set::into_keys(completed_tasks);
 
-    let index = 0;
+    let mut index = 0;
     while (num_of_tasks > index) {
      let task = vector::borrow(&required_tasks, index);
      assert!(vector::contains(&completed_tasks, task), EWrongTasks);
