@@ -4,7 +4,6 @@ module suitears::linear_vesting_wallet_clawback_tests {
   use sui::coin;
   use sui::clock;
   use sui::sui::SUI;
-  use sui::tx_context;
   use sui::test_utils::assert_eq;
 
   use suitears::owner;
@@ -129,10 +128,10 @@ module suitears::linear_vesting_wallet_clawback_tests {
     linear_vesting_wallet_clawback::destroy_zero(wallet);
     clock::destroy_for_testing(c);
     owner::destroy(recipient_cap);
-  }  
+  }
 
   #[test]
-  #[expected_failure(abort_code = linear_vesting_wallet_clawback::EInvalidStart)] 
+  #[expected_failure(abort_code = linear_vesting_wallet_clawback::EInvalidStart)]
   fun test_invalid_start_time() {
     let mut ctx = tx_context::dummy();
 
@@ -153,7 +152,7 @@ module suitears::linear_vesting_wallet_clawback_tests {
   }
 
   #[test]
-  #[expected_failure] 
+  #[expected_failure]
   fun test_destroy_non_zero_wallet() {
     let mut ctx = tx_context::dummy();
 

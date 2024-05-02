@@ -4,7 +4,6 @@ module suitears::linear_vesting_wallet_tests {
   use sui::coin;
   use sui::clock;
   use sui::sui::SUI;
-  use sui::tx_context;
   use sui::test_utils::assert_eq;
 
   use suitears::linear_vesting_wallet;
@@ -59,7 +58,7 @@ module suitears::linear_vesting_wallet_tests {
   }
 
   #[test]
-  #[expected_failure(abort_code = linear_vesting_wallet::EInvalidStart)] 
+  #[expected_failure(abort_code = linear_vesting_wallet::EInvalidStart)]
   fun test_invalid_start_time() {
     let mut ctx = tx_context::dummy();
 
@@ -78,7 +77,7 @@ module suitears::linear_vesting_wallet_tests {
   }
 
   #[test]
-  #[expected_failure] 
+  #[expected_failure]
   fun test_destroy_non_zero_wallet() {
     let mut ctx = tx_context::dummy();
 

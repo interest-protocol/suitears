@@ -1,9 +1,8 @@
 #[test_only]
 module suitears::quest_tests {
   use std::type_name;
-  
+
   use sui::vec_set;
-  use sui::tx_context;
   use sui::test_utils::assert_eq;
 
   use suitears::quest;
@@ -50,8 +49,8 @@ module suitears::quest_tests {
 
     let q = quest::new(required_tasks, Reward { value: 7}, &mut ctx);
 
-    quest::finish(q); 
-  }  
+    quest::finish(q);
+  }
 
   #[test]
   #[expected_failure(abort_code = quest::EWrongTasks)]
@@ -68,13 +67,13 @@ module suitears::quest_tests {
     task_one::complete_task(&mut q);
 
     quest::finish(q);
-  }   
+  }
 }
 
 
 #[test_only]
 module suitears::task_one {
-  
+
   use suitears::quest::{Self, Quest};
 
   public struct Witness has drop {}
@@ -86,7 +85,7 @@ module suitears::task_one {
 
 #[test_only]
 module suitears::task_two {
-  
+
   use suitears::quest::{Self, Quest};
 
   public struct Witness has drop {}

@@ -1,22 +1,20 @@
 #[test_only]
-module suitears::vectors_tests {  
-  use std::vector;
-
+module suitears::vectors_tests {
   use sui::vec_set;
   use sui::test_utils::assert_eq;
 
   use suitears::vectors::{
-    lt, 
-    gt, 
-    lte, 
-    gte, 
+    lt,
+    gt,
+    lte,
+    gte,
     quick_sort,
     to_vec_set,
-    find_upper_bound, 
+    find_upper_bound,
     ascending_insertion_sort,
-    descending_insertion_sort, 
+    descending_insertion_sort,
   };
-  
+
   #[test]
   fun test_find_upper_bound() {
     let vec = vector[33, 66, 99, 100, 123, 222, 233, 244];
@@ -117,7 +115,7 @@ module suitears::vectors_tests {
       ascending_insertion_sort(vector[12, 23, 4, 5, 2, 34, 1, 43, 54, 32, 45, 6, 7, 8, 9, 10, 21, 20]),
       vector[1, 2, 4, 5, 6, 7, 8, 9, 10, 12, 20, 21, 23, 32, 34, 43, 45, 54]
     );
-  } 
+  }
 
   #[test]
   fun test_quick_sort() {
@@ -125,7 +123,7 @@ module suitears::vectors_tests {
     let len = vector::length(&x);
     quick_sort(&mut x, 0, len - 1);
     assert_eq(x, vector[1, 2, 4, 5, 6, 7, 8, 9, 10, 12, 20, 21, 23, 32, 34, 43, 45, 54]);
-  
+
 
     let mut x = vector[3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5];
     let len = vector::length(&x);
@@ -135,18 +133,18 @@ module suitears::vectors_tests {
     let mut x = vector[6, 5, 4, 3, 2, 1];
     let len = vector::length(&x);
     quick_sort(&mut x, 0, len - 1);
-    assert_eq(x, vector[1, 2, 3, 4, 5, 6]);    
+    assert_eq(x, vector[1, 2, 3, 4, 5, 6]);
 
     let mut x = vector[1, 2, 3, 4, 5, 6];
     let len = vector::length(&x);
     quick_sort(&mut x, 0, len - 1);
-    assert_eq(x, vector[1, 2, 3, 4, 5, 6]);      
+    assert_eq(x, vector[1, 2, 3, 4, 5, 6]);
 
     let mut x = vector[5, 2, 9, 1, 5, 6];
     let len = vector::length(&x);
     quick_sort(&mut x, 0, len - 1);
-    assert_eq(x, vector[1, 2, 5, 5, 6, 9]);      
-  } 
+    assert_eq(x, vector[1, 2, 5, 5, 6, 9]);
+  }
 
   #[test]
   fun test_to_vec_set() {
@@ -165,6 +163,6 @@ module suitears::vectors_tests {
   #[test]
   #[expected_failure]
   fun test_to_vec_set_duplicate() {
-    assert_eq(vec_set::empty<u64>(), to_vec_set(vector[0, 0]));    
+    assert_eq(vec_set::empty<u64>(), to_vec_set(vector[0, 0]));
   }
 }

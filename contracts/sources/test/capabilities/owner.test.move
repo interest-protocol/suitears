@@ -1,8 +1,6 @@
 #[test_only]
 module suitears::owner_tests {
-  
-  use sui::object;
-  use sui::tx_context;
+
   use sui::test_utils::assert_eq;
 
   use suitears::owner;
@@ -49,7 +47,7 @@ module suitears::owner_tests {
   }
 
   #[test]
-  #[expected_failure(abort_code = owner::ENotAllowed)] 
+  #[expected_failure(abort_code = owner::ENotAllowed)]
   fun test_failure_case() {
     let mut ctx = tx_context::dummy();
     let uid = object::new(&mut ctx);

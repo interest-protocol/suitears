@@ -2,8 +2,6 @@
 module suitears::dao_treasury_tests {
 
   use sui::clock;
-  use sui::object;
-  use sui::transfer;
   use sui::test_utils::assert_eq;
   use sui::coin::{Self, mint_for_testing};
   use sui::test_scenario::{Self as test, Scenario, next_tx, ctx};
@@ -15,7 +13,7 @@ module suitears::dao_treasury_tests {
   use suitears::dao_treasury::{Self, DaoTreasury};
 
   const DAO_VOTING_DELAY: u64 = 10;
-  const DAO_VOTING_PERIOD: u64 = 20;  
+  const DAO_VOTING_PERIOD: u64 = 20;
   const DAO_QUORUM_RATE: u64 = 7_00_000_000;
   const DAO_MIN_ACTION_DELAY: u64 = 7;
   const DAO_MIN_QUORUM_VOTES: u64 = 1234;
@@ -36,7 +34,7 @@ module suitears::dao_treasury_tests {
     set_up(test);
 
     // Dao is initialized correctly
-    next_tx(test, alice);  
+    next_tx(test, alice);
     {
       let mut treasury = test::take_shared<DaoTreasury<InterestDAO>>(test);
       let dao = test::take_shared<Dao<InterestDAO>>(test);
@@ -52,7 +50,7 @@ module suitears::dao_treasury_tests {
       test::return_shared(treasury);
     };
     clock::destroy_for_testing(c);
-    test::end(scenario);  
+    test::end(scenario);
   }
 
   #[test]
@@ -67,7 +65,7 @@ module suitears::dao_treasury_tests {
     set_up(test);
 
     // Dao is initialized correctly
-    next_tx(test, alice); 
+    next_tx(test, alice);
     {
       let mut treasury = test::take_shared<DaoTreasury<InterestDAO>>(test);
       let dao = test::take_shared<Dao<InterestDAO>>(test);
@@ -96,13 +94,13 @@ module suitears::dao_treasury_tests {
       );
 
       test::return_shared(dao);
-      test::return_shared(treasury);            
+      test::return_shared(treasury);
     };
     clock::destroy_for_testing(c);
-    test::end(scenario);         
-  }  
+    test::end(scenario);
+  }
 
-  #[test]  
+  #[test]
   #[lint_allow(share_owned)]
   #[expected_failure(abort_code = dao_treasury::ERepayAmountTooLow)]
   fun test_low_flash_loan_repay() {
@@ -116,7 +114,7 @@ module suitears::dao_treasury_tests {
     set_up(test);
 
     // Dao is initialized correctly
-    next_tx(test, alice); 
+    next_tx(test, alice);
     {
       let mut treasury = test::take_shared<DaoTreasury<InterestDAO>>(test);
       let dao = test::take_shared<Dao<InterestDAO>>(test);
@@ -140,11 +138,11 @@ module suitears::dao_treasury_tests {
       );
 
       test::return_shared(dao);
-      test::return_shared(treasury);            
+      test::return_shared(treasury);
     };
     clock::destroy_for_testing(c);
-    test::end(scenario);      
-  }  
+    test::end(scenario);
+  }
 
   #[lint_allow(share_owned)]
   fun set_up(test: &mut Scenario) {
@@ -160,9 +158,9 @@ module suitears::dao_treasury_tests {
         DAO_MIN_QUORUM_VOTES,
         ctx(test)
       );
-      
+
       transfer::public_share_object(dao);
       transfer::public_share_object(treasury);
     };
-  }  
+  }
 }

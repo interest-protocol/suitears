@@ -9,7 +9,7 @@ module suitears::linear_vesting_airdrop {
   // === Imports ===
 
   use sui::coin::{Self, Coin};
-  use sui::clock::{Self, Clock};
+  use sui::clock::Clock;
   use sui::balance::Balance;
 
   use suitears::airdrop_utils::verify;

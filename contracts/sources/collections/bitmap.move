@@ -12,9 +12,7 @@
 module suitears::bitmap {
   // === Imports ===
 
-  use sui::object::{Self, UID};
   use sui::dynamic_field as df;
-  use sui::tx_context::TxContext;
 
   // === Constants ===
 
@@ -52,7 +50,7 @@ module suitears::bitmap {
 
     if (!bucket_exists(self, key)) return false;
 
-    *df::borrow(&self.id, key) & mask != 0
+    *self.id.borrow(key) & mask != 0
   }
 
   // === Public Mutable Functions ===
@@ -68,7 +66,7 @@ module suitears::bitmap {
 
     safe_register(self, key);
 
-    let x = df::borrow_mut<u256, u256>(&mut self.id, key);
+    let x: &mut u256 = self.id.borrow_mut(key);
     *x = *x | mask
   }
 
@@ -83,7 +81,7 @@ module suitears::bitmap {
 
     if (!bucket_exists(self, key)) return;
 
-    let x = df::borrow_mut<u256, u256>(&mut self.id, key);
+    let x: &mut u256 = self.id.borrow_mut(key);
     *x = *x & (mask ^ MAX_U256)
   }
 
@@ -96,7 +94,7 @@ module suitears::bitmap {
   */
   public fun destroy(self: Bitmap) {
     let Bitmap { id } = self;
-    object::delete(id);
+    id.delete();
   }
 
   // === Private Functions ===
@@ -120,7 +118,7 @@ module suitears::bitmap {
   * @return bool. Check if the key exists in the {Bitmap}.
   */
   fun bucket_exists(self: &Bitmap, key: u256): bool {
-    df::exists_with_type<u256, u256>(&self.id, key)
+    self.id.exists_with_type<u256, u256>(key)
   }
 
   /*
@@ -131,7 +129,14 @@ module suitears::bitmap {
   */
   fun safe_register(self: &mut Bitmap, key: u256) {
     if (!bucket_exists(self, key)) {
-      df::add<u256, u256>(&mut self.id, key, 0);
+      self.id.add(key, 0u256);
     };
   }
+
+  // === Local Aliases ===
+
+  use fun df::add as UID.add;
+  use fun df::borrow as UID.borrow;
+  use fun df::borrow_mut as UID.borrow_mut;
+  use fun df::exists_with_type as UID.exists_with_type;
 }

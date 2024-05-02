@@ -3,8 +3,6 @@ module suitears::oracle_tests {
   use std::type_name;
 
   use sui::clock;
-  use sui::object;
-  use sui::transfer;
   use sui::tx_context::dummy;
   use sui::test_utils::{assert_eq, destroy};
   use sui::test_scenario::{Self as test, next_tx, ctx};
@@ -18,10 +16,10 @@ module suitears::oracle_tests {
 
   public struct CoinXOracle has drop {}
   public struct CoinYOracle has drop {}
-  
+
   const DEVIATION: u256 = 20000000000000000;
   const TIME_LIMIT: u64 = 100;
-  
+
   #[test]
   fun test_oracle_flow() {
     let mut scenario = scenario();
@@ -31,7 +29,7 @@ module suitears::oracle_tests {
 
     let mut c = clock::create_for_testing(ctx(test));
 
-    next_tx(test, alice);  
+    next_tx(test, alice);
     {
       let mut cap = owner::new(CoinXOracle {}, vector[], ctx(test));
 
@@ -46,7 +44,7 @@ module suitears::oracle_tests {
 
       assert_eq(oracle::deviation(&oracle), DEVIATION);
       assert_eq(oracle::time_limit(&oracle), TIME_LIMIT);
-      
+
 
       oracle::share(oracle);
 
@@ -89,7 +87,7 @@ module suitears::oracle_tests {
     let test = &mut scenario;
 
 
-    next_tx(test, alice);  
+    next_tx(test, alice);
     {
       let mut cap = owner::new(CoinXOracle {}, vector[], ctx(test));
 
@@ -101,14 +99,14 @@ module suitears::oracle_tests {
         DEVIATION,
         ctx(test)
       );
-      
+
 
       oracle::share(oracle);
 
       transfer::public_transfer(cap, alice);
-    };   
-    test::end(scenario); 
-  } 
+    };
+    test::end(scenario);
+  }
 
   #[test]
   #[expected_failure(abort_code = oracle::EMustHavePositiveDeviation)]
@@ -119,7 +117,7 @@ module suitears::oracle_tests {
     let test = &mut scenario;
 
 
-    next_tx(test, alice);  
+    next_tx(test, alice);
     {
       let mut cap = owner::new(CoinXOracle {}, vector[], ctx(test));
 
@@ -131,13 +129,13 @@ module suitears::oracle_tests {
         0,
         ctx(test)
       );
-      
+
       oracle::share(oracle);
 
       transfer::public_transfer(cap, alice);
-    };   
-    test::end(scenario); 
-  } 
+    };
+    test::end(scenario);
+  }
 
   #[test]
   #[expected_failure(abort_code = oracle::ERequestAndOracleIdMismatch)]
@@ -149,7 +147,7 @@ module suitears::oracle_tests {
 
     let c = clock::create_for_testing(ctx(test));
 
-    next_tx(test, alice);  
+    next_tx(test, alice);
     {
       let mut cap = owner::new(CoinXOracle {}, vector[], ctx(test));
       let mut cap_2 = owner::new(CoinYOracle {}, vector[], ctx(test));
@@ -171,13 +169,13 @@ module suitears::oracle_tests {
         1,
         ctx(test)
       );
-      
+
       oracle::share(oracle);
       oracle::share(oracle_2);
 
       transfer::public_transfer(cap, alice);
       transfer::public_transfer(cap_2, alice);
-    };   
+    };
 
     next_tx(test, alice);
     {
@@ -192,12 +190,12 @@ module suitears::oracle_tests {
 
       test::return_shared(oracle);
       test::return_shared(oracle_2);
-    };    
+    };
 
     clock::destroy_for_testing(c);
-    test::end(scenario);     
+    test::end(scenario);
   }
- 
+
   #[test]
   #[expected_failure(abort_code = oracle::EWrongNumberOfReports)]
   fun test_destroy_request_wrong_number_of_reports() {
@@ -208,7 +206,7 @@ module suitears::oracle_tests {
 
     let c = clock::create_for_testing(ctx(test));
 
-    next_tx(test, alice);  
+    next_tx(test, alice);
     {
       let mut cap = owner::new(CoinXOracle {}, vector[], ctx(test));
 
@@ -220,11 +218,11 @@ module suitears::oracle_tests {
         1,
         ctx(test)
       );
-      
+
       oracle::share(oracle);
 
       transfer::public_transfer(cap, alice);
-    };   
+    };
 
     next_tx(test, alice);
     {
@@ -239,10 +237,10 @@ module suitears::oracle_tests {
       let (_oracle_id, _price, _decimals, _timestamp) = oracle::destroy_price(price);
 
       test::return_shared(oracle);
-    };    
+    };
 
     clock::destroy_for_testing(c);
-    test::end(scenario);     
+    test::end(scenario);
   }
 
   #[test]
@@ -255,7 +253,7 @@ module suitears::oracle_tests {
 
     let c = clock::create_for_testing(ctx(test));
 
-    next_tx(test, alice);  
+    next_tx(test, alice);
     {
       let mut cap = owner::new(CoinXOracle {}, vector[], ctx(test));
 
@@ -267,11 +265,11 @@ module suitears::oracle_tests {
         1,
         ctx(test)
       );
-      
+
       oracle::share(oracle);
 
       transfer::public_transfer(cap, alice);
-    };   
+    };
 
     next_tx(test, alice);
     {
@@ -287,14 +285,14 @@ module suitears::oracle_tests {
       let (_oracle_id, _price, _decimals, _timestamp) = oracle::destroy_price(price);
 
       test::return_shared(oracle);
-    };    
+    };
 
     clock::destroy_for_testing(c);
-    test::end(scenario);     
+    test::end(scenario);
   }
 
   #[test]
-  #[expected_failure(abort_code = oracle::EStalePriceReport)]  
+  #[expected_failure(abort_code = oracle::EStalePriceReport)]
   fun test_destroy_request_stale_price() {
     let mut scenario = scenario();
     let (alice, _) = people();
@@ -303,7 +301,7 @@ module suitears::oracle_tests {
 
     let mut c = clock::create_for_testing(ctx(test));
 
-    next_tx(test, alice);  
+    next_tx(test, alice);
     {
       let mut cap = owner::new(CoinXOracle {}, vector[], ctx(test));
 
@@ -318,7 +316,7 @@ module suitears::oracle_tests {
 
       assert_eq(oracle::deviation(&oracle), DEVIATION);
       assert_eq(oracle::time_limit(&oracle), TIME_LIMIT);
-      
+
 
       oracle::share(oracle);
 
@@ -345,10 +343,10 @@ module suitears::oracle_tests {
 
     clock::destroy_for_testing(c);
     test::end(scenario);
-  }  
+  }
 
   #[test]
-  #[expected_failure(abort_code = oracle::EPriceCannotBeZero)]  
+  #[expected_failure(abort_code = oracle::EPriceCannotBeZero)]
   fun test_report_zero_price() {
     let mut scenario = scenario();
     let (alice, _) = people();
@@ -357,7 +355,7 @@ module suitears::oracle_tests {
 
     let mut c = clock::create_for_testing(ctx(test));
 
-    next_tx(test, alice);  
+    next_tx(test, alice);
     {
       let mut cap = owner::new(CoinXOracle {}, vector[], ctx(test));
 
@@ -372,7 +370,7 @@ module suitears::oracle_tests {
 
       assert_eq(oracle::deviation(&oracle), DEVIATION);
       assert_eq(oracle::time_limit(&oracle), TIME_LIMIT);
-      
+
 
       oracle::share(oracle);
 
@@ -399,10 +397,10 @@ module suitears::oracle_tests {
 
     clock::destroy_for_testing(c);
     test::end(scenario);
-  } 
+  }
 
   #[test]
-  #[expected_failure(abort_code = oracle::EPriceDeviationIsTooHigh)]  
+  #[expected_failure(abort_code = oracle::EPriceDeviationIsTooHigh)]
   fun test_destroy_request_wrong_deviation() {
     let mut scenario = scenario();
     let (alice, _) = people();
@@ -411,7 +409,7 @@ module suitears::oracle_tests {
 
     let mut c = clock::create_for_testing(ctx(test));
 
-    next_tx(test, alice);  
+    next_tx(test, alice);
     {
       let mut cap = owner::new(CoinXOracle {}, vector[], ctx(test));
 
@@ -426,7 +424,7 @@ module suitears::oracle_tests {
 
       assert_eq(oracle::deviation(&oracle), DEVIATION);
       assert_eq(oracle::time_limit(&oracle), TIME_LIMIT);
-      
+
 
       oracle::share(oracle);
 
@@ -462,7 +460,7 @@ module suitears::oracle_tests {
 
     let test = &mut scenario;
 
-    next_tx(test, alice);  
+    next_tx(test, alice);
     {
       let mut cap = owner::new(CoinXOracle {}, vector[], ctx(test));
 
@@ -474,11 +472,11 @@ module suitears::oracle_tests {
         DEVIATION,
         ctx(test)
       );
-      
+
       oracle::share(oracle);
 
       transfer::public_transfer(cap, alice);
-    };   
+    };
 
   next_tx(test, alice);
     {
@@ -495,18 +493,18 @@ module suitears::oracle_tests {
       test::return_shared(oracle);
     };
 
-    test::end(scenario); 
-  } 
+    test::end(scenario);
+  }
 
   #[test]
-  #[expected_failure] 
+  #[expected_failure]
   fun test_add_invalid_cap() {
    let mut scenario = scenario();
     let (alice, _) = people();
 
     let test = &mut scenario;
 
-    next_tx(test, alice);  
+    next_tx(test, alice);
     {
       let mut cap = owner::new(CoinXOracle {}, vector[], ctx(test));
 
@@ -518,11 +516,11 @@ module suitears::oracle_tests {
         DEVIATION,
         ctx(test)
       );
-      
+
       oracle::share(oracle);
 
       transfer::public_transfer(cap, alice);
-    };   
+    };
 
   next_tx(test, alice);
     {
@@ -535,8 +533,8 @@ module suitears::oracle_tests {
       test::return_shared(oracle);
     };
 
-    test::end(scenario); 
-  } 
+    test::end(scenario);
+  }
 
   #[test]
   fun test_remove() {
@@ -545,7 +543,7 @@ module suitears::oracle_tests {
 
     let test = &mut scenario;
 
-    next_tx(test, alice);  
+    next_tx(test, alice);
     {
       let mut cap = owner::new(CoinXOracle {}, vector[], ctx(test));
 
@@ -557,11 +555,11 @@ module suitears::oracle_tests {
         DEVIATION,
         ctx(test)
       );
-      
+
       oracle::share(oracle);
 
       transfer::public_transfer(cap, alice);
-    };   
+    };
 
   next_tx(test, alice);
     {
@@ -578,8 +576,8 @@ module suitears::oracle_tests {
       test::return_shared(oracle);
     };
 
-    test::end(scenario); 
-  }   
+    test::end(scenario);
+  }
 
   #[test]
   #[expected_failure(abort_code = oracle::EOracleMustHaveFeeds)]
@@ -589,7 +587,7 @@ module suitears::oracle_tests {
 
     let test = &mut scenario;
 
-    next_tx(test, alice);  
+    next_tx(test, alice);
     {
       let mut cap = owner::new(CoinXOracle {}, vector[], ctx(test));
 
@@ -601,11 +599,11 @@ module suitears::oracle_tests {
         DEVIATION,
         ctx(test)
       );
-      
+
       oracle::share(oracle);
 
       transfer::public_transfer(cap, alice);
-    };   
+    };
 
   next_tx(test, alice);
     {
@@ -624,8 +622,8 @@ module suitears::oracle_tests {
       test::return_shared(oracle);
     };
 
-    test::end(scenario); 
-  }  
+    test::end(scenario);
+  }
 
   #[test]
   fun test_update_time_limit() {
@@ -634,7 +632,7 @@ module suitears::oracle_tests {
 
     let test = &mut scenario;
 
-    next_tx(test, alice);  
+    next_tx(test, alice);
     {
       let mut cap = owner::new(CoinXOracle {}, vector[], ctx(test));
 
@@ -652,14 +650,14 @@ module suitears::oracle_tests {
       oracle::update_time_limit(&mut oracle, &cap, TIME_LIMIT + 1);
 
       assert_eq(oracle::time_limit(&oracle), TIME_LIMIT + 1);
-      
+
       oracle::share(oracle);
 
       transfer::public_transfer(cap, alice);
-    };   
+    };
 
-    test::end(scenario); 
-  }  
+    test::end(scenario);
+  }
 
   #[test]
   #[expected_failure(abort_code = oracle::EMustHavePositiveTimeLimit)]
@@ -669,7 +667,7 @@ module suitears::oracle_tests {
 
     let test = &mut scenario;
 
-    next_tx(test, alice);  
+    next_tx(test, alice);
     {
       let mut cap = owner::new(CoinXOracle {}, vector[], ctx(test));
 
@@ -683,14 +681,14 @@ module suitears::oracle_tests {
       );
 
       oracle::update_time_limit(&mut oracle, &cap, 0);
-      
+
       oracle::share(oracle);
 
       transfer::public_transfer(cap, alice);
-    };   
+    };
 
-    test::end(scenario); 
-  }   
+    test::end(scenario);
+  }
 
   #[test]
   fun test_update_deviation() {
@@ -699,7 +697,7 @@ module suitears::oracle_tests {
 
     let test = &mut scenario;
 
-    next_tx(test, alice);  
+    next_tx(test, alice);
     {
       let mut cap = owner::new(CoinXOracle {}, vector[], ctx(test));
 
@@ -717,14 +715,14 @@ module suitears::oracle_tests {
       oracle::update_deviation(&mut oracle, &cap,DEVIATION + 1);
 
       assert_eq(oracle::deviation(&oracle), DEVIATION + 1);
-      
+
       oracle::share(oracle);
 
       transfer::public_transfer(cap, alice);
-    };   
+    };
 
-    test::end(scenario); 
-  }  
+    test::end(scenario);
+  }
 
   #[test]
   #[expected_failure(abort_code = oracle::EMustHavePositiveDeviation)]
@@ -734,7 +732,7 @@ module suitears::oracle_tests {
 
     let test = &mut scenario;
 
-    next_tx(test, alice);  
+    next_tx(test, alice);
     {
       let mut cap = owner::new(CoinXOracle {}, vector[], ctx(test));
 
@@ -748,14 +746,14 @@ module suitears::oracle_tests {
       );
 
       oracle::update_deviation(&mut oracle, &cap,0);
-      
+
       oracle::share(oracle);
 
       transfer::public_transfer(cap, alice);
-    };   
+    };
 
-    test::end(scenario); 
-  }  
+    test::end(scenario);
+  }
 
   #[test]
   fun test_destroy_oracle() {
@@ -792,8 +790,8 @@ module suitears::oracle_tests {
     oracle::destroy_oracle(oracle, &cap2);
     destroy(cap);
     destroy(cap2);
-  }        
-}  
+  }
+}
 
 
 #[test_only]
@@ -817,7 +815,7 @@ module suitears::switchboard_feed_test {
 
   public fun report(request: &mut Request, timestamp: u64, price: u128, decimals: u8) {
     oracle::report(request, SwitchboardFeed {}, timestamp, price, decimals);
-  }  
+  }
 }
 
 #[test_only]
@@ -829,5 +827,5 @@ module suitears::supra_feed_test {
 
   public fun report(request: &mut Request, timestamp: u64, price: u128, decimals: u8) {
     oracle::report(request, SupraFeed {}, timestamp, price, decimals);
-  }  
+  }
 }

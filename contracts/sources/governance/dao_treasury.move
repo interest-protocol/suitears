@@ -12,9 +12,7 @@ module suitears::dao_treasury {
   use sui::clock::Clock;
   use sui::bag::{Self, Bag};
   use sui::coin::{Self, Coin};
-  use sui::object::{Self, UID, ID};
-  use sui::balance::{Self, Balance};
-  use sui::tx_context::{Self, TxContext};
+  use sui::balance;
 
   use suitears::dao_admin::DaoAdmin;
   use suitears::fixed_point_roll::mul_up;
@@ -115,9 +113,9 @@ module suitears::dao_treasury {
   */
   public fun balance<DaoWitness: drop, CoinType>(treasury: &DaoTreasury<DaoWitness>): u64 {
     let key = type_name::get<CoinType>();
-    if (!bag::contains(&treasury.coins, key)) return 0;
+    if (!treasury.coins.contains(key)) return 0;
 
-    balance::value(bag::borrow<TypeName, Balance<CoinType>>(&treasury.coins, key))
+    balance::value<CoinType>(&treasury.coins[key])
   }
 
   // === Public Mutative Functions ===
@@ -130,12 +128,12 @@ module suitears::dao_treasury {
   */
   public fun donate<DaoWitness: drop, CoinType>(treasury: &mut DaoTreasury<DaoWitness>, token: Coin<CoinType>, ctx: &mut TxContext) {
     let key = type_name::get<CoinType>();
-    let value = coin::value(&token);
+    let value = token.value();
 
-    if (!bag::contains(&treasury.coins, key)) {
-      bag::add(&mut treasury.coins, key, coin::into_balance(token))
+    if (!treasury.coins.contains(key)) {
+      treasury.coins.add(key, token.into_balance())
     } else {
-      balance::join(bag::borrow_mut<TypeName, Balance<CoinType>>(&mut treasury.coins, key), coin::into_balance(token));
+      balance::join(&mut treasury.coins[key], token.into_balance());
     };
 
     emit(Donate<DaoWitness, CoinType> { value, donator: tx_context::sender(ctx) });
@@ -156,7 +154,7 @@ module suitears::dao_treasury {
     ctx: &mut TxContext
   ): Coin<CoinType> {
 
-    let token = coin::take(bag::borrow_mut(&mut treasury.coins, type_name::get<TransferCoin>()), value, ctx);
+    let token = coin::take(&mut treasury.coins[type_name::get<TransferCoin>()], value, ctx);
 
     emit(Transfer<DaoWitness, CoinType> {
         value: value,
@@ -188,7 +186,7 @@ module suitears::dao_treasury {
     ctx: &mut TxContext
   ): LinearWallet<CoinType> {
 
-    let token = coin::take<CoinType>(bag::borrow_mut(&mut treasury.coins, type_name::get<TransferCoin>()), value, ctx);
+    let token = coin::take<CoinType>(&mut treasury.coins[type_name::get<TransferCoin>()], value, ctx);
 
     let wallet = linear_vesting_wallet::new(token, c, start, duration, ctx);
 
@@ -220,14 +218,23 @@ module suitears::dao_treasury {
     ctx: &mut TxContext
   ): (Coin<CoinType>, FlashLoan<DaoWitness, CoinType>) {
 
-    let `type` = type_name::get<CoinType>();
-    let amount = balance::value(bag::borrow<TypeName, Balance<CoinType>>(&treasury.coins, `type`));
+    let coin_type = type_name::get<CoinType>();
+    let amount = balance::value<CoinType>(&treasury.coins[coin_type]);
 
-    emit(FlashLoanRequest<DaoWitness, CoinType> { `type`, borrower: tx_context::sender(ctx), value, treasury_id: object::id(treasury) });
+    emit(FlashLoanRequest<DaoWitness, CoinType> {
+      `type`: coin_type,
+      borrower: ctx.sender(),
+      value,
+      treasury_id: object::id(treasury)
+    });
 
     (
-      coin::take<CoinType>(bag::borrow_mut(&mut treasury.coins, `type`), value, ctx),
-      FlashLoan { amount , `type`, fee: mul_up(value, FLASH_LOAN_FEE) }
+      coin::take<CoinType>(&mut treasury.coins[coin_type], value, ctx),
+      FlashLoan {
+        amount,
+        `type`: coin_type,
+        fee: mul_up(value, FLASH_LOAN_FEE)
+      }
     )
   }
 
@@ -266,9 +273,9 @@ module suitears::dao_treasury {
     flash_loan: FlashLoan<DaoWitness, CoinType>,
     token: Coin<CoinType>
   ) {
-    let FlashLoan { amount, `type`, fee } = flash_loan;
-    assert!(coin::value(&token) >= amount + fee, ERepayAmountTooLow);
+    let FlashLoan { amount, `type`: coin_type, fee } = flash_loan;
+    assert!(token.value() >= amount + fee, ERepayAmountTooLow);
 
-    balance::join(bag::borrow_mut(&mut treasury.coins, `type`), coin::into_balance(token));
+    balance::join(&mut treasury.coins[coin_type], token.into_balance());
   }
 }

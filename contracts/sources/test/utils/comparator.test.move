@@ -1,6 +1,5 @@
 #[test_only]
 module suitears::comparator_tests {
-  use std::vector;
   use std::string;
 
   use suitears::comparator::{compare, eq, gt, lt, lte, gte};
@@ -34,9 +33,9 @@ module suitears::comparator_tests {
     assert!(gte(&compare(&value2, &value0)), 6);
 
     assert!(lt(&compare(&value1, &value2)), 7);
-    assert!(lte(&compare(&value1, &value2)), 7);    
+    assert!(lte(&compare(&value1, &value2)), 7);
     assert!(gt(&compare(&value2, &value1)), 8);
-    assert!(gte(&compare(&value2, &value1)), 8);    
+    assert!(gte(&compare(&value2, &value1)), 8);
   }
 
   #[test]
@@ -62,13 +61,13 @@ module suitears::comparator_tests {
   #[test]
   public fun test_complex() {
     let mut value0_0 = vector::empty();
-    
+
     vector::push_back(&mut value0_0, 10);
     vector::push_back(&mut value0_0, 9);
     vector::push_back(&mut value0_0, 5);
 
     let mut value0_1 = vector::empty();
-    
+
     vector::push_back(&mut value0_1, 10);
     vector::push_back(&mut value0_1, 9);
     vector::push_back(&mut value0_1, 5);
@@ -109,7 +108,7 @@ module suitears::comparator_tests {
     assert!(lte(&compare(&base, &other_2)), 5);
     assert!(gt(&compare(&other_2, &base)), 6);
     assert!(gte(&compare(&other_2, &base)), 6);
-  }  
+  }
 
   #[test]
   #[expected_failure]
@@ -123,5 +122,5 @@ module suitears::comparator_tests {
 
     assert!(lt(&compare(&value0, &value1)), 2);
     assert!(gt(&compare(&value1, &value0)), 3);
-  }    
+  }
 }

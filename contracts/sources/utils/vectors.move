@@ -1,51 +1,49 @@
 /*
 * @title Vectors
 *
-* @notice Utility functions for vectors.  
+* @notice Utility functions for vectors.
 *
-* @dev Credits to Movemate at https://github.com/pentagonxyz/movemate. 
+* @dev Credits to Movemate at https://github.com/pentagonxyz/movemate.
 */
 module suitears::vectors {
   // === Imports ===
-
-  use std::vector;
 
   use sui::vec_set::{Self, VecSet};
 
   use suitears::math64::average;
 
-  // === Errors ===  
+  // === Errors ===
 
   /// @dev When you supply vectors of different lengths to a function requiring equal-length vectors.
   const EVectorLengthMismatch: u64 = 0;
 
-  // === Transform Functions ===    
+  // === Transform Functions ===
 
   /*
-  * @notice Transforms a vector into a `sui::vec_set::VecSet` to ensure that all values are unique. 
+  * @notice Transforms a vector into a `sui::vec_set::VecSet` to ensure that all values are unique.
   *
-  * @dev The order of the items remains the same.  
+  * @dev The order of the items remains the same.
   *
-  * @param v A vector.  
-  * @return VecSet It returns a copy of the items in the array in a `sui::vec_set::VecSet`. 
+  * @param v A vector.
+  * @return VecSet It returns a copy of the items in the array in a `sui::vec_set::VecSet`.
   *
-  * aborts-if:   
-  * - There are repeated items in `v`.  
+  * aborts-if:
+  * - There are repeated items in `v`.
   */
   public fun to_vec_set<T: copy + drop>(v: vector<T>): VecSet<T> {
-    let len = vector::length(&v);
+    let len = v.length();
 
     let mut i = 0;
     let mut set = vec_set::empty();
     while (len > i) {
-      vec_set::insert(&mut set, *vector::borrow(&v, i));
+      set.insert(v[i]);
       i = i + 1;
     };
 
     set
-  }  
+  }
 
-  // === Compare Functions ===  
+  // === Compare Functions ===
 
   /*
   * @notice Searches a sorted `vec` and returns the first index that contains
@@ -53,26 +51,26 @@ module suitears::vectors {
   * values in the vector are strictly less than `element`), and the vector length is returned.
   *
   * @dev Time complexity O(log n).
-  * @dev `vec` is expected to be sorted in ascending order, and to contain no repeated elements. 
+  * @dev `vec` is expected to be sorted in ascending order, and to contain no repeated elements.
   *
-  * @param vec The vector to be searched. 
-  * @param element We check if there is a value higher than it in the vector. 
+  * @param vec The vector to be searched.
+  * @param element We check if there is a value higher than it in the vector.
   * @return u64. The index of the member that is larger than `element`. The length is returned if no member is found.
   */
   public fun find_upper_bound(vec: vector<u64>, element: u64): u64 {
-    if (vector::length(&vec) == 0) {
+    if (vec.length() == 0) {
       return 0
     };
 
     let mut low = 0;
-    let mut high = vector::length(&vec);
+    let mut high = vec.length();
 
     while (low < high) {
       let mid = average(low, high);
 
       // Note that mid will always be strictly less than high (i.e. it will be a valid vector index)
       // because Math::average rounds down (it does integer division with truncation).
-      if (*vector::borrow(&vec, mid) > element) {
+      if (vec[mid] > element) {
         high = mid;
       } else {
         low = mid + 1;
@@ -80,7 +78,7 @@ module suitears::vectors {
     };
 
     // At this point `low` is the exclusive upper bound. We will return the inclusive upper bound.
-    if (low > 0 && *vector::borrow(&vec, low - 1) == element) {
+    if (low > 0 && vec[low - 1] == element) {
       low - 1
     } else {
       low
@@ -88,25 +86,23 @@ module suitears::vectors {
   }
 
   /*
-  * @notice Checks if `a` is smaller than `b`. E.g. x"123" < x"456". 
+  * @notice Checks if `a` is smaller than `b`. E.g. x"123" < x"456".
   *
-  * @param a The first operand. 
-  * @param b The second operand. 
+  * @param a The first operand.
+  * @param b The second operand.
   * @return bool. If `a` is smaller than `b`.
   *
-  * aborts-if 
-  * - `a` and `b` have different lengths. 
+  * aborts-if
+  * - `a` and `b` have different lengths.
   */
   public fun lt(a: vector<u8>, b: vector<u8>): bool {
     let mut i = 0;
-    let len = vector::length(&a);
-    assert!(len == vector::length(&b), EVectorLengthMismatch);
+    let len = a.length();
+    assert!(len == b.length(), EVectorLengthMismatch);
 
     while (i < len) {
-      let aa = *vector::borrow(&a, i);
-      let bb = *vector::borrow(&b, i);
-      if (aa < bb) return true;
-      if (aa > bb) return false;
+      if (a[i] < b[i]) return true;
+      if (a[i] > b[i]) return false;
       i = i + 1;
     };
 
@@ -114,25 +110,23 @@ module suitears::vectors {
   }
 
   /*
-  * @notice Checks if `a` is larger than `b`. E.g. x"123" < x"456". 
+  * @notice Checks if `a` is larger than `b`. E.g. x"123" < x"456".
   *
-  * @param a The first operand. 
-  * @param b The second operand. 
+  * @param a The first operand.
+  * @param b The second operand.
   * @return bool. If `a` is larger than `b`.
   *
-  * aborts-if 
-  * - `a` and `b` have different lengths. 
+  * aborts-if
+  * - `a` and `b` have different lengths.
   */
   public fun gt(a: vector<u8>, b: vector<u8>): bool {
     let mut i = 0;
-    let len = vector::length(&a);
-    assert!(len == vector::length(&b), EVectorLengthMismatch);
+    let len = a.length();
+    assert!(len == b.length(), EVectorLengthMismatch);
 
     while (i < len) {
-      let aa = *vector::borrow(&a, i);
-      let bb = *vector::borrow(&b, i);
-      if (aa > bb) return true;
-      if (aa < bb) return false;
+      if (a[i] > b[i]) return true;
+      if (a[i] < b[i]) return false;
       i = i + 1;
     };
 
@@ -140,25 +134,23 @@ module suitears::vectors {
   }
 
   /*
-  * @notice Checks if `a` is smaller or equal to `b`. E.g. x"123" < x"456". 
+  * @notice Checks if `a` is smaller or equal to `b`. E.g. x"123" < x"456".
   *
-  * @param a The first operand. 
-  * @param b The second operand. 
+  * @param a The first operand.
+  * @param b The second operand.
   * @return bool. If `a` is smaller or equal to `b`.
   *
-  * aborts-if 
-  * - `a` and `b` have different lengths. 
+  * aborts-if
+  * - `a` and `b` have different lengths.
   */
   public fun lte(a: vector<u8>, b: vector<u8>): bool {
     let mut i = 0;
-    let len = vector::length(&a);
-    assert!(len == vector::length(&b), EVectorLengthMismatch);
+    let len = a.length();
+    assert!(len == b.length(), EVectorLengthMismatch);
 
     while (i < len) {
-      let aa = *vector::borrow(&a, i);
-      let bb = *vector::borrow(&b, i);
-      if (aa < bb) return true;
-      if (aa > bb) return false;
+      if (a[i] < b[i]) return true;
+      if (a[i] > b[i]) return false;
       i = i + 1;
     };
 
@@ -166,104 +158,102 @@ module suitears::vectors {
   }
 
   /*
-  * @notice Checks if `a` is larger or equal to `b`. E.g. x"123" < x"456". 
+  * @notice Checks if `a` is larger or equal to `b`. E.g. x"123" < x"456".
   *
-  * @param a The first operand. 
-  * @param b The second operand. 
+  * @param a The first operand.
+  * @param b The second operand.
   * @return bool. If `a` is larger or equal to `b`.
   *
-  * aborts-if 
-  * - `a` and `b` have different lengths. 
+  * aborts-if
+  * - `a` and `b` have different lengths.
   */
   public fun gte(a: vector<u8>, b: vector<u8>): bool {
     let mut i = 0;
-    let len = vector::length(&a);
-    assert!(len == vector::length(&b), EVectorLengthMismatch);
+    let len = a.length();
+    assert!(len == b.length(), EVectorLengthMismatch);
 
     while (i < len) {
-      let aa = *vector::borrow(&a, i);
-      let bb = *vector::borrow(&b, i);
-      if (aa > bb) return true;
-      if (aa < bb) return false;
+      if (a[i] > b[i]) return true;
+      if (a[i] < b[i]) return false;
       i = i + 1;
     };
 
     true
   }
 
-  // === Sorting Functions ===   
+  // === Sorting Functions ===
 
   /*
-  * @notice Sorts a `a` in ascending order. E.g. [342] => [234].  
+  * @notice Sorts a `a` in ascending order. E.g. [342] => [234].
   *
-  * @param a The vector to sort. 
+  * @param a The vector to sort.
   * @return vector<u256>. Sorted `a`.
   */
   public fun ascending_insertion_sort(mut a: vector<u256>): vector<u256> {
-    let len = vector::length(&a);
+    let len = a.length();
     let mut i = 1;
 
     while (len > i) {
-      let x = *vector::borrow(&a, i);
+      let x = a[i];
       let mut curr = i;
       let j = 0;
 
       while (len > j) {
-        let y = *vector::borrow(&a, curr - 1);
+        let y = a[curr - 1];
         if (y < x) break;
-        *vector::borrow_mut(&mut a, curr) = y;
+        *(&mut a[curr]) = y;
         curr = curr - 1;
         if (curr == 0) break;
       };
 
-      *vector::borrow_mut(&mut a, curr) = x;  
+      *(&mut a[curr]) = x;
       i = i + 1;
-    }; 
-
-    a
-  }  
-
-  /*
-  * @notice Sorts a `a` in descending order. E.g. [342] => [432].  
-  *
-  * @param a The vector to sort. 
-  * @return vector<u256>. Sorted `a`.
-  */
-  public fun descending_insertion_sort(mut a: vector<u256>): vector<u256> {
-    let len = vector::length(&a);
-    let mut i = 1;
-
-    while (len > i) {
-      let x = *vector::borrow(&a, i);
-      let mut curr = i;
-      let j = 0;
-
-      while (len > j) {
-        let y = *vector::borrow(&a, curr - 1);
-        if (y > x) break;
-        *vector::borrow_mut(&mut a, curr) = y;
-        curr = curr - 1;
-        if (curr == 0) break;
-      };
-
-      *vector::borrow_mut(&mut a, curr) = x;  
-      i = i + 1;
-    }; 
+    };
 
     a
   }
 
   /*
-  * @notice Sorts a `values`. E.g. [342] => [234].  
+  * @notice Sorts a `a` in descending order. E.g. [342] => [432].
   *
-  * @dev It mutates `values`. 
-  * @dev It uses recursion. 
-  * @dev Credits to https://github.com/suidouble/suidouble-liquid/blob/main/move/sources/suidouble_liquid_staker.move 
+  * @param a The vector to sort.
+  * @return vector<u256>. Sorted `a`.
+  */
+  public fun descending_insertion_sort(mut a: vector<u256>): vector<u256> {
+    let len = a.length();
+    let mut i = 1;
+
+    while (len > i) {
+      let x = a[i];
+      let mut curr = i;
+      let j = 0;
+
+      while (len > j) {
+        let y = a[curr - 1];
+        if (y > x) break;
+        *(&mut a[curr]) = y;
+        curr = curr - 1;
+        if (curr == 0) break;
+      };
+
+      *(&mut a[curr]) = x;
+      i = i + 1;
+    };
+
+    a
+  }
+
+  /*
+  * @notice Sorts a `values`. E.g. [342] => [234].
   *
-  * @param values The vector to sort. 
+  * @dev It mutates `values`.
+  * @dev It uses recursion.
+  * @dev Credits to https://github.com/suidouble/suidouble-liquid/blob/main/move/sources/suidouble_liquid_staker.move
+  *
+  * @param values The vector to sort.
   * @param left The smaller side of the pivot. Pass the 0.
   * @param right The larger side of the pivot. Pass the `vector::length - 1`.
-  */  
+  */
   public fun quick_sort(values: &mut vector<u256>, left: u64, right: u64) {
     if (left < right) {
       let partition_index = partion(values, left, right);
@@ -275,31 +265,31 @@ module suitears::vectors {
     }
   }
 
-  // === Private Functions ===    
+  // === Private Functions ===
 
   /*
-  * @notice A utility function for {quick_sort}. 
+  * @notice A utility function for {quick_sort}.
   *
-  * @dev Places the pivot and smaller elements on the left and larger elements on the right.  
+  * @dev Places the pivot and smaller elements on the left and larger elements on the right.
   *
-  * @param values The vector to sort. 
-  * @param left The smaller side of the pivot. 
-  * @param right The larger side of the pivot. 
-  */  
+  * @param values The vector to sort.
+  * @param left The smaller side of the pivot.
+  * @param right The larger side of the pivot.
+  */
   fun partion(values: &mut vector<u256>, left: u64, right: u64): u64 {
     let pivot: u64 = left;
     let mut index: u64 = pivot + 1;
     let mut i: u64 = index;
-    
+
     while (i <= right) {
-      if ((*vector::borrow(values, i)) < (*vector::borrow(values, pivot))) {
-        vector::swap(values, i, index);
+      if (values[i] < values[pivot]) {
+        values.swap(i, index);
         index = index + 1;
       };
       i = i + 1;
     };
 
-    vector::swap(values, pivot, index -1);
+    values.swap(pivot, index -1);
 
     index - 1
   }
