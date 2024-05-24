@@ -1,0 +1,6 @@
+{
+	"dependencies": {
+		"prettier": "^3.2.5",
+		"prettier-plugin-move-test": "^0.0.2"
+	}
+}

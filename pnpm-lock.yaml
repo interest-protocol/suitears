@@ -1,0 +1,32 @@
+lockfileVersion: '6.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+dependencies:
+  prettier:
+    specifier: ^3.2.5
+    version: 3.2.5
+  prettier-plugin-move-test:
+    specifier: ^0.0.2
+    version: 0.0.2
+
+packages:
+
+  /prettier-plugin-move-test@0.0.2:
+    resolution: {integrity: sha512-S9WfuyZzkWlakQsbxyC+PnCFxGWGlI6dR1+gm89SHsPA2Ar53Cj1TbPqNU8OyUQOEve7NFg58f/YvrT22zRo1w==}
+    dependencies:
+      prettier: 3.2.5
+      web-tree-sitter: 0.20.8
+    dev: false
+
+  /prettier@3.2.5:
+    resolution: {integrity: sha512-3/GWa9aOC0YeD7LUfvOG2NiDyhOWRvt1k+rcKhOuYnMY24iiCphgneUfJDyFXd6rZCAnuLBv6UeAULtrhT/F4A==}
+    engines: {node: '>=14'}
+    hasBin: true
+    dev: false
+
+  /web-tree-sitter@0.20.8:
+    resolution: {integrity: sha512-weOVgZ3aAARgdnb220GqYuh7+rZU0Ka9k9yfKtGAzEYMa6GgiCzW9JjQRJyCJakvibQW+dfjJdihjInKuuCAUQ==}
+    dev: false
