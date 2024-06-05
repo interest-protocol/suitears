@@ -346,7 +346,6 @@ module suitears::math256 {
         (x & y) + (x ^ y) / 2
     }
 
-
     /*
      * @notice Calculates the average of the vector of numbers sum of vector/length of vector.
      *

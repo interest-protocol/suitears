@@ -25,6 +25,7 @@ module suitears::s_eth {
         init(S_ETH {}, ctx);
     }
 }
+
 #[test_only]
 module suitears::s_btc {
     use sui::coin;
