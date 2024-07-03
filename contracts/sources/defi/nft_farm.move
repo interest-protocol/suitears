@@ -2,6 +2,7 @@
  * @title NFT Farm
  *
  * @notice A module that allows users to stake NFTs in a farm to earn rewards.
+ * @notice This module doesn't supports floor price rule.
  *
  * @dev All times are in seconds.
  */
