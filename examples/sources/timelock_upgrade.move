@@ -10,7 +10,7 @@ module examples::timelock_upgrade {
 
     use suitears::timelock::{Self, Timelock};
 
-    struct UpgradeWrapper has key, store {
+    public struct UpgradeWrapper has key, store {
         id: UID,
         cap: UpgradeCap,
         policy: u8,
@@ -20,27 +20,27 @@ module examples::timelock_upgrade {
     
     // * Events
 
-    struct NewUpgradeWrapper has copy, drop {
+    public struct NewUpgradeWrapper has copy, drop {
         time_delay: u64
     }
 
-    struct InitUpgrade has copy, drop {
+    public struct InitUpgrade has copy, drop {
         policy: u8,
         digest: vector<u8>,
         unlock_timestamp: u64
     }
 
-    struct AuthorizeUpgrade has copy, drop {
+    public struct AuthorizeUpgrade has copy, drop {
         policy: u8,
         digest: vector<u8>,
         timestamp: u64
     }
 
-    struct CancelUpgrade has copy, drop {
+    public struct CancelUpgrade has copy, drop {
         id: ID
     }
 
-    struct CommitUpgrade has copy, drop {
+    public struct CommitUpgrade has copy, drop {
         id: ID
     }
 
@@ -65,7 +65,7 @@ module examples::timelock_upgrade {
 
     public fun init_upgrade(
         c: &Clock,
-        cap: UpgradeWrapper,
+        mut cap: UpgradeWrapper,
         policy: u8,
         digest: vector<u8>,
         ctx: &mut TxContext        
@@ -80,7 +80,7 @@ module examples::timelock_upgrade {
     }
 
     public fun cancel_upgrade(c: &Clock, lock: Timelock<UpgradeWrapper>): UpgradeWrapper {
-        let cap = timelock::unlock( lock, c);
+        let mut cap = timelock::unlock( lock, c);
         cap.policy = 0;
         cap.digest = vector::empty();
         emit(CancelUpgrade { id:  package::upgrade_package(&cap.cap) });
@@ -95,7 +95,7 @@ module examples::timelock_upgrade {
 
         emit(AuthorizeUpgrade { timestamp: clock::timestamp_ms(c), policy: cap.policy, digest: cap.digest });
 
-        let UpgradeWrapper { id, cap, policy, digest, time_delay: _ } = cap;
+        let UpgradeWrapper { id, mut cap, policy, digest, time_delay: _ } = cap;
 
         object::delete(id);
 

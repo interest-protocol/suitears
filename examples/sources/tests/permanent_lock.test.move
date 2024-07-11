@@ -8,15 +8,15 @@ module suitears::permanent_lock_tests {
 
   use examples::permanent_lock;
 
-  struct Data has store, drop {
+  public struct Data has store, drop {
     value: u64
   }
 
 
   #[test]
   fun test_success_case() {
-    let ctx = tx_context::dummy();
-    let c = clock::create_for_testing(&mut ctx);
+    let mut ctx = tx_context::dummy();
+    let mut c = clock::create_for_testing(&mut ctx);
     clock::set_for_testing(&mut c, 10);
     let time_delay = 1000;
     let lock = permanent_lock::lock(Data { value: 7 }, &c, time_delay, &mut ctx);

@@ -4,10 +4,10 @@ module examples::whitelist {
   use sui::object::UID;
   use sui::dynamic_field as df;
 
-  struct Mode has copy, drop, store {}
+  public struct Mode has copy, drop, store {}
 
-  struct Whitelisted has copy, drop, store { user: address }
-  struct Blacklisted has copy, drop, store { user: address }
+  public struct Whitelisted has copy, drop, store { user: address }
+  public struct Blacklisted has copy, drop, store { user: address }
 
   const ACCEPT_ALL_MODE: u64 = 0;
   const REJECT_ALL_MODE: u64 = 1;

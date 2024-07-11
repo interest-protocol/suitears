@@ -33,7 +33,7 @@ module examples::request_lock {
   const ERequestHasAlreadyBeenAdded: u64 = 3;
 
   // @dev It can only be destroyed if all `required_requests` have been completed. 
-  struct Lock<phantom Issuer: drop> {
+  public struct Lock<phantom Issuer: drop> {
     // The requests that must be completed before calling the function {destroy}.  
     required_requests: vector<Request>,
     // The current completed requests. It starts empty.       
@@ -42,7 +42,7 @@ module examples::request_lock {
 
   // @dev Represents a single request.  
   // @dev It may have a payload saved as a dynamic field. 
-  struct Request has key, store {
+  public struct Request has key, store {
     id: UID,
     // The name of the Witness associated with this request. 
     name: TypeName,
@@ -51,7 +51,7 @@ module examples::request_lock {
   }
 
   // @dev The key used to access a Payload saved in a request
-  struct RequestKey has copy, drop, store { witness: TypeName }
+  public struct RequestKey has copy, drop, store { witness: TypeName }
 
   // === Public View Function ===    
 
@@ -129,7 +129,7 @@ module examples::request_lock {
   */
   public fun new_request_with_payload<RequestName: drop, Payload: store>(payload: Payload, ctx: &mut TxContext): Request {
     let name = type_name::get<RequestName>();
-    let req = Request {
+    let mut req = Request {
       id: object::new(ctx),
       name: type_name::get<RequestName>(),
       has_payload: true
@@ -155,7 +155,7 @@ module examples::request_lock {
   */
   public fun add<Witness: drop>(lock: &mut Lock<Witness>, req: Request) {
     let length = vector::length(&lock.required_requests);
-    let index = 0;
+    let mut index = 0;
 
     while (length > index) {
       assert!(vector::borrow(&lock.required_requests, index).name != req.name, ERequestHasAlreadyBeenAdded);
@@ -224,12 +224,12 @@ module examples::request_lock {
   * - a request was completed in the wrong order.  
   */
   public fun destroy<Witness: drop>(lock: Lock<Witness>) {
-    let Lock { required_requests, completed_requests } = lock;
+    let Lock { mut required_requests, completed_requests } = lock;
 
     let num_of_requests = vector::length(&required_requests);
-    let completed_requests = vec_set::into_keys(completed_requests);
+    let mut completed_requests = vec_set::into_keys(completed_requests);
 
-    let index = 0;
+    let mut index = 0;
 
     while (num_of_requests > index) {
       let Request { id, name, has_payload: _ } = vector::remove(&mut required_requests, 0);

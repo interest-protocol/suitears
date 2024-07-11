@@ -10,128 +10,131 @@
  * unlike the regular `bool` which would consume an entire slot for a single value.
  */
 module suitears::bitmap {
-  // === Imports ===
+    // === Imports ===
 
-  use sui::object::{Self, UID};
-  use sui::dynamic_field as df;
-  use sui::tx_context::TxContext;
+    use sui::dynamic_field as df;
 
-  // === Constants ===
+    // === Constants ===
 
-  // @dev The maximum u256. It is used to unflag an index. 
-  const MAX_U256: u256 = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+    // @dev The maximum u256. It is used to unflag an index.
+    const MAX_U256: u256 = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
 
-  // === Structs ===
+    // === Structs ===
 
-  struct Bitmap has key, store {
-    id: UID
-  }
+    public struct Bitmap has key, store { id: UID }
 
-  // === Public Create Function ===
+    // === Public Create Function ===
 
-  /*
-  * @notice Creates a {Bitmap}. 
-  *
-  * @return Bitmap.
-  */
-  public fun new(ctx: &mut TxContext): Bitmap {
-    Bitmap { id: object::new(ctx) }
-  }
+    /*
+     * @notice Creates a {Bitmap}.
+     *
+     * @return Bitmap.
+     */
+    public fun new(ctx: &mut TxContext): Bitmap {
+        Bitmap {id: object::new(ctx)}
+    }
 
-  // === Public View Function ===
+    // === Public View Function ===
 
-  /*
-  * @notice Checks if an `index` in the `map` is true or false. 
-  *
-  * @param self A reference to the {Bitmap}. 
-  * @param index The slot to check if it is flagged. 
-  * @return bool. If the `index` is true or false. 
-  */
-  public fun get(self: &Bitmap, index: u256): bool {
-    let (key, mask) = key_mask(index);
-    
-    if (!bucket_exists(self, key)) return false;
-    
-    *df::borrow(&self.id, key) & mask != 0
-  }
+    /*
+     * @notice Checks if an `index` in the `map` is true or false.
+     *
+     * @param self A reference to the {Bitmap}.
+     * @param index The slot to check if it is flagged.
+     * @return bool. If the `index` is true or false.
+     */
+    public fun get(self: &Bitmap, index: u256): bool {
+        let (key, mask) = key_mask(index);
 
-  // === Public Mutable Functions ===
+        if (!bucket_exists(self, key)) return false;
 
-  /*
-  * @notice Sets the slot `index` to true in `self`. 
-  *
-  * @param self A reference to the {Bitmap}. 
-  * @param index The slot we will set to true. 
-  */
-  public fun set(self: &mut Bitmap, index: u256) {
-    let (key, mask) = key_mask(index);
-    
-    safe_register(self, key);   
-    
-    let x = df::borrow_mut<u256, u256>(&mut self.id, key);
-    *x = *x | mask
-  }
+        *self.id.borrow(key) & mask != 0
+    }
 
-  /*
-  * @notice Sets the slot `index` to false in `self`. 
-  *
-  * @param self A reference to the {Bitmap}. 
-  * @param index The slot we will set to false. 
-  */
-  public fun unset(self: &mut Bitmap, index: u256) {
-    let (key, mask) = key_mask(index);
+    // === Public Mutable Functions ===
 
-    if (!bucket_exists(self, key)) return;
+    /*
+     * @notice Sets the slot `index` to true in `self`.
+     *
+     * @param self A reference to the {Bitmap}.
+     * @param index The slot we will set to true.
+     */
+    public fun set(self: &mut Bitmap, index: u256) {
+        let (key, mask) = key_mask(index);
 
-    let x = df::borrow_mut<u256, u256>(&mut self.id, key);
-    *x = *x & (mask ^ MAX_U256)
-  }
+        safe_register(self, key);
 
-  // === Public Destroy Function ===
+        let x: &mut u256 = self.id.borrow_mut(key);
+        *x = *x | mask
+    }
 
-  /*
-  * @notice Destroys the `self`. 
-  *
-  * @param self A bitmap to destroy. 
-  */
-  public fun destroy(self: Bitmap) {
-    let Bitmap { id } = self;
-    object::delete(id);
-  }
+    /*
+     * @notice Sets the slot `index` to false in `self`.
+     *
+     * @param self A reference to the {Bitmap}.
+     * @param index The slot we will set to false.
+     */
+    public fun unset(self: &mut Bitmap, index: u256) {
+        let (key, mask) = key_mask(index);
 
-  // === Private Functions ===  
+        if (!bucket_exists(self, key)) return;
 
-  /*
-  * @notice Finds the key and the mask to find the `index` in a {Bitmap}. 
-  *
-  * @param index A slot in the {Bitmap}. 
-  * @return key. The key in the {Bitmap}.   
-  * @return mask. To find the right in the {Bitmap} value. 
-  */
-  fun key_mask(index: u256): (u256, u256) {
-    (index >> 8, 1 << ((index & 0xff) as u8)) 
-  }
+        let x: &mut u256 = self.id.borrow_mut(key);
+        *x = *x & (mask ^ MAX_U256)
+    }
 
-  /*
-  * @notice Checks if the `key` is present in the `self`. 
-  *
-  * @param self A {Bitmap}. 
-  * @param key A {Bitmap} key. 
-  * @return bool. Check if the key exists in the {Bitmap}.   
-  */
-  fun bucket_exists(self: &Bitmap, key: u256): bool {
-    df::exists_with_type<u256, u256>(&self.id, key)
-  }
+    // === Public Destroy Function ===
 
-  /*
-  * @notice Adds the `key` to `self`. 
-  *
-  * @param self A {Bitmap}. 
-  * @param key A {Bitmap} key.  
-  */
-  fun safe_register(self: &mut Bitmap, key: u256) {
-    if (!bucket_exists(self, key)) {
-      df::add<u256, u256>(&mut self.id, key, 0);
-    };
-  }
+    /*
+     * @notice Destroys the `self`.
+     *
+     * @param self A bitmap to destroy.
+     */
+    public fun destroy(self: Bitmap) {
+        let Bitmap { id } = self;
+        id.delete();
+    }
+
+    // === Private Functions ===
+
+    /*
+     * @notice Finds the key and the mask to find the `index` in a {Bitmap}.
+     *
+     * @param index A slot in the {Bitmap}.
+     * @return key. The key in the {Bitmap}.
+     * @return mask. To find the right in the {Bitmap} value.
+     */
+    fun key_mask(index: u256): (u256, u256) {
+        (index >> 8, 1 << ((index & 0xff) as u8))
+    }
+
+    /*
+     * @notice Checks if the `key` is present in the `self`.
+     *
+     * @param self A {Bitmap}.
+     * @param key A {Bitmap} key.
+     * @return bool. Check if the key exists in the {Bitmap}.
+     */
+    fun bucket_exists(self: &Bitmap, key: u256): bool {
+        self.id.exists_with_type<u256, u256>(key)
+    }
+
+    /*
+     * @notice Adds the `key` to `self`.
+     *
+     * @param self A {Bitmap}.
+     * @param key A {Bitmap} key.
+     */
+    fun safe_register(self: &mut Bitmap, key: u256) {
+        if (!bucket_exists(self, key)) {
+            self.id.add(key, 0u256);
+        };
+    }
+
+    // === Local Aliases ===
+
+    use fun df::add as UID.add;
+    use fun df::borrow as UID.borrow;
+    use fun df::borrow_mut as UID.borrow_mut;
+    use fun df::exists_with_type as UID.exists_with_type;
 }
