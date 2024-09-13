@@ -1,5 +1,5 @@
 #[test_only]
-module suitears::acess_control_tests {
+module suitears::access_control_tests {
 
     use sui::object::id_address;
     use sui::test_utils::{assert_eq, destroy};
@@ -9,9 +9,11 @@ module suitears::acess_control_tests {
 
     const TEST_ROLE: vector<u8> = b"TEST_ROLE";
 
+    public struct ACCESS_CONTROL_TESTS has drop {}
+
     #[test]
     fun test_new() {
-        let (ac, super_admin) = access_control::new(&mut dummy());
+        let (ac, super_admin) = access_control::new( ACCESS_CONTROL_TESTS {}, &mut dummy());
 
         assert_eq(access_control::access_control(&super_admin), id_address(&ac));
         assert_eq(
@@ -25,9 +27,9 @@ module suitears::acess_control_tests {
 
     #[test]
     fun test_new_admin() {
-        let (ac, super_admin) = access_control::new(&mut dummy());
+        let (ac, super_admin) = access_control::new(ACCESS_CONTROL_TESTS {}, &mut dummy());
 
-        let admin = access_control::new_admin(&ac, &mut dummy());
+        let admin = access_control::new_admin(&super_admin, &ac, &mut dummy());
 
         assert_eq(access_control::access_control(&admin), id_address(&ac));
 
@@ -38,7 +40,7 @@ module suitears::acess_control_tests {
 
     #[test]
     fun test_add() {
-        let (mut ac, super_admin) = access_control::new(&mut dummy());
+        let (mut ac, super_admin) = access_control::new(ACCESS_CONTROL_TESTS {}, &mut dummy());
 
         assert_eq(access_control::contains(&ac, TEST_ROLE), false);
 
@@ -54,7 +56,7 @@ module suitears::acess_control_tests {
 
     #[test]
     fun test_remove() {
-        let (mut ac, super_admin) = access_control::new(&mut dummy());
+        let (mut ac, super_admin) = access_control::new(ACCESS_CONTROL_TESTS {}, &mut dummy());
 
         access_control::add(&super_admin, &mut ac, TEST_ROLE);
         assert_eq(access_control::contains(&ac, TEST_ROLE), true);
@@ -68,9 +70,9 @@ module suitears::acess_control_tests {
 
     #[test]
     fun test_grant() {
-        let (mut ac, super_admin) = access_control::new(&mut dummy());
+        let (mut ac, super_admin) = access_control::new(ACCESS_CONTROL_TESTS {}, &mut dummy());
 
-        let admin = access_control::new_admin(&ac, &mut dummy());
+        let admin = access_control::new_admin(&super_admin, &ac, &mut dummy());
 
         assert_eq(access_control::has_role(&admin, &ac, TEST_ROLE), false);
         access_control::grant(&super_admin, &mut ac, TEST_ROLE, id_address(&admin));
@@ -84,9 +86,9 @@ module suitears::acess_control_tests {
 
     #[test]
     fun test_revoke() {
-        let (mut ac, super_admin) = access_control::new(&mut dummy());
+        let (mut ac, super_admin) = access_control::new(ACCESS_CONTROL_TESTS {}, &mut dummy());
 
-        let admin = access_control::new_admin(&ac, &mut dummy());
+        let admin = access_control::new_admin(&super_admin, &ac, &mut dummy());
         access_control::grant(&super_admin, &mut ac, TEST_ROLE, id_address(&admin));
 
         assert_eq(access_control::has_role(&admin, &ac, TEST_ROLE), true);
@@ -104,9 +106,9 @@ module suitears::acess_control_tests {
 
     #[test]
     fun test_renounce() {
-        let (mut ac, super_admin) = access_control::new(&mut dummy());
+        let (mut ac, super_admin) = access_control::new(ACCESS_CONTROL_TESTS {}, &mut dummy());
 
-        let admin = access_control::new_admin(&ac, &mut dummy());
+        let admin = access_control::new_admin(&super_admin, &ac, &mut dummy());
         access_control::grant(&super_admin, &mut ac, TEST_ROLE, id_address(&admin));
 
         assert_eq(access_control::has_role(&admin, &ac, TEST_ROLE), true);
@@ -124,7 +126,7 @@ module suitears::acess_control_tests {
 
     #[test]
     fun test_destroy() {
-        let (ac, super_admin) = access_control::new(&mut dummy());
+        let (ac, super_admin) = access_control::new(ACCESS_CONTROL_TESTS {}, &mut dummy());
 
         access_control::destroy(&super_admin, ac);
         destroy(super_admin);
@@ -132,7 +134,7 @@ module suitears::acess_control_tests {
 
     #[test]
     fun test_destroy_empty() {
-        let (mut ac, super_admin) = access_control::new(&mut dummy());
+        let (mut ac, super_admin) = access_control::new(ACCESS_CONTROL_TESTS {}, &mut dummy());
 
         access_control::remove(&super_admin, &mut ac, access_control::super_admin_role());
 
@@ -142,7 +144,7 @@ module suitears::acess_control_tests {
 
     #[test]
     fun test_destroy_account() {
-        let (ac, super_admin) = access_control::new(&mut dummy());
+        let (ac, super_admin) = access_control::new(ACCESS_CONTROL_TESTS {}, &mut dummy());
 
         destroy(ac);
         access_control::destroy_account(super_admin);
@@ -151,9 +153,9 @@ module suitears::acess_control_tests {
     #[test]
     #[expected_failure(abort_code = access_control::EMustBeASuperAdmin)]
     fun test_add_error_case() {
-        let (mut ac, super_admin) = access_control::new(&mut dummy());
+        let (mut ac, super_admin) = access_control::new(ACCESS_CONTROL_TESTS {}, &mut dummy());
 
-        let admin = access_control::new_admin(&ac, &mut dummy());
+        let admin = access_control::new_admin(&super_admin,&ac, &mut dummy());
 
         access_control::add(&admin, &mut ac, TEST_ROLE);
 
@@ -165,9 +167,9 @@ module suitears::acess_control_tests {
     #[test]
     #[expected_failure(abort_code = access_control::EMustBeASuperAdmin)]
     fun test_remove_error_case() {
-        let (mut ac, super_admin) = access_control::new(&mut dummy());
+        let (mut ac, super_admin) = access_control::new(ACCESS_CONTROL_TESTS {}, &mut dummy());
 
-        let admin = access_control::new_admin(&ac, &mut dummy());
+        let admin = access_control::new_admin(&super_admin, &ac, &mut dummy());
 
         access_control::remove(&admin, &mut ac, TEST_ROLE);
 
@@ -179,9 +181,9 @@ module suitears::acess_control_tests {
     #[test]
     #[expected_failure(abort_code = access_control::EMustBeASuperAdmin)]
     fun test_grant_error_case_no_super_admin() {
-        let (mut ac, super_admin) = access_control::new(&mut dummy());
+        let (mut ac, super_admin) = access_control::new(ACCESS_CONTROL_TESTS {}, &mut dummy());
 
-        let admin = access_control::new_admin(&ac, &mut dummy());
+        let admin = access_control::new_admin(&super_admin, &ac, &mut dummy());
 
         access_control::grant(&super_admin, &mut ac, TEST_ROLE, id_address(&admin));
 
@@ -195,9 +197,9 @@ module suitears::acess_control_tests {
     #[test]
     #[expected_failure(abort_code = access_control::ERoleDoesNotExist)]
     fun test_revoke_error_case_role_does_not_exist() {
-        let (mut ac, super_admin) = access_control::new(&mut dummy());
+        let (mut ac, super_admin) = access_control::new(ACCESS_CONTROL_TESTS {}, &mut dummy());
 
-        let admin = access_control::new_admin(&ac, &mut dummy());
+        let admin = access_control::new_admin(&super_admin, &ac, &mut dummy());
 
         access_control::revoke(&super_admin, &mut ac, TEST_ROLE, id_address(&admin));
 
@@ -209,9 +211,9 @@ module suitears::acess_control_tests {
     #[test]
     #[expected_failure(abort_code = access_control::EMustBeASuperAdmin)]
     fun test_revoke_error_must_be_super_admin() {
-        let (mut ac, super_admin) = access_control::new(&mut dummy());
+        let (mut ac, super_admin) = access_control::new(ACCESS_CONTROL_TESTS {}, &mut dummy());
 
-        let admin = access_control::new_admin(&ac, &mut dummy());
+        let admin = access_control::new_admin(&super_admin, &ac, &mut dummy());
 
         access_control::grant(&admin, &mut ac, TEST_ROLE, id_address(&admin));
 
@@ -225,10 +227,10 @@ module suitears::acess_control_tests {
     #[test]
     #[expected_failure(abort_code = access_control::EInvalidAccessControlAddress)]
     fun test_renounce_wrong_access_control() {
-        let (mut ac, super_admin) = access_control::new(&mut dummy());
-        let (ac2, super_admin2) = access_control::new(&mut new_from_hint(@0x5, 1, 2, 3, 4));
+        let (mut ac, super_admin) = access_control::new(ACCESS_CONTROL_TESTS {}, &mut dummy());
+        let (ac2, super_admin2) = access_control::new(ACCESS_CONTROL_TESTS {}, &mut new_from_hint(@0x5, 1, 2, 3, 4));
 
-        let admin = access_control::new_admin(&ac2, &mut new_from_hint(@0x6, 1, 2, 3, 4));
+        let admin = access_control::new_admin(&super_admin, &ac2, &mut new_from_hint(@0x6, 1, 2, 3, 4));
 
         access_control::renounce(&admin, &mut ac, TEST_ROLE);
 
@@ -242,9 +244,9 @@ module suitears::acess_control_tests {
     #[test]
     #[expected_failure(abort_code = access_control::EMustBeASuperAdmin)]
     fun test_destroy_error_must_be_super_admin() {
-        let (ac, super_admin) = access_control::new(&mut dummy());
+        let (ac, super_admin) = access_control::new(ACCESS_CONTROL_TESTS {}, &mut dummy());
 
-        let admin = access_control::new_admin(&ac, &mut dummy());
+        let admin = access_control::new_admin(&super_admin, &ac, &mut dummy());
 
         access_control::destroy(&admin, ac);
         destroy(admin);
@@ -254,7 +256,7 @@ module suitears::acess_control_tests {
     #[test]
     #[expected_failure]
     fun test_destroy_empty_error_must_be_super_admin() {
-        let (ac, super_admin) = access_control::new(&mut dummy());
+        let (ac, super_admin) = access_control::new(ACCESS_CONTROL_TESTS {}, &mut dummy());
 
         access_control::destroy_empty(ac);
         destroy(super_admin);

@@ -5,9 +5,10 @@
  */
 module suitears::access_control {
     // === Imports ===
-
+    
     use sui::vec_map::{Self, VecMap};
     use sui::vec_set::{Self, VecSet};
+    use sui::types::is_one_time_witness;
 
     // === Errors ===
 
@@ -17,6 +18,8 @@ module suitears::access_control {
     const EMustBeASuperAdmin: u64 = 1;
     /// The {AccessControl} does not have a role.
     const ERoleDoesNotExist: u64 = 2;
+    /// Must pass a OTW to create a new {AccessControl} 
+    const EInvalidOneTimeWitness: u64 = 3;
 
     // === Constants ===
 
@@ -25,13 +28,13 @@ module suitears::access_control {
 
     // === Structs ===
 
-    public struct AccessControl has key, store {
+    public struct AccessControl<phantom T: drop> has key, store {
         id: UID,
         /// Map to store a role => set of addresses with said role.
         roles: VecMap<vector<u8>, VecSet<address>>
     }
 
-    public struct Admin has key, store {
+    public struct Admin<phantom T: drop> has key, store {
         id: UID,
         /// Address of the {AccessControl} this capability belongs to.
         access_control: address
@@ -48,10 +51,11 @@ module suitears::access_control {
      * @return {AccessControl}. It stores the role's data.
      * @return {Admin}. The {SUPER_ADMIN_ROLE} {Admin}.
      */
-    public fun new(ctx: &mut TxContext): (AccessControl, Admin) {
+    public fun new<T: drop>(otw: T, ctx: &mut TxContext): (AccessControl<T>, Admin<T>) {
+        assert!(is_one_time_witness(&otw), EInvalidOneTimeWitness);
         let mut access_control = AccessControl {id: object::new(ctx), roles: vec_map::empty()};
 
-        let super_admin = new_admin(&access_control, ctx);
+        let super_admin = Admin {id: object::new(ctx), access_control: access_control.id.to_address() };
 
         new_role_singleton_impl(&mut access_control, SUPER_ADMIN_ROLE, super_admin.id.to_address());
 
@@ -64,7 +68,8 @@ module suitears::access_control {
      * @param self The {AccessControl} object.
      * @return {Admin}. An {Admin} without roles.
      */
-    public fun new_admin(self: &AccessControl, ctx: &mut TxContext): Admin {
+    public fun new_admin<T: drop>(admin: &Admin<T>, self: &AccessControl<T>, ctx: &mut TxContext): Admin<T> {
+        assert_super_admin(admin, self);
         Admin {id: object::new(ctx), access_control: self.id.to_address()}
     }
 
@@ -81,7 +86,7 @@ module suitears::access_control {
      * - `admin` is not a {SUPER_ADMIN_ROLE} {Admin}.
      * - `admin` was not created from the `self`.
      */
-    public fun add(admin: &Admin, self: &mut AccessControl, role: vector<u8>) {
+    public fun add<T: drop>(admin: &Admin<T>, self: &mut AccessControl<T>, role: vector<u8>) {
         assert_super_admin(admin, self);
 
         if (!self.contains(role)) {
@@ -102,7 +107,7 @@ module suitears::access_control {
      * - `admin` is not a {SUPER_ADMIN_ROLE} {Admin}.
      * - `admin` was not created from the `self`.
      */
-    public fun remove(admin: &Admin, self: &mut AccessControl, role: vector<u8>) {
+    public fun remove<T: drop>(admin: &Admin<T>, self: &mut AccessControl<T>, role: vector<u8>) {
         assert_super_admin(admin, self);
 
         if (self.contains(role)) {
@@ -126,9 +131,9 @@ module suitears::access_control {
      * - `admin` was not created from the `self`.
      * - `role` does not exist.
      */
-    public fun grant(
-        admin: &Admin,
-        self: &mut AccessControl,
+    public fun grant<T: drop>(
+        admin: &Admin<T>,
+        self: &mut AccessControl<T>,
         role: vector<u8>,
         new_admin: address,
     ) {
@@ -157,9 +162,9 @@ module suitears::access_control {
      * - `admin` was not created from the `self`.
      * - `role` does not exist.
      */
-    public fun revoke(
-        admin: &Admin,
-        self: &mut AccessControl,
+    public fun revoke<T: drop>(
+        admin: &Admin<T>,
+        self: &mut AccessControl<T>,
         role: vector<u8>,
         old_admin: address,
     ) {
@@ -183,7 +188,7 @@ module suitears::access_control {
      * aborts-if
      * - `admin` was not created from the `self`.
      */
-    public fun renounce(admin: &Admin, self: &mut AccessControl, role: vector<u8>) {
+    public fun renounce<T: drop>(admin: &Admin<T>, self: &mut AccessControl<T>, role: vector<u8>) {
         assert!(self.id.to_address() == admin.access_control, EInvalidAccessControlAddress);
 
         let old_admin = admin.id.to_address();
@@ -206,7 +211,7 @@ module suitears::access_control {
      * - `admin` is not a {SUPER_ADMIN_ROLE} {Admin}.
      * - `admin` was not created from the `self`.
      */
-    public fun destroy(admin: &Admin, self: AccessControl) {
+    public fun destroy<T: drop>(admin: &Admin<T>, self: AccessControl<T>) {
         assert_super_admin(admin, &self);
 
         let AccessControl { id, roles: _ } = self;
@@ -224,7 +229,7 @@ module suitears::access_control {
      * aborts-if
      * - `self` is not empty.
      */
-    public fun destroy_empty(self: AccessControl) {
+    public fun destroy_empty<T: drop>(self: AccessControl<T>) {
         let AccessControl { id, roles } = self;
 
         roles.destroy_empty();
@@ -236,7 +241,7 @@ module suitears::access_control {
      *
      * @param admin An {Admin}.
      */
-    public fun destroy_account(admin: Admin) {
+    public fun destroy_account<T: drop>(admin: Admin<T>) {
         let Admin { id, access_control: _ } = admin;
         id.delete()
     }
@@ -258,7 +263,7 @@ module suitears::access_control {
      * @param admin An {Admin}.
      * @return address.
      */
-    public fun access_control(admin: &Admin): address {
+    public fun access_control<T: drop>(admin: &Admin<T>): address {
         admin.access_control
     }
 
@@ -269,7 +274,7 @@ module suitears::access_control {
      * @param role A role.
      * @return bool. True if it contains the `role`.
      */
-    public fun contains(self: &AccessControl, role: vector<u8>): bool {
+    public fun contains<T: drop>(self: &AccessControl<T>, role: vector<u8>): bool {
         self.roles.contains(&role)
     }
 
@@ -283,7 +288,7 @@ module suitears::access_control {
      * @param role A role.
      * @return bool. True if it has the `role`.
      */
-    public fun has_role_(admin_address: address, self: &AccessControl, role: vector<u8>): bool {
+    public fun has_role_<T: drop>(admin_address: address, self: &AccessControl<T>, role: vector<u8>): bool {
         self.roles.contains(&role) && self.roles[&role].contains(&admin_address)
     }
 
@@ -300,7 +305,7 @@ module suitears::access_control {
      * aborts-if
      * - `admin` was not created from the `self`.
      */
-    public fun has_role(admin: &Admin, self: &AccessControl, role: vector<u8>): bool {
+    public fun has_role<T: drop>(admin: &Admin<T>, self: &AccessControl<T>, role: vector<u8>): bool {
         assert!(self.id.to_address() == admin.access_control, EInvalidAccessControlAddress);
 
         has_role_(admin.id.to_address(), self, role)
@@ -318,7 +323,7 @@ module suitears::access_control {
      * - `admin` is not a {SUPER_ADMIN_ROLE} {Admin}.
      * - `admin` was not created from the `self`.
      */
-    fun assert_super_admin(admin: &Admin, self: &AccessControl) {
+    fun assert_super_admin<T: drop>(admin: &Admin<T>, self: &AccessControl<T>) {
         assert!(has_role(admin, self, SUPER_ADMIN_ROLE), EMustBeASuperAdmin);
     }
 
@@ -331,7 +336,7 @@ module suitears::access_control {
      * aborts-if
      * - `role` is already in the `self`.
      */
-    fun new_role_impl(self: &mut AccessControl, role: vector<u8>) {
+    fun new_role_impl<T: drop>(self: &mut AccessControl<T>, role: vector<u8>) {
         self.roles.insert(role, vec_set::empty());
     }
 
@@ -345,7 +350,7 @@ module suitears::access_control {
      * aborts-if
      * - `role` is already in the `self`.
      */
-    fun new_role_singleton_impl(self: &mut AccessControl, role: vector<u8>, recipient: address) {
+    fun new_role_singleton_impl<T: drop>(self: &mut AccessControl<T>, role: vector<u8>, recipient: address) {
         self.roles.insert(role, vec_set::singleton(recipient));
     }
 }

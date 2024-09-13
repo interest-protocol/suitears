@@ -8,7 +8,8 @@
 module suitears::farm {
     // === Imports ===
 
-    use sui::math;
+    use std::u64::pow;
+
     use sui::event::emit;
     use sui::clock::{Self, Clock};
     use sui::balance::{Self, Balance};
@@ -141,7 +142,7 @@ module suitears::farm {
             last_reward_timestamp: start_timestamp,
             rewards_per_second,
             accrued_rewards_per_share: 0,
-            stake_coin_decimal_factor: math::pow(10, coin::get_decimals(stake_coin_metadata)),
+            stake_coin_decimal_factor: pow(10, coin::get_decimals(stake_coin_metadata)),
             owned_by: cap_id,
             balance_stake_coin: balance::zero(),
             balance_reward_coin: balance::zero(),

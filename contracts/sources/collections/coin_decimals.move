@@ -8,9 +8,9 @@
 module suitears::coin_decimals {
     // === Imports ===
 
+    use std::u64::pow;
     use std::type_name::{Self, TypeName};
 
-    use sui::math::pow;
     use sui::dynamic_field as df;
     use sui::coin::CoinMetadata;
 
